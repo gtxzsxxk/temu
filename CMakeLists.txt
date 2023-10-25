@@ -3,4 +3,6 @@ project(temu)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(temu main.cpp)
+add_executable(temu src/main.cpp
+        include/elf.h
+        include/types.h)
