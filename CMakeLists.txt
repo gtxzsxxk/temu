@@ -6,15 +6,18 @@ set(CMAKE_CXX_STANDARD 17)
 add_executable(temu src/main.cpp
         include/elf.h
         include/types.h
-        src/elf_helper.cpp
-        src/elf_helper.h
-        src/machine.cpp
-        src/machine.h
-        src/peripherals.cpp
-        src/peripherals.h
-        src/peripherals/serial_8250.cpp
-        src/peripherals/serial_8250.h
-        src/irom.cpp
-        src/irom.h
-        src/iram.cpp
-        src/iram.h)
+        lib/elf_helper.cpp
+        lib/elf_helper.h
+        src/cpu-wip-0001/machine.cpp
+        src/cpu-wip-0001/machine.h
+        src/cpu-wip-0001/peripherals.cpp
+        src/cpu-wip-0001/peripherals.h
+        peripherals/serial_8250.cpp
+        peripherals/serial_8250.h
+        src/cpu-wip-0001/irom.cpp
+        src/cpu-wip-0001/irom.h
+        src/cpu-wip-0001/iram.cpp
+        src/cpu-wip-0001/iram.h
+        include/cpu.h
+        include/ram.h
+        include/rom.h)
