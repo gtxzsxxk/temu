@@ -3,6 +3,11 @@ project(temu)
 
 set(CMAKE_CXX_STANDARD 17)
 
+include_directories(include)
+include_directories(lib)
+include_directories(src)
+include_directories(src/*)
+
 add_executable(temu src/main.cpp
         include/elf.h
         include/types.h

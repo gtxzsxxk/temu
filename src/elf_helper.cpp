@@ -3,3 +3,7 @@
 //
 
 #include "elf_helper.h"
+
+void elf_helper::read_elf() {
+
+}
