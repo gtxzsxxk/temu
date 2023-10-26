@@ -11,6 +11,11 @@ void elf_helper::read_elf() {
         return;
     }
     Elf64_Ehdr hdr;
-    fread(&hdr,sizeof(hdr),1,fp);
+    fread(&hdr, sizeof(hdr), 1, fp);
+    Elf64_Shdr *section_headers = new Elf64_Shdr[hdr.e_shnum];
+    fseek(fp, hdr.e_shoff, SEEK_SET);
+    fread(section_headers, sizeof(Elf64_Shdr) * hdr.e_shnum, 1, fp);
     fclose(fp);
+
+    delete[] section_headers;
 }
