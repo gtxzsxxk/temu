@@ -5,9 +5,13 @@
 #ifndef TEMU_MACHINE_H
 #define TEMU_MACHINE_H
 
+#include "cpu.h"
 
-class machine {
+class machine : public cpu {
+public:
+    machine():cpu(64,32){
 
+    }
 };
 
 

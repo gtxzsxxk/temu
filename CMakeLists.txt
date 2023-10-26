@@ -19,11 +19,6 @@ add_executable(temu src/main.cpp
         src/cpu-wip-0001/peripherals.h
         peripherals/serial_8250.cpp
         peripherals/serial_8250.h
-        src/cpu-wip-0001/irom.cpp
-        src/cpu-wip-0001/irom.h
-        src/cpu-wip-0001/iram.cpp
-        src/cpu-wip-0001/iram.h
         include/cpu.h
-        include/ram.h
-        include/rom.h
-        src/cpu.cpp)
+        include/memory.h
+)

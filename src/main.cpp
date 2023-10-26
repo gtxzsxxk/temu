@@ -15,5 +15,6 @@ int main(int argc, char **argv) {
         return -1;
     }
     auto elf_handler = elf_helper(elf_path);
+
     return 0;
 }
