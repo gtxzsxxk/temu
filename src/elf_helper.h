@@ -11,7 +11,8 @@
 
 class elf_helper {
     std::string elf_file_path;
-    uint64_t entry_addr;
+    Elf64_Ehdr hdr;
+    Elf64_Shdr *section_headers;
 
     void read_elf();
 
