@@ -21,4 +21,5 @@ add_executable(temu src/main.cpp
         peripherals/serial_8250.h
         include/cpu.h
         include/memory.h
+        src/cpu.cpp
 )
