@@ -9,7 +9,8 @@
 
 class machine : public cpu {
 public:
-    machine():cpu(64,32){
+    machine() : cpu(0x20000000, 64,
+                    0x08000000, 32) {
 
     }
 };
