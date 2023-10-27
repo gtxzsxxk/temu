@@ -5,6 +5,8 @@
 #ifndef TEMU_DECODE_H
 #define TEMU_DECODE_H
 
+#include "cpu.h"
+
 enum inst_opcode_rv32i {
     LUI = 0x37,
     AUIPC = 0x17,
@@ -58,5 +60,7 @@ enum inst_opcode_rv32i {
     FENCE_TSO_PAUSE = 0x0f,
     E_CALL_BREAK = 0x73
 };
+
+void decode_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *program_counter);
 
 #endif //TEMU_DECODE_H
