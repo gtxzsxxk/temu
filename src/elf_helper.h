@@ -22,6 +22,8 @@ public:
         read_elf();
     }
 
+    Elf64_Ehdr get_header() const;
+
     [[nodiscard]] std::pair<Elf64_Shdr *, uint8_t> get_section_headers() const;
 
     FILE *get_elf_fp() const;

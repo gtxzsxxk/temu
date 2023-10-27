@@ -29,3 +29,7 @@ elf_helper::~elf_helper() {
 FILE *elf_helper::get_elf_fp() const {
     return fp;
 }
+
+Elf64_Ehdr elf_helper::get_header() const {
+    return hdr;
+}
