@@ -25,39 +25,39 @@ SECTIONS
   /* The program code and other data into "FLASH" Rom type memory */
   .text :
   {
-    . = ALIGN(4);
+    . = ALIGN(8);
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
     *(.eh_frame)
 
-    . = ALIGN(4);
+    . = ALIGN(8);
     _etext = .;        /* define a global symbols at end of code */
   } >FLASH
 
   /* Constant data into "FLASH" Rom type memory */
   .rodata :
   {
-    . = ALIGN(4);
+    . = ALIGN(8);
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
-    . = ALIGN(4);
+    . = ALIGN(8);
   } >FLASH
 
   /* Initialized data sections into "RAM" Ram type memory */
   .data :
   {
-    . = ALIGN(4);
+    . = ALIGN(8);
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
 
-    . = ALIGN(4);
+    . = ALIGN(8);
     _edata = .;        /* define a global symbol at data end */
 
   } >RAM AT> FLASH
 
   /* Uninitialized data section into "RAM" Ram type memory */
-  . = ALIGN(4);
+  . = ALIGN(8);
   .bss :
   {
     /* This is used by the startup in order to initialize the .bss section */
@@ -68,7 +68,7 @@ SECTIONS
     *(.bss*)
     *(COMMON)
 
-    . = ALIGN(4);
+    . = ALIGN(8);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
   } >RAM
