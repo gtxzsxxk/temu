@@ -7,10 +7,12 @@
 
 #include "memory.h"
 #include "elf_helper.h"
+#include "register_file.h"
 
 class cpu {
     memory RAM;
     memory ROM;
+    register_file *registers;
 public:
     cpu(uint64_t ram_map_addr,
         uint64_t ram_size,

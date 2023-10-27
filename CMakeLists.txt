@@ -22,4 +22,5 @@ add_executable(temu src/main.cpp
         include/cpu.h
         include/memory.h
         src/cpu.cpp
+        include/register_file.h
 )
