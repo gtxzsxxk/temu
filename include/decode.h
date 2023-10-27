@@ -5,6 +5,7 @@
 #ifndef TEMU_DECODE_H
 #define TEMU_DECODE_H
 
+#include <tuple>
 #include "cpu.h"
 
 enum inst_opcode_rv32i {
@@ -67,6 +68,22 @@ enum inst_opcode_rv64i {
     S_FUNCT_SD = 3,
 };
 
-void decode_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *program_counter);
+std::tuple<uint8_t, uint8_t, uint8_t,
+        uint8_t, uint8_t, uint8_t> inst_decode_r(uint32_t inst);
+
+std::tuple<uint8_t, uint8_t, uint8_t,
+        uint8_t, uint16_t> inst_decode_i(uint32_t inst);
+
+std::tuple<uint8_t, uint8_t, uint8_t,
+        uint8_t, uint8_t, uint8_t> inst_decode_s(uint32_t inst);
+
+std::tuple<uint8_t, uint8_t, uint8_t,
+        uint8_t, uint8_t, uint8_t> inst_decode_b(uint32_t inst);
+
+std::tuple<uint8_t, uint8_t, uint32_t> inst_decode_u(uint32_t inst);
+
+std::tuple<uint8_t, uint8_t, uint32_t> inst_decode_j(uint32_t inst);
+
+void inst_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *program_counter);
 
 #endif //TEMU_DECODE_H
