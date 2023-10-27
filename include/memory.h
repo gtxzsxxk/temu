@@ -10,11 +10,11 @@
 
 class memory {
 public:
-    uint64_t *addr;
+    uint64_t addr;
     uint64_t *mem;
 
     /* The size is in MiB */
-    memory(uint64_t *addr, uint64_t size) : addr(addr) {
+    memory(uint64_t addr, uint64_t size) : addr(addr) {
         mem = new uint64_t[size * 65536];
     }
 
