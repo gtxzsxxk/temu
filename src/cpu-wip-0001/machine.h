@@ -13,6 +13,7 @@ public:
                     0x08000000, 32) {
 
     }
+    void boot() override;
 };
 
 

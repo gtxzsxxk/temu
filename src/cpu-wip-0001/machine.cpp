@@ -3,3 +3,7 @@
 //
 
 #include "machine.h"
+
+void machine::boot() {
+
+}
