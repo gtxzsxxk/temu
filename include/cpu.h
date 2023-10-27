@@ -26,8 +26,6 @@ public:
 
     virtual void boot() = 0;
 
-    void decode();
-
     void load_elf(elf_helper &handler);
 
     uint64_t *memory_map(uint64_t *mem);

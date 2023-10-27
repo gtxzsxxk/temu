@@ -32,7 +32,3 @@ uint64_t *cpu::memory_map(uint64_t *mem) {
     }
     return nullptr;
 }
-
-void cpu::decode() {
-
-}
