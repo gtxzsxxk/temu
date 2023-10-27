@@ -62,7 +62,7 @@ std::tuple<uint8_t, uint8_t, int32_t> inst_decode_j(uint32_t inst) {
     if (inst & 0x80000000) {
         imm += (1 << 20);
     }
-    int32_t imm_sext = (int32_t) imm << 12;
+    int32_t imm_sext = (int32_t) (imm << 12);
     imm_sext >>= 12;
     return std::make_tuple(opcode, rd, imm_sext);
 }
@@ -87,9 +87,14 @@ void inst_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *p
         }
             break;
         case JALR: {
+            /* std::make_tuple(opcode, rd, funct3, rs1, imm) */
             auto res = inst_decode_i(inst);
+            int32_t imm_sext = (int32_t) (std::get<4>(res) << 20);
+            imm_sext >>= 20;
+            uint64_t pc_next = registers->read(std::get<1>(res)) + imm_sext;
+            pc_next &= 0xfffffffffffffffe;
             registers->write(std::get<1>(res), *program_counter + 4);
-            *program_counter += std::get<2>(res);
+            *program_counter = pc_next;
         }
             break;
     }
