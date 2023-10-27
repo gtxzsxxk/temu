@@ -61,6 +61,12 @@ enum inst_opcode_rv32i {
     E_CALL_BREAK = 0x73
 };
 
+enum inst_opcode_rv64i {
+    L_FUNCT_LWU = 6,
+    L_FUNCt_LD = 3,
+    S_FUNCT_SD = 3,
+};
+
 void decode_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *program_counter);
 
 #endif //TEMU_DECODE_H
