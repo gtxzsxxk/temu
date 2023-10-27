@@ -82,7 +82,7 @@ std::tuple<uint8_t, uint8_t, uint8_t,
 
 std::tuple<uint8_t, uint8_t, uint32_t> inst_decode_u(uint32_t inst);
 
-std::tuple<uint8_t, uint8_t, uint32_t> inst_decode_j(uint32_t inst);
+std::tuple<uint8_t, uint8_t, int32_t> inst_decode_j(uint32_t inst);
 
 void inst_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *program_counter);
 

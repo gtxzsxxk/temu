@@ -54,11 +54,35 @@ std::tuple<uint8_t, uint8_t, uint32_t> inst_decode_u(uint32_t inst) {
     return std::make_tuple(opcode, rd, imm);
 }
 
-std::tuple<uint8_t, uint8_t, uint32_t> inst_decode_j(uint32_t inst) {
+std::tuple<uint8_t, uint8_t, int32_t> inst_decode_j(uint32_t inst) {
     uint8_t opcode = inst & 0x7f;
     uint8_t rd = (inst >> 7) & 0x1f;
-    uint32_t imm = (inst >> 12) & 0xfffff;
-    return std::make_tuple(opcode, rd, imm);
+    uint32_t imm = (inst & 0xff000) + (((inst >> 20) & 0xfffffffe) << 11)
+                   + (((inst >> 21) & 0x3ff) << 1);
+    if (inst & 0x80000000) {
+        imm += (1 << 20);
+    }
+    return std::make_tuple(opcode, rd, (int32_t) imm);
 }
 
-void inst_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *program_counter);
+void inst_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *program_counter) {
+    uint8_t opcode = inst & 0x7f;
+    switch (opcode) {
+        case LUI: {
+            auto res = inst_decode_u(inst);
+            registers->write(std::get<1>(res), (std::get<2>(res) << 12) & 0xffffffff);
+        }
+            break;
+        case AUIPC: {
+            auto res = inst_decode_u(inst);
+            registers->write(std::get<1>(res), (std::get<2>(res) << 12) & 0xffffffff + *program_counter);
+        }
+            break;
+        case JAL: {
+            auto res = inst_decode_j(inst);
+            registers->write(std::get<1>(res), *program_counter + 4);
+            *program_counter += std::get<2>(res);
+        }
+            break;
+    }
+}
