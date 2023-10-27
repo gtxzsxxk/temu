@@ -5,5 +5,8 @@
 #include "machine.h"
 
 void machine::boot() {
-
+    registers->program_counter = entry_addr;
+    while (1) {
+        registers->program_counter += 4;
+    }
 }

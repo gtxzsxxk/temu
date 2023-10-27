@@ -10,9 +10,11 @@
 #include "register_file.h"
 
 class cpu {
+protected:
     memory RAM;
     memory ROM;
     register_file *registers;
+    uint64_t entry_addr;
 public:
     cpu(uint64_t ram_map_addr,
         uint64_t ram_size,
@@ -23,6 +25,8 @@ public:
     }
 
     virtual void boot() = 0;
+
+    void decode();
 
     void load_elf(elf_helper &handler);
 

@@ -17,6 +17,7 @@ void cpu::load_elf(elf_helper &handler) {
         fseek(fp, sec.sh_offset, SEEK_SET);
         fread(addr, sec.sh_size, 1, fp);
     }
+    entry_addr = handler.get_header().e_entry;
 }
 
 uint64_t *cpu::memory_map(uint64_t *mem) {
@@ -30,4 +31,8 @@ uint64_t *cpu::memory_map(uint64_t *mem) {
         return tmp;
     }
     return nullptr;
+}
+
+void cpu::decode() {
+
 }
