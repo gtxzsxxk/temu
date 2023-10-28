@@ -11,8 +11,9 @@ class machine : public cpu {
 public:
     machine() : cpu(0x20000000, 64,
                     0x08000000, 32) {
-
+        registers = new register_file(32);
     }
+
     void boot() override;
 };
 

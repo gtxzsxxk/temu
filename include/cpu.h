@@ -24,6 +24,10 @@ public:
 
     }
 
+    ~cpu() {
+        delete registers;
+    }
+
     virtual void boot() = 0;
 
     void load_elf(elf_helper &handler);
