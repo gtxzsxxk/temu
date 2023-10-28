@@ -32,3 +32,7 @@ uint64_t *cpu::memory_map(uint64_t *mem) {
     }
     return nullptr;
 }
+
+register_file *cpu::get_registers() const {
+    return registers;
+}

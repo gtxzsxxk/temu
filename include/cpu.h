@@ -29,6 +29,8 @@ public:
     void load_elf(elf_helper &handler);
 
     uint64_t *memory_map(uint64_t *mem);
+
+    register_file *get_registers() const;
 };
 
 
