@@ -229,11 +229,15 @@ void inst_exec(uint32_t inst, cpu *machine) {
             }
         }
             break;
-        case ARITHMIC_IMMEDIATE: {
+        case ARITHMETIC_IMMEDIATE: {
             /* return std::make_tuple(opcode, rd, funct3, rs1, imm); */
             auto res = inst_decode_i(inst);
             uint8_t funct3 = std::get<2>(res);
             auto imm = std::get<4>(res);
+            auto imm_64 = (int64_t) (imm << 48);
+            imm_64 >>= 48;
+            auto imm_u = (uint64_t) imm_64;
+            uint8_t shamt = imm & 0x1f;
             switch (funct3) {
                 case ARITH_FUNCT_ADDI:
                     registers->write(std::get<1>(res),
@@ -247,16 +251,37 @@ void inst_exec(uint32_t inst, cpu *machine) {
                     }
                     break;
                 case ARITH_FUNCT_SLTIU:
-                    auto imm_64 = (int64_t) (imm << 48);
-                    imm_64 >>= 48;
-                    auto imm_u = (uint64_t) imm_64;
                     if ((uint64_t) registers->read(std::get<3>(res)) < imm_u) {
                         registers->write(std::get<1>(res), 1);
                     } else {
                         registers->write(std::get<1>(res), 0);
                     }
                     break;
-
+                case ARITH_FUNCT_XORI:
+                    registers->write(std::get<1>(res),
+                                     registers->read(std::get<3>(res)) ^ imm_64);
+                    break;
+                case ARITH_FUNCT_ORI:
+                    registers->write(std::get<1>(res),
+                                     registers->read(std::get<3>(res)) | imm_64);
+                    break;
+                case ARITH_FUNCT_ANDI:
+                    registers->write(std::get<1>(res),
+                                     registers->read(std::get<3>(res)) & imm_64);
+                    break;
+                case ARITH_FUNCT_SLLI:
+                    registers->write(std::get<1>(res),
+                                     ((uint64_t) registers->read(std::get<3>(res))) << shamt);
+                    break;
+                case ARITH_FUNCT_SRLI:
+                    if (inst & (1 << 30)) {
+                        registers->write(std::get<1>(res),
+                                         (uint64_t) (((int64_t) registers->read(std::get<3>(res))) >> shamt));
+                    } else {
+                        registers->write(std::get<1>(res),
+                                         ((uint64_t) registers->read(std::get<3>(res))) >> shamt);
+                    }
+                    break;
             }
         }
             break;
