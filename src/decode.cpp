@@ -239,6 +239,13 @@ void inst_exec(uint32_t inst, cpu *machine) {
                     registers->write(std::get<1>(res),
                                      registers->read(std::get<3>(res)) + imm);
                     break;
+                case ARITH_FUNCT_SLTI:
+                    if ((int64_t) registers->read(std::get<3>(res)) < imm) {
+                        registers->write(std::get<1>(res), 1);
+                    } else {
+                        registers->write(std::get<1>(res), 0);
+                    }
+                    break;
             }
         }
             break;
