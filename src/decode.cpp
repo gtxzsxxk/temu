@@ -17,12 +17,14 @@ std::tuple<uint8_t, uint8_t, uint8_t,
 }
 
 std::tuple<uint8_t, uint8_t, uint8_t,
-        uint8_t, uint16_t> inst_decode_i(uint32_t inst) {
+        uint8_t, int16_t> inst_decode_i(uint32_t inst) {
     uint8_t opcode = inst & 0x7f;
     uint8_t rd = (inst >> 7) & 0x1f;
     uint8_t funct3 = (inst >> 12) & 0x07;
     uint8_t rs1 = (inst >> 15) & 0x1f;
-    uint16_t imm = (inst >> 20) & 0xfff;
+    uint16_t tmp = (inst >> 20) & 0xfff;
+    auto imm = (int16_t) (tmp << 4);
+    imm >>= 4;
     return std::make_tuple(opcode, rd, funct3, rs1, imm);
 }
 
@@ -74,8 +76,11 @@ std::tuple<uint8_t, uint8_t, int32_t> inst_decode_j(uint32_t inst) {
     return std::make_tuple(opcode, rd, imm_sext);
 }
 
-void inst_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *program_counter) {
+void inst_exec(uint32_t inst, cpu *machine) {
+    /* TODO: be compatible with different XLEN */
     uint8_t opcode = inst & 0x7f;
+    register_file *registers = machine->get_registers();
+    uint64_t *program_counter = &registers->program_counter;
     switch (opcode) {
         case LUI: {
             auto res = inst_decode_u(inst);
@@ -96,9 +101,8 @@ void inst_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *p
         case JALR: {
             /* std::make_tuple(opcode, rd, funct3, rs1, imm) */
             auto res = inst_decode_i(inst);
-            auto imm_sext = (int32_t) (std::get<4>(res) << 20);
-            imm_sext >>= 20;
-            uint64_t pc_next = registers->read(std::get<1>(res)) + imm_sext;
+            uint64_t pc_next = registers->read(std::get<1>(res)) +
+                               std::get<4>(res);
             pc_next &= 0xfffffffffffffffe;
             registers->write(std::get<1>(res), *program_counter + 4);
             *program_counter = pc_next;
@@ -147,6 +151,51 @@ void inst_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *p
                     break;
                 default:
                     std::cerr << "Unknown FUNCT3 when BRANCH: " << funct3 << std::endl;
+                    break;
+            }
+        }
+            break;
+        case L: {
+            /* return std::make_tuple(opcode, rd, funct3, rs1, imm); */
+            auto res = inst_decode_i(inst);
+            auto funct3 = std::get<2>(res);
+            uint64_t addr = registers->read(std::get<3>(res)) + std::get<4>(res);
+            uint64_t *mem = machine->memory_map((uint64_t *) addr);
+            uint64_t value = *mem;
+            int64_t sext_tmp;
+            switch (funct3) {
+                case L_FUNCT_LB:
+                    value &= 0xff;
+                    sext_tmp = (int64_t) (value << 56);
+                    sext_tmp >> 56;
+                    registers->write(std::get<1>(res), (uint64_t) sext_tmp);
+                    break;
+                case L_FUNCT_LBU:
+                    value &= 0xff;
+                    registers->write(std::get<1>(res), (uint64_t) value);
+                    break;
+                case L_FUNCT_LH:
+                    value &= 0xffff;
+                    sext_tmp = (int64_t) (value << 48);
+                    sext_tmp >> 48;
+                    registers->write(std::get<1>(res), (uint64_t) sext_tmp);
+                    break;
+                case L_FUNCT_LHU:
+                    value &= 0xffff;
+                    registers->write(std::get<1>(res), (uint64_t) value);
+                    break;
+                case L_FUNCT_LW:
+                    value &= 0xffffffff;
+                    sext_tmp = (int64_t) (value << 32);
+                    sext_tmp >> 32;
+                    registers->write(std::get<1>(res), (uint64_t) sext_tmp);
+                    break;
+                case L_FUNCT_LWU:
+                    value &= 0xffffffff;
+                    registers->write(std::get<1>(res), (uint64_t) value);
+                    break;
+                case L_FUNCt_LD:
+                    registers->write(std::get<1>(res), (uint64_t) value);
                     break;
             }
         }
