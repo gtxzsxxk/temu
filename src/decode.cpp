@@ -29,14 +29,15 @@ std::tuple<uint8_t, uint8_t, uint8_t,
 }
 
 std::tuple<uint8_t, uint8_t, uint8_t,
-        uint8_t, uint8_t, uint8_t> inst_decode_s(uint32_t inst) {
+        uint8_t, int16_t> inst_decode_s(uint32_t inst) {
     uint8_t opcode = inst & 0x7f;
-    uint8_t imm1 = (inst >> 7) & 0x1f;
     uint8_t funct3 = (inst >> 12) & 0x07;
     uint8_t rs1 = (inst >> 15) & 0x1f;
     uint8_t rs2 = (inst >> 20) & 0x1f;
-    uint8_t imm2 = (inst >> 25) & 0x7f;
-    return std::make_tuple(opcode, imm1, funct3, rs1, rs2, imm2);
+    auto tmp = ((inst >> 7) & 0x1f) + ((inst >> 20) & 0xfe0);
+    auto sext_offset = (int16_t) (tmp << 4);
+    sext_offset >>= 4;
+    return std::make_tuple(opcode, funct3, rs1, rs2, sext_offset);
 }
 
 std::tuple<uint8_t, uint8_t, uint8_t,
@@ -196,6 +197,34 @@ void inst_exec(uint32_t inst, cpu *machine) {
                     break;
                 case L_FUNCt_LD:
                     registers->write(std::get<1>(res), (uint64_t) value);
+                    break;
+                default:
+                    std::cerr << "Unknown FUNCT3 when LOAD: " << funct3 << std::endl;
+                    break;
+            }
+        }
+            break;
+        case S: {
+            /* return std::make_tuple(opcode, funct3, rs1, rs2, sext_offset); */
+            auto res = inst_decode_s(inst);
+            auto funct3 = std::get<1>(res);
+            uint64_t addr = registers->read(std::get<2>(res)) + std::get<4>(res);
+            uint64_t *mem = machine->memory_map((uint64_t *) addr);
+            switch (funct3) {
+                case S_FUNCT_SB:
+                    *mem &= 0xffffffffffffff00;
+                    *mem |= (registers->read(std::get<3>(res)) & 0xff);
+                    break;
+                case S_FUNCT_SH:
+                    *mem &= 0xffffffffffff0000;
+                    *mem |= (registers->read(std::get<3>(res)) & 0xffff);
+                    break;
+                case S_FUNCT_SW:
+                    *mem &= 0xffffffff00000000;
+                    *mem |= (registers->read(std::get<3>(res)) & 0xffffffff);
+                    break;
+                case S_FUNCT_SD:
+                    *mem = registers->read(std::get<3>(res));
                     break;
             }
         }
