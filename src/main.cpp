@@ -18,5 +18,6 @@ int main(int argc, char **argv) {
     auto elf_handler = elf_helper(elf_path);
     auto cpu_machine = machine();
     cpu_machine.load_elf(elf_handler);
+    cpu_machine.boot();
     return 0;
 }
