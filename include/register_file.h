@@ -5,6 +5,8 @@
 #ifndef TEMU_REGISTER_FILE_H
 #define TEMU_REGISTER_FILE_H
 
+#include <iostream>
+#include <iomanip>
 #include <cstdint>
 
 class register_file {
@@ -29,6 +31,16 @@ public:
             return 0;
         }
         return registers[rd];
+    }
+
+    void debug_print() {
+        std::cout << "Register File:" << std::endl;
+        for (int i = 0; i < register_len; i++) {
+            std::cout << "Register X" << std::dec << i << ": 0x" << std::setw(16) << std::setfill('0') << std::hex
+                      << read(i)
+                      << std::endl;
+        }
+        std::cout << std::endl;
     }
 
     ~register_file() {
