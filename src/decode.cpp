@@ -90,7 +90,8 @@ void inst_exec(uint32_t inst, cpu *machine) {
             break;
         case AUIPC: {
             auto res = inst_decode_u(inst);
-            registers->write(std::get<1>(res), (std::get<2>(res) << 12) & 0xffffffff + *program_counter);
+            registers->write(std::get<1>(res),
+                             ((((uint64_t) std::get<2>(res)) << 12) & 0xffffffff) + *program_counter);
         }
             break;
         case JAL: {
