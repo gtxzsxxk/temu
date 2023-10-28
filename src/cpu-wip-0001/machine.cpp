@@ -9,6 +9,7 @@ void machine::boot() {
     registers->program_counter = entry_addr;
     while (1) {
         uint32_t inst = (*memory_map((uint64_t *) registers->program_counter)) & 0xffffffff;
+        registers->debug_print();
         inst_exec(inst, this);
         registers->program_counter += 4;
     }
