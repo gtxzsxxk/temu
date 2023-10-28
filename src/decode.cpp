@@ -229,6 +229,19 @@ void inst_exec(uint32_t inst, cpu *machine) {
             }
         }
             break;
+        case ARITHMIC_IMMEDIATE: {
+            /* return std::make_tuple(opcode, rd, funct3, rs1, imm); */
+            auto res = inst_decode_i(inst);
+            uint8_t funct3 = std::get<2>(res);
+            auto imm = std::get<4>(res);
+            switch (funct3) {
+                case ARITH_FUNCT_ADDI:
+                    registers->write(std::get<1>(res),
+                                     registers->read(std::get<3>(res)) + imm);
+                    break;
+            }
+        }
+            break;
         default:
             std::cerr << "Unknown OPCODE: " << opcode << std::endl;
             break;
