@@ -273,7 +273,7 @@ void inst_exec(uint32_t inst, cpu *machine) {
                     registers->write(std::get<1>(res),
                                      ((uint64_t) registers->read(std::get<3>(res))) << shamt);
                     break;
-                case ARITH_FUNCT_SRLI:
+                case ARITH_FUNCT_SRLI_SRAI:
                     if (inst & (1 << 30)) {
                         registers->write(std::get<1>(res),
                                          (uint64_t) (((int64_t) registers->read(std::get<3>(res))) >> shamt));
@@ -309,7 +309,7 @@ void inst_exec(uint32_t inst, cpu *machine) {
                                      registers->read(rs1)
                                              << (registers->read(rs2) & 0x1f));
                     break;
-                case ARITH_FUNCT_SRL:
+                case ARITH_FUNCT_SRL_SRA:
                     if (inst & (1 << 30)) {
                         registers->write(rd,
                                          (uint64_t) (((int64_t) registers->read(rs1))
