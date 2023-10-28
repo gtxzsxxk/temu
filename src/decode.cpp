@@ -2,6 +2,7 @@
 // Created by hanyuan on 2023/10/27.
 //
 
+#include <iostream>
 #include "decode.h"
 
 std::tuple<uint8_t, uint8_t, uint8_t,
@@ -47,8 +48,8 @@ std::tuple<uint8_t, uint8_t, uint8_t,
     if (inst & 0x80000000) {
         addr_tmp += (1 << 12);
     }
-    int16_t addr = (int16_t) (addr_tmp << 19);
-    addr >>= 19;
+    auto addr = (int16_t) (addr_tmp << 3);
+    addr >>= 3;
 
     return std::make_tuple(opcode, funct3, rs1, rs2, addr);
 }
@@ -68,7 +69,7 @@ std::tuple<uint8_t, uint8_t, int32_t> inst_decode_j(uint32_t inst) {
     if (inst & 0x80000000) {
         imm += (1 << 20);
     }
-    int32_t imm_sext = (int32_t) (imm << 11);
+    auto imm_sext = (int32_t) (imm << 11);
     imm_sext >>= 11;
     return std::make_tuple(opcode, rd, imm_sext);
 }
@@ -95,7 +96,7 @@ void inst_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *p
         case JALR: {
             /* std::make_tuple(opcode, rd, funct3, rs1, imm) */
             auto res = inst_decode_i(inst);
-            int32_t imm_sext = (int32_t) (std::get<4>(res) << 20);
+            auto imm_sext = (int32_t) (std::get<4>(res) << 20);
             imm_sext >>= 20;
             uint64_t pc_next = registers->read(std::get<1>(res)) + imm_sext;
             pc_next &= 0xfffffffffffffffe;
@@ -103,7 +104,7 @@ void inst_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *p
             *program_counter = pc_next;
         }
             break;
-        case BRANCH:
+        case BRANCH: {
             /* return std::make_tuple(opcode, funct3, rs1, rs2, addr); */
             auto res = inst_decode_b(inst);
             auto funct3 = std::get<1>(res);
@@ -144,6 +145,14 @@ void inst_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *p
                         *program_counter = std::get<4>(res);
                     }
                     break;
+                default:
+                    std::cerr << "Unknown FUNCT3 when BRANCH: " << funct3 << std::endl;
+                    break;
             }
+        }
+            break;
+        default:
+            std::cerr << "Unknown OPCODE: " << opcode << std::endl;
+            break;
     }
 }
