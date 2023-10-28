@@ -37,14 +37,20 @@ std::tuple<uint8_t, uint8_t, uint8_t,
 }
 
 std::tuple<uint8_t, uint8_t, uint8_t,
-        uint8_t, uint8_t, uint8_t> inst_decode_b(uint32_t inst) {
+        uint8_t, int16_t> inst_decode_b(uint32_t inst) {
     uint8_t opcode = inst & 0x7f;
-    uint8_t imm1 = (inst >> 7) & 0x1f;
     uint8_t funct3 = (inst >> 12) & 0x07;
     uint8_t rs1 = (inst >> 15) & 0x1f;
     uint8_t rs2 = (inst >> 20) & 0x1f;
-    uint8_t imm2 = (inst >> 25) & 0x7f;
-    return std::make_tuple(opcode, imm1, funct3, rs1, rs2, imm2);
+    uint16_t addr_tmp = ((inst>>7)&0x1e)+((inst>>20)&0x7e0)
+            +((inst<<4)&0x800);
+    if(inst&0x80000000){
+        addr_tmp += (1<<12);
+    }
+    int16_t addr = (int16_t)(addr_tmp<<19);
+    addr >>= 19;
+
+    return std::make_tuple(opcode, funct3, rs1, rs2, addr);
 }
 
 std::tuple<uint8_t, uint8_t, uint32_t> inst_decode_u(uint32_t inst) {
@@ -62,8 +68,8 @@ std::tuple<uint8_t, uint8_t, int32_t> inst_decode_j(uint32_t inst) {
     if (inst & 0x80000000) {
         imm += (1 << 20);
     }
-    int32_t imm_sext = (int32_t) (imm << 12);
-    imm_sext >>= 12;
+    int32_t imm_sext = (int32_t) (imm << 11);
+    imm_sext >>= 11;
     return std::make_tuple(opcode, rd, imm_sext);
 }
 
