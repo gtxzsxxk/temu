@@ -49,7 +49,7 @@ enum inst_opcode_rv32i {
     ARITH_FUNCT_OR = 6,
     ARITH_FUNCT_AND = 7,
     FENCE_TSO_PAUSE = 0x0f,
-    E_CALL_BREAK = 0x73
+    SYSTEM = 0x73
 };
 
 enum inst_opcode_rv64i {

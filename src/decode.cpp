@@ -349,6 +349,12 @@ void inst_exec(uint32_t inst, cpu *machine) {
             }
         }
             break;
+        case FENCE_TSO_PAUSE:
+            /* Our I/O model are very simple. No need to implement this. */
+            break;
+        case SYSTEM:
+            /* TODO: need to be done by the implementation of the interrupt */
+            break;
         default:
             std::cerr << "Unknown OPCODE: " << opcode << std::endl;
             break;
