@@ -246,6 +246,17 @@ void inst_exec(uint32_t inst, cpu *machine) {
                         registers->write(std::get<1>(res), 0);
                     }
                     break;
+                case ARITH_FUNCT_SLTIU:
+                    auto imm_64 = (int64_t) (imm << 48);
+                    imm_64 >>= 48;
+                    auto imm_u = (uint64_t) imm_64;
+                    if ((uint64_t) registers->read(std::get<3>(res)) < imm_u) {
+                        registers->write(std::get<1>(res), 1);
+                    } else {
+                        registers->write(std::get<1>(res), 0);
+                    }
+                    break;
+
             }
         }
             break;
