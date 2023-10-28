@@ -42,12 +42,12 @@ std::tuple<uint8_t, uint8_t, uint8_t,
     uint8_t funct3 = (inst >> 12) & 0x07;
     uint8_t rs1 = (inst >> 15) & 0x1f;
     uint8_t rs2 = (inst >> 20) & 0x1f;
-    uint16_t addr_tmp = ((inst>>7)&0x1e)+((inst>>20)&0x7e0)
-            +((inst<<4)&0x800);
-    if(inst&0x80000000){
-        addr_tmp += (1<<12);
+    uint16_t addr_tmp = ((inst >> 7) & 0x1e) + ((inst >> 20) & 0x7e0)
+                        + ((inst << 4) & 0x800);
+    if (inst & 0x80000000) {
+        addr_tmp += (1 << 12);
     }
-    int16_t addr = (int16_t)(addr_tmp<<19);
+    int16_t addr = (int16_t) (addr_tmp << 19);
     addr >>= 19;
 
     return std::make_tuple(opcode, funct3, rs1, rs2, addr);
@@ -103,5 +103,47 @@ void inst_exec(uint32_t inst, register_file *registers, memory *RAM, uint64_t *p
             *program_counter = pc_next;
         }
             break;
+        case BRANCH:
+            /* return std::make_tuple(opcode, funct3, rs1, rs2, addr); */
+            auto res = inst_decode_b(inst);
+            auto funct3 = std::get<1>(res);
+            switch (funct3) {
+                case BRANCH_FUNCT_BEQ:
+                    if (registers->read(std::get<2>(res)) ==
+                        registers->read(std::get<3>(res))) {
+                        *program_counter = std::get<4>(res);
+                    }
+                    break;
+                case BRANCH_FUNCT_BNE:
+                    if (registers->read(std::get<2>(res)) !=
+                        registers->read(std::get<3>(res))) {
+                        *program_counter = std::get<4>(res);
+                    }
+                    break;
+                case BRANCH_FUNCT_BLT:
+                    if (((int64_t) registers->read(std::get<2>(res))) <
+                        ((int64_t) registers->read(std::get<3>(res)))) {
+                        *program_counter = std::get<4>(res);
+                    }
+                    break;
+                case BRANCH_FUNCT_BLTU:
+                    if (registers->read(std::get<2>(res)) <
+                        registers->read(std::get<3>(res))) {
+                        *program_counter = std::get<4>(res);
+                    }
+                    break;
+                case BRANCH_FUNCT_BGE:
+                    if (((int64_t) registers->read(std::get<2>(res))) >=
+                        ((int64_t) registers->read(std::get<3>(res)))) {
+                        *program_counter = std::get<4>(res);
+                    }
+                    break;
+                case BRANCH_FUNCT_BGEU:
+                    if (registers->read(std::get<2>(res)) >=
+                        registers->read(std::get<3>(res))) {
+                        *program_counter = std::get<4>(res);
+                    }
+                    break;
+            }
     }
 }
