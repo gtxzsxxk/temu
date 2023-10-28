@@ -29,7 +29,7 @@ public:
         if (cmp >= base_addr) {
             uint64_t diff = cmp - base_addr;
             if (diff <= length_bytes) {
-                return mem + (diff >> 3);
+                return (uint64_t *) ((uint8_t *) mem + diff);
             }
         }
         return nullptr;
