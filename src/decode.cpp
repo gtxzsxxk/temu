@@ -168,7 +168,7 @@ void inst_exec(uint32_t inst, cpu *machine) {
                 case L_FUNCT_LB:
                     value &= 0xff;
                     sext_tmp = (int64_t) (value << 56);
-                    sext_tmp >> 56;
+                    sext_tmp >>= 56;
                     registers->write(std::get<1>(res), (uint64_t) sext_tmp);
                     break;
                 case L_FUNCT_LBU:
@@ -178,7 +178,7 @@ void inst_exec(uint32_t inst, cpu *machine) {
                 case L_FUNCT_LH:
                     value &= 0xffff;
                     sext_tmp = (int64_t) (value << 48);
-                    sext_tmp >> 48;
+                    sext_tmp >>= 48;
                     registers->write(std::get<1>(res), (uint64_t) sext_tmp);
                     break;
                 case L_FUNCT_LHU:
@@ -188,7 +188,7 @@ void inst_exec(uint32_t inst, cpu *machine) {
                 case L_FUNCT_LW:
                     value &= 0xffffffff;
                     sext_tmp = (int64_t) (value << 32);
-                    sext_tmp >> 32;
+                    sext_tmp >>= 32;
                     registers->write(std::get<1>(res), (uint64_t) sext_tmp);
                     break;
                 case L_FUNCT_LWU:
@@ -281,6 +281,70 @@ void inst_exec(uint32_t inst, cpu *machine) {
                         registers->write(std::get<1>(res),
                                          ((uint64_t) registers->read(std::get<3>(res))) >> shamt);
                     }
+                    break;
+            }
+        }
+            break;
+        case ARITHMETIC: {
+            /* return std::make_tuple(opcode, rd, funct3, rs1, rs2, funct7);*/
+            auto res = inst_decode_r(inst);
+            uint8_t funct3 = std::get<2>(res);
+            uint8_t rd = std::get<1>(res);
+            uint8_t rs1 = std::get<3>(res);
+            uint8_t rs2 = std::get<4>(res);
+            switch (funct3) {
+                case ARITH_FUNCT_ADD_SUB:
+                    if (inst & (1 << 30)) {
+                        /* SUB */
+                        registers->write(rd,
+                                         registers->read(rs1) - registers->read(rs2));
+                    } else {
+                        /* ADD */
+                        registers->write(rd,
+                                         registers->read(rs1) + registers->read(rs2));
+                    }
+                    break;
+                case ARITH_FUNCT_SLL:
+                    registers->write(rd,
+                                     registers->read(rs1)
+                                             << (registers->read(rs2) & 0x1f));
+                    break;
+                case ARITH_FUNCT_SRL:
+                    if (inst & (1 << 30)) {
+                        registers->write(rd,
+                                         (uint64_t) (((int64_t) registers->read(rs1))
+                                                 >> (registers->read(rs2) & 0x1f)));
+                    } else {
+                        registers->write(rd,
+                                         registers->read(rs1)
+                                                 >> (registers->read(rs2) & 0x1f));
+                    }
+                    break;
+                case ARITH_FUNCT_SLT:
+                    if ((int64_t) registers->read(rs1) < (int64_t) registers->read(rs2)) {
+                        registers->write(rd, 1);
+                    } else {
+                        registers->write(rd, 0);
+                    }
+                    break;
+                case ARITH_FUNCT_SLTU:
+                    if ((uint64_t) registers->read(rs1) < (uint64_t) registers->read(rs2)) {
+                        registers->write(rd, 1);
+                    } else {
+                        registers->write(rd, 0);
+                    }
+                    break;
+                case ARITH_FUNCT_XOR:
+                    registers->write(rd,
+                                     registers->read(rs1) ^ registers->read(rs2));
+                    break;
+                case ARITH_FUNCT_OR:
+                    registers->write(rd,
+                                     registers->read(rs1) | registers->read(rs2));
+                    break;
+                case ARITH_FUNCT_AND:
+                    registers->write(rd,
+                                     registers->read(rs1) & registers->read(rs2));
                     break;
             }
         }
