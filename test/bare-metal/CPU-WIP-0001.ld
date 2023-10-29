@@ -61,10 +61,10 @@ SECTIONS
   .bss :
   {
     /* This is used by the startup in order to initialize the .bss section */
+    __global_pointer$ = .;
     _sbss = .;         /* define a global symbol at bss start */
     __bss_start__ = _sbss;
     *(.bss)
-    __global_pointer$ = .;
     *(.bss*)
     *(COMMON)
 
