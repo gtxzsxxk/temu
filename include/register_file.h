@@ -40,6 +40,9 @@ public:
                       << read(i)
                       << std::endl;
         }
+        std::cout << "Program Counter" << ": 0x" << std::setw(16) << std::setfill('0') << std::hex
+                  << program_counter
+                  << std::endl;
         std::cout << std::endl;
     }
 
