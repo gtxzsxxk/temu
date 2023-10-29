@@ -67,7 +67,7 @@ std::tuple<uint8_t, uint8_t, uint32_t> inst_decode_u(uint32_t inst) {
 std::tuple<uint8_t, uint8_t, int32_t> inst_decode_j(uint32_t inst) {
     uint8_t opcode = inst & 0x7f;
     uint8_t rd = (inst >> 7) & 0x1f;
-    uint32_t imm = (inst & 0xff000) + (((inst >> 20) & 0xfffffffe) << 11)
+    uint32_t imm = (inst & 0xff000) + (((inst >> 20) & 0x01) << 11)
                    + (((inst >> 21) & 0x3ff) << 1);
     if (inst & 0x80000000) {
         imm += (1 << 20);
@@ -227,6 +227,9 @@ int inst_exec(uint32_t inst, cpu *machine) {
                 case S_FUNCT_SD:
                     *mem = registers->read(std::get<3>(res));
                     break;
+                default:
+                    std::cerr << "Unknown store FUNCT: 0x" << std::hex << (int) funct3 << std::endl;
+                    return -1;
             }
         }
             break;
@@ -283,6 +286,9 @@ int inst_exec(uint32_t inst, cpu *machine) {
                                          ((uint64_t) registers->read(std::get<3>(res))) >> shamt);
                     }
                     break;
+                default:
+                    std::cerr << "Unknown arith immediate funct: 0x" << std::hex << (int) funct3 << std::endl;
+                    return -1;
             }
         }
             break;
@@ -347,6 +353,9 @@ int inst_exec(uint32_t inst, cpu *machine) {
                     registers->write(rd,
                                      registers->read(rs1) & registers->read(rs2));
                     break;
+                default:
+                    std::cerr << "Unknown arith funct: 0x" << std::hex << (int) funct3 << std::endl;
+                    return -1;
             }
         }
             break;
