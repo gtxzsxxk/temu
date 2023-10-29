@@ -40,6 +40,8 @@ SECTIONS
     . = ALIGN(8);
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+    *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2)
+    *(.srodata .srodata.*) *(.sdata .sdata.* .gnu.linkonce.s.*)
     . = ALIGN(8);
   } >FLASH
 
@@ -61,7 +63,6 @@ SECTIONS
   .bss :
   {
     /* This is used by the startup in order to initialize the .bss section */
-    __global_pointer$ = .;
     _sbss = .;         /* define a global symbol at bss start */
     __bss_start__ = _sbss;
     *(.bss)

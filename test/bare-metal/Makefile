@@ -9,7 +9,10 @@ endif
 CC				:=	${CROSS_COMPILE}gcc
 STRIP			:=	${CROSS_COMPILE}strip
 
-CFLAGS			+= -march=rv64id -mabi=lp64d -fno-PIC -fno-stack-protector -static
+CFLAGS			+= -march=rv64ima -mabi=lp64 -fno-pie -no-pie -fno-stack-protector -static
+CFLAGS			+= -fno-omit-frame-pointer -fno-optimize-sibling-calls -fdata-sections
+CFLAGS			+= -mno-save-restore -mstrict-align -nostdlib
+CFLAGS			+= -Wl,--build-id=none -N -static-libgcc -lgcc
 
 LD_SCRIPT	:=	CPU-WIP-0001.ld
 
