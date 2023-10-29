@@ -26,7 +26,7 @@ void cpu::load_elf(elf_helper &handler) {
     /* TODO: move here to the machine's definition */
     for (int i = 0; i < sec_num; i++) {
         if (!strcmp(str_buffer + sec_hdr[i].sh_name, "._user_heap_stack")) {
-            registers->write(2, sec_hdr[i].sh_addr);
+            registers->write(2, sec_hdr[i].sh_addr + sec_hdr[i].sh_size);
         }
         if (!strcmp(str_buffer + sec_hdr[i].sh_name, ".text")) {
             text_size = sec_hdr[i].sh_size;
