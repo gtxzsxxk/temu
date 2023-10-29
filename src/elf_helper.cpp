@@ -14,8 +14,6 @@ void elf_helper::read_elf() {
     section_headers = new Elf64_Shdr[hdr.e_shnum];
     fseek(fp, hdr.e_shoff, SEEK_SET);
     fread(section_headers, sizeof(Elf64_Shdr) * hdr.e_shnum, 1, fp);
-
-    delete[] section_headers;
 }
 
 std::pair<Elf64_Shdr *, uint8_t> elf_helper::get_section_headers() const {
@@ -24,6 +22,7 @@ std::pair<Elf64_Shdr *, uint8_t> elf_helper::get_section_headers() const {
 
 elf_helper::~elf_helper() {
     fclose(fp);
+    delete[] section_headers;
 }
 
 FILE *elf_helper::get_elf_fp() const {
