@@ -77,7 +77,7 @@ std::tuple<uint8_t, uint8_t, int32_t> inst_decode_j(uint32_t inst) {
     return std::make_tuple(opcode, rd, imm_sext);
 }
 
-void inst_exec(uint32_t inst, cpu *machine) {
+int inst_exec(uint32_t inst, cpu *machine) {
     /* TODO: be compatible with different XLEN */
     uint8_t opcode = inst & 0x7f;
     register_file *registers = machine->get_registers();
@@ -152,8 +152,8 @@ void inst_exec(uint32_t inst, cpu *machine) {
                     }
                     break;
                 default:
-                    std::cerr << "Unknown FUNCT3 when BRANCH: " << funct3 << std::endl;
-                    break;
+                    std::cerr << "Unknown FUNCT3 when BRANCH: 0x" << std::hex << (int) funct3 << std::endl;
+                    return -1;
             }
         }
             break;
@@ -200,8 +200,8 @@ void inst_exec(uint32_t inst, cpu *machine) {
                     registers->write(std::get<1>(res), (uint64_t) value);
                     break;
                 default:
-                    std::cerr << "Unknown FUNCT3 when LOAD: " << funct3 << std::endl;
-                    break;
+                    std::cerr << "Unknown FUNCT3 when LOAD: 0x" << std::hex << (int) funct3 << std::endl;
+                    return -1;
             }
         }
             break;
@@ -357,7 +357,8 @@ void inst_exec(uint32_t inst, cpu *machine) {
             /* TODO: need to be done by the implementation of the interrupt */
             break;
         default:
-            std::cerr << "Unknown OPCODE: " << opcode << std::endl;
-            break;
+            std::cerr << "Unknown OPCODE: 0x" << std::hex << (int) opcode << std::endl;
+            return -1;
     }
+    return 0;
 }

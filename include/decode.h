@@ -74,6 +74,6 @@ std::tuple<uint8_t, uint8_t, uint32_t> inst_decode_u(uint32_t inst);
 
 std::tuple<uint8_t, uint8_t, int32_t> inst_decode_j(uint32_t inst);
 
-void inst_exec(uint32_t inst, cpu *machine);
+int inst_exec(uint32_t inst, cpu *machine);
 
 #endif //TEMU_DECODE_H
