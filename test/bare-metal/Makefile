@@ -9,7 +9,7 @@ endif
 CC				:=	${CROSS_COMPILE}gcc
 STRIP			:=	${CROSS_COMPILE}strip
 
-CFLAGS			+= -march=rv64id -mabi=lp64d
+CFLAGS			+= -march=rv64id -mabi=lp64d -fno-PIC -fno-stack-protector -static
 
 LD_SCRIPT	:=	CPU-WIP-0001.ld
 
