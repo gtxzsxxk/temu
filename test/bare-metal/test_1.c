@@ -2,5 +2,5 @@ int b = 1;
 
 int main() {
     int a = 3;
-    return a * b + b;
+    return a + b - 20;
 }

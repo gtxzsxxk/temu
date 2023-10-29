@@ -11,7 +11,6 @@
 	.size	b, 4
 b:
 	.word	1
-	.globl	__muldi3
 	.text
 	.align	2
 	.globl	main
@@ -21,10 +20,8 @@ main:
 	.cfi_startproc
 	addi	sp,sp,-32
 	.cfi_def_cfa_offset 32
-	sd	ra,24(sp)
-	sd	s0,16(sp)
-	.cfi_offset 1, -8
-	.cfi_offset 8, -16
+	sd	s0,24(sp)
+	.cfi_offset 8, -8
 	addi	s0,sp,32
 	.cfi_def_cfa 8, 0
 	li	a5,3
@@ -32,19 +29,12 @@ main:
 	lla	a5,b
 	lw	a5,0(a5)
 	lw	a4,-20(s0)
-	mv	a1,a4
-	mv	a0,a5
-	call	__muldi3@plt
-	mv	a5,a0
-	sext.w	a4,a5
-	lla	a5,b
-	lw	a5,0(a5)
 	addw	a5,a4,a5
 	sext.w	a5,a5
+	addiw	a5,a5,-20
+	sext.w	a5,a5
 	mv	a0,a5
-	ld	ra,24(sp)
-	.cfi_restore 1
-	ld	s0,16(sp)
+	ld	s0,24(sp)
 	.cfi_restore 8
 	.cfi_def_cfa 2, 32
 	addi	sp,sp,32
