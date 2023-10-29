@@ -15,6 +15,7 @@ protected:
     memory ROM;
     register_file *registers;
     uint64_t entry_addr;
+    uint64_t text_size;
 public:
     cpu(uint64_t ram_map_addr,
         uint64_t ram_size,

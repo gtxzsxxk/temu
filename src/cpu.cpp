@@ -22,9 +22,12 @@ void cpu::load_elf(elf_helper &handler) {
     char *str_buffer = new char[1024];
     fseek(fp, strtlb_sec_hdr.sh_offset, SEEK_SET);
     fread(str_buffer, strtlb_sec_hdr.sh_size, 1, fp);
-    for(int i=0;i<sec_num;i++){
-        if(!strcmp(str_buffer+sec_hdr[i].sh_name,"._user_heap_stack")){
-            registers->write(2,sec_hdr[i].sh_addr);
+    for (int i = 0; i < sec_num; i++) {
+        if (!strcmp(str_buffer + sec_hdr[i].sh_name, "._user_heap_stack")) {
+            registers->write(2, sec_hdr[i].sh_addr);
+        }
+        if (!strcmp(str_buffer + sec_hdr[i].sh_name, ".text")) {
+            text_size = sec_hdr[i].sh_size;
         }
     }
     delete[] str_buffer;
