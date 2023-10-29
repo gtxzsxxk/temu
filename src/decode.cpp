@@ -114,41 +114,42 @@ int inst_exec(uint32_t inst, cpu *machine) {
             /* return std::make_tuple(opcode, funct3, rs1, rs2, addr); */
             auto res = inst_decode_b(inst);
             auto funct3 = std::get<1>(res);
+            auto offset = std::get<4>(res) - 4;
             switch (funct3) {
                 case BRANCH_FUNCT_BEQ:
                     if (registers->read(std::get<2>(res)) ==
                         registers->read(std::get<3>(res))) {
-                        *program_counter = std::get<4>(res);
+                        *program_counter += offset;
                     }
                     break;
                 case BRANCH_FUNCT_BNE:
                     if (registers->read(std::get<2>(res)) !=
                         registers->read(std::get<3>(res))) {
-                        *program_counter = std::get<4>(res);
+                        *program_counter += offset;
                     }
                     break;
                 case BRANCH_FUNCT_BLT:
                     if (((int64_t) registers->read(std::get<2>(res))) <
                         ((int64_t) registers->read(std::get<3>(res)))) {
-                        *program_counter = std::get<4>(res);
+                        *program_counter += offset;
                     }
                     break;
                 case BRANCH_FUNCT_BLTU:
                     if (registers->read(std::get<2>(res)) <
                         registers->read(std::get<3>(res))) {
-                        *program_counter = std::get<4>(res);
+                        *program_counter += offset;
                     }
                     break;
                 case BRANCH_FUNCT_BGE:
                     if (((int64_t) registers->read(std::get<2>(res))) >=
                         ((int64_t) registers->read(std::get<3>(res)))) {
-                        *program_counter = std::get<4>(res);
+                        *program_counter += offset;
                     }
                     break;
                 case BRANCH_FUNCT_BGEU:
                     if (registers->read(std::get<2>(res)) >=
                         registers->read(std::get<3>(res))) {
-                        *program_counter = std::get<4>(res);
+                        *program_counter += offset;
                     }
                     break;
                 default:
