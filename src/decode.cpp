@@ -97,7 +97,7 @@ int inst_exec(uint32_t inst, cpu *machine) {
         case JAL: {
             auto res = inst_decode_j(inst);
             registers->write(std::get<1>(res), *program_counter + 4);
-            *program_counter += std::get<2>(res);
+            *program_counter += (std::get<2>(res) - 4);
         }
             break;
         case JALR: {
@@ -106,6 +106,7 @@ int inst_exec(uint32_t inst, cpu *machine) {
             uint64_t pc_next = registers->read(std::get<1>(res)) +
                                std::get<4>(res);
             pc_next &= 0xfffffffffffffffe;
+            pc_next -= 4;
             registers->write(std::get<1>(res), *program_counter + 4);
             *program_counter = pc_next;
         }
