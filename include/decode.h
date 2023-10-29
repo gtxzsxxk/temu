@@ -56,6 +56,8 @@ enum inst_opcode_rv64i {
     L_FUNCT_LWU = 6,
     L_FUNCt_LD = 3,
     S_FUNCT_SD = 3,
+    ARITHMETIC_IMMEDIATE_64=0x1b,
+    ARITHMETIC_64=0x3b,
 };
 
 std::tuple<uint8_t, uint8_t, uint8_t,
