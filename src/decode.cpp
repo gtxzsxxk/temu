@@ -103,7 +103,7 @@ int inst_exec(uint32_t inst, cpu *machine) {
         case JALR: {
             /* std::make_tuple(opcode, rd, funct3, rs1, imm) */
             auto res = inst_decode_i(inst);
-            uint64_t pc_next = registers->read(std::get<1>(res)) +
+            uint64_t pc_next = registers->read(std::get<3>(res)) +
                                std::get<4>(res);
             pc_next &= 0xfffffffffffffffe;
             pc_next -= 4;
