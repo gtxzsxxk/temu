@@ -85,13 +85,13 @@ int inst_exec(uint32_t inst, cpu *machine) {
     switch (opcode) {
         case LUI: {
             auto res = inst_decode_u(inst);
-            registers->write(std::get<1>(res), (std::get<2>(res) << 12) & 0xffffffff);
+            registers->write(std::get<1>(res), (std::get<2>(res) << 12) & 0xfffff000);
         }
             break;
         case AUIPC: {
             auto res = inst_decode_u(inst);
             registers->write(std::get<1>(res),
-                             ((((uint64_t) std::get<2>(res)) << 12) & 0xffffffff) + *program_counter);
+                             ((((uint64_t) std::get<2>(res)) << 12) & 0xfffff000) + *program_counter);
         }
             break;
         case JAL: {
@@ -243,7 +243,7 @@ int inst_exec(uint32_t inst, cpu *machine) {
             auto imm_64 = (int64_t) ((uint64_t) imm << 48);
             imm_64 >>= 48;
             auto imm_u = (uint64_t) imm_64;
-            uint8_t shamt = imm & 0x1f;
+            uint8_t shamt = imm & 0x3f;
             switch (funct3) {
                 case ARITH_FUNCT_ADDI:
                     registers->write(std::get<1>(res),
@@ -322,11 +322,11 @@ int inst_exec(uint32_t inst, cpu *machine) {
                     if (inst & (1 << 30)) {
                         registers->write(rd,
                                          (uint64_t) (((int64_t) registers->read(rs1))
-                                                 >> (registers->read(rs2) & 0x1f)));
+                                                 >> (registers->read(rs2) & 0x3f)));
                     } else {
                         registers->write(rd,
                                          registers->read(rs1)
-                                                 >> (registers->read(rs2) & 0x1f));
+                                                 >> (registers->read(rs2) & 0x3f));
                     }
                     break;
                 case ARITH_FUNCT_SLT:
