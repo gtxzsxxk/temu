@@ -384,29 +384,21 @@ int inst_exec(uint32_t inst, cpu *machine) {
                         tmp_64 = tmp_128 >> 64;
                         registers->write(rd, tmp_64);
                         break;
-                    case ARITH_FUNCT_SRL_SRA_DIVU:
-                        if (inst & (1 << 30)) {
-                            registers->write(rd,
-                                             (uint64_t) (((int64_t) registers->read(rs1))
-                                                     >> (registers->read(rs2) & 0x3f)));
-                        } else {
-                            registers->write(rd,
-                                             registers->read(rs1)
-                                                     >> (registers->read(rs2) & 0x3f));
-                        }
-                        break;
-
                     case ARITH_FUNCT_XOR_DIV:
                         registers->write(rd,
-                                         registers->read(rs1) ^ registers->read(rs2));
+                                         ((int64_t) registers->read(rs1)) / ((int64_t) registers->read(rs2)));
+                        break;
+                    case ARITH_FUNCT_SRL_SRA_DIVU:
+                        registers->write(rd,
+                                         registers->read(rs1) / registers->read(rs2));
                         break;
                     case ARITH_FUNCT_OR_REM:
                         registers->write(rd,
-                                         registers->read(rs1) | registers->read(rs2));
+                                         ((int64_t) registers->read(rs1)) % ((int64_t) registers->read(rs2)));
                         break;
                     case ARITH_FUNCT_AND_REMU:
                         registers->write(rd,
-                                         registers->read(rs1) & registers->read(rs2));
+                                         registers->read(rs1) % registers->read(rs2));
                         break;
                     default:
                         std::cerr << "Unknown arith funct: 0x" << std::hex << (int) funct3 << std::endl;
