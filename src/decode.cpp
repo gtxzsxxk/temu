@@ -316,7 +316,7 @@ int inst_exec(uint32_t inst, cpu *machine) {
                 case ARITH_FUNCT_SLL:
                     registers->write(rd,
                                      registers->read(rs1)
-                                             << (registers->read(rs2) & 0x1f));
+                                             << (registers->read(rs2) & 0x3f));
                     break;
                 case ARITH_FUNCT_SRL_SRA:
                     if (inst & (1 << 30)) {
@@ -368,7 +368,7 @@ int inst_exec(uint32_t inst, cpu *machine) {
             auto imm = std::get<4>(res);
             auto imm_64 = (int64_t) ((uint64_t) imm << 48);
             imm_64 >>= 48;
-            uint8_t shamt = imm & 0x1f;
+            uint8_t shamt = imm & 0x3f;
             uint64_t tmp;
             int64_t sext_tmp;
             switch (funct3) {
@@ -436,7 +436,7 @@ int inst_exec(uint32_t inst, cpu *machine) {
                     break;
                 case ARITH_FUNCT_SLL:
                     tmp = registers->read(rs1)
-                            << (registers->read(rs2) & 0x1f);
+                            << (registers->read(rs2) & 0x3f);
                     tmp &= 0xffffffff;
                     sext_tmp = (int64_t) (tmp << 32);
                     sext_tmp >>= 32;
@@ -445,14 +445,14 @@ int inst_exec(uint32_t inst, cpu *machine) {
                 case ARITH_FUNCT_SRL_SRA:
                     if (inst & (1 << 30)) {
                         tmp = (uint64_t) (((int64_t) registers->read(rs1))
-                                >> (registers->read(rs2) & 0x1f));
+                                >> (registers->read(rs2) & 0x3f));
                         tmp &= 0xffffffff;
                         sext_tmp = (int64_t) (tmp << 32);
                         sext_tmp >>= 32;
                         registers->write(rd, sext_tmp);
                     } else {
                         tmp = registers->read(rs1)
-                                >> (registers->read(rs2) & 0x1f);
+                                >> (registers->read(rs2) & 0x3f);
                         tmp &= 0xffffffff;
                         sext_tmp = (int64_t) (tmp << 32);
                         sext_tmp >>= 32;
