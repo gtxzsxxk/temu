@@ -462,52 +462,101 @@ int inst_exec(uint32_t inst, cpu *machine) {
             uint8_t rs2 = std::get<4>(res);
             uint64_t tmp;
             int64_t sext_tmp;
-            switch (funct3) {
-                case ARITH_FUNCT_ADD_SUB_MUL:
-                    if (inst & (1 << 30)) {
-                        /* SUB */
-                        tmp = registers->read(rs1) - registers->read(rs2);
+            if (!((inst >> 25) & 0x01)) {
+                switch (funct3) {
+                    case ARITH_FUNCT_ADD_SUB_MUL:
+                        if (inst & (1 << 30)) {
+                            /* SUB */
+                            tmp = registers->read(rs1) - registers->read(rs2);
+                            tmp &= 0xffffffff;
+                            sext_tmp = (int64_t) (tmp << 32);
+                            sext_tmp >>= 32;
+                            registers->write(rd, sext_tmp);
+                        } else {
+                            /* ADD */
+                            tmp = registers->read(rs1) + registers->read(rs2);
+                            tmp &= 0xffffffff;
+                            sext_tmp = (int64_t) (tmp << 32);
+                            sext_tmp >>= 32;
+                            registers->write(rd, sext_tmp);
+                        }
+                        break;
+                    case ARITH_FUNCT_SLL_MULH:
+                        tmp = registers->read(rs1)
+                                << (registers->read(rs2) & 0x1f);
                         tmp &= 0xffffffff;
                         sext_tmp = (int64_t) (tmp << 32);
                         sext_tmp >>= 32;
                         registers->write(rd, sext_tmp);
-                    } else {
-                        /* ADD */
-                        tmp = registers->read(rs1) + registers->read(rs2);
-                        tmp &= 0xffffffff;
-                        sext_tmp = (int64_t) (tmp << 32);
+                        break;
+                    case ARITH_FUNCT_SRL_SRA_DIVU:
+                        if (inst & (1 << 30)) {
+                            tmp = (uint64_t) ((((int64_t) registers->read(rs1)) & 0xffffffff)
+                                    >> (registers->read(rs2) & 0x1f));
+                            tmp &= 0xffffffff;
+                            sext_tmp = (int64_t) (tmp << 32);
+                            sext_tmp >>= 32;
+                            registers->write(rd, sext_tmp);
+                        } else {
+                            tmp = (registers->read(rs1) & 0xffffffff)
+                                    >> (registers->read(rs2) & 0x1f);
+                            tmp &= 0xffffffff;
+                            sext_tmp = (int64_t) (tmp << 32);
+                            sext_tmp >>= 32;
+                            registers->write(rd, sext_tmp);
+                        }
+                        break;
+                    default:
+                        std::cerr << "Unknown arith funct: 0x" << std::hex << (int) funct3 << std::endl;
+                        return -1;
+                }
+            } else {
+                /* M extension */
+                __uint128_t tmp_128;
+                uint64_t tmp_64;
+                int64_t sext_tmp;
+                switch (funct3) {
+                    case ARITH_FUNCT_ADD_SUB_MUL:
+                        tmp_64 = (registers->read(rs1) & 0xffffffff) * (registers->read(rs2) & 0xffffffff);
+                        tmp_64 &= 0xffffffff;
+                        sext_tmp = (int64_t) (tmp_64 << 32);
                         sext_tmp >>= 32;
                         registers->write(rd, sext_tmp);
-                    }
-                    break;
-                case ARITH_FUNCT_SLL_MULH:
-                    tmp = registers->read(rs1)
-                            << (registers->read(rs2) & 0x1f);
-                    tmp &= 0xffffffff;
-                    sext_tmp = (int64_t) (tmp << 32);
-                    sext_tmp >>= 32;
-                    registers->write(rd, sext_tmp);
-                    break;
-                case ARITH_FUNCT_SRL_SRA_DIVU:
-                    if (inst & (1 << 30)) {
-                        tmp = (uint64_t) ((((int64_t) registers->read(rs1)) & 0xffffffff)
-                                >> (registers->read(rs2) & 0x1f));
-                        tmp &= 0xffffffff;
-                        sext_tmp = (int64_t) (tmp << 32);
+                        break;
+                    case ARITH_FUNCT_XOR_DIV:
+                        sext_tmp = ((int64_t) (registers->read(rs1) & 0xffffffff)) /
+                                   ((int64_t) (registers->read(rs2) & 0xffffffff));
+                        sext_tmp &= 0xffffffff;
+                        sext_tmp <<= 32;
                         sext_tmp >>= 32;
                         registers->write(rd, sext_tmp);
-                    } else {
-                        tmp = (registers->read(rs1) & 0xffffffff)
-                                >> (registers->read(rs2) & 0x1f);
-                        tmp &= 0xffffffff;
-                        sext_tmp = (int64_t) (tmp << 32);
+                        break;
+                    case ARITH_FUNCT_SRL_SRA_DIVU:
+                        tmp_64 = (registers->read(rs1) & 0xffffffff) / (registers->read(rs2) & 0xffffffff);
+                        tmp_64 &= 0xffffffff;
+                        sext_tmp = (int64_t) (tmp_64 << 32);
                         sext_tmp >>= 32;
                         registers->write(rd, sext_tmp);
-                    }
-                    break;
-                default:
-                    std::cerr << "Unknown arith funct: 0x" << std::hex << (int) funct3 << std::endl;
-                    return -1;
+                        break;
+                    case ARITH_FUNCT_OR_REM:
+                        sext_tmp = ((int64_t) (registers->read(rs1) & 0xffffffff)) %
+                                   ((int64_t) (registers->read(rs2) & 0xffffffff));
+                        sext_tmp &= 0xffffffff;
+                        sext_tmp <<= 32;
+                        sext_tmp >>= 32;
+                        registers->write(rd, sext_tmp);
+                        break;
+                    case ARITH_FUNCT_AND_REMU:
+                        tmp_64 = (registers->read(rs1) & 0xffffffff) % (registers->read(rs2) & 0xffffffff);
+                        tmp_64 &= 0xffffffff;
+                        sext_tmp = (int64_t) (tmp_64 << 32);
+                        sext_tmp >>= 32;
+                        registers->write(rd, sext_tmp);
+                        break;
+                    default:
+                        std::cerr << "Unknown arith funct: 0x" << std::hex << (int) funct3 << std::endl;
+                        return -1;
+                }
             }
         }
             break;
