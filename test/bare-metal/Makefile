@@ -22,7 +22,7 @@ define create_elf
 	${CC} -T ${LD_SCRIPT} -S ${TEST_FILE}.c -o ${TEST_FILE}.S ${CFLAGS}
 	${CC} -T ${LD_SCRIPT} ${TEST_FILE}.c -o ${TEST_FILE}.elf ${CFLAGS}
 #	${STRIP} ${TEST_FILE}.elf
-	${OBJDUMP} ${TEST_FILE}.elf > ${TEST_FILE}.dump -D
+	${OBJDUMP} ${TEST_FILE}.elf > ${TEST_FILE}.dump -D -M no-aliases,numeric
 endef
 
 $(TEST_FILE): $(TEST_FILE).c $(LD_SCRIPT)
