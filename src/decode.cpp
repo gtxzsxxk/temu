@@ -301,63 +301,117 @@ int inst_exec(uint32_t inst, cpu *machine) {
             uint8_t rd = std::get<1>(res);
             uint8_t rs1 = std::get<3>(res);
             uint8_t rs2 = std::get<4>(res);
-            switch (funct3) {
-                case ARITH_FUNCT_ADD_SUB:
-                    if (inst & (1 << 30)) {
-                        /* SUB */
-                        registers->write(rd,
-                                         registers->read(rs1) - registers->read(rs2));
-                    } else {
-                        /* ADD */
-                        registers->write(rd,
-                                         registers->read(rs1) + registers->read(rs2));
-                    }
-                    break;
-                case ARITH_FUNCT_SLL:
-                    registers->write(rd,
-                                     registers->read(rs1)
-                                             << (registers->read(rs2) & 0x3f));
-                    break;
-                case ARITH_FUNCT_SRL_SRA:
-                    if (inst & (1 << 30)) {
-                        registers->write(rd,
-                                         (uint64_t) (((int64_t) registers->read(rs1))
-                                                 >> (registers->read(rs2) & 0x3f)));
-                    } else {
+            if (!((inst >> 25) & 0x01)) {
+                switch (funct3) {
+                    case ARITH_FUNCT_ADD_SUB_MUL:
+                        if (inst & (1 << 30)) {
+                            /* SUB */
+                            registers->write(rd,
+                                             registers->read(rs1) - registers->read(rs2));
+                        } else {
+                            /* ADD */
+                            registers->write(rd,
+                                             registers->read(rs1) + registers->read(rs2));
+                        }
+                        break;
+                    case ARITH_FUNCT_SLL_MULH:
                         registers->write(rd,
                                          registers->read(rs1)
-                                                 >> (registers->read(rs2) & 0x3f));
-                    }
-                    break;
-                case ARITH_FUNCT_SLT:
-                    if ((int64_t) registers->read(rs1) < (int64_t) registers->read(rs2)) {
-                        registers->write(rd, 1);
-                    } else {
-                        registers->write(rd, 0);
-                    }
-                    break;
-                case ARITH_FUNCT_SLTU:
-                    if ((uint64_t) registers->read(rs1) < (uint64_t) registers->read(rs2)) {
-                        registers->write(rd, 1);
-                    } else {
-                        registers->write(rd, 0);
-                    }
-                    break;
-                case ARITH_FUNCT_XOR:
-                    registers->write(rd,
-                                     registers->read(rs1) ^ registers->read(rs2));
-                    break;
-                case ARITH_FUNCT_OR:
-                    registers->write(rd,
-                                     registers->read(rs1) | registers->read(rs2));
-                    break;
-                case ARITH_FUNCT_AND:
-                    registers->write(rd,
-                                     registers->read(rs1) & registers->read(rs2));
-                    break;
-                default:
-                    std::cerr << "Unknown arith funct: 0x" << std::hex << (int) funct3 << std::endl;
-                    return -1;
+                                                 << (registers->read(rs2) & 0x3f));
+                        break;
+                    case ARITH_FUNCT_SRL_SRA_DIVU:
+                        if (inst & (1 << 30)) {
+                            registers->write(rd,
+                                             (uint64_t) (((int64_t) registers->read(rs1))
+                                                     >> (registers->read(rs2) & 0x3f)));
+                        } else {
+                            registers->write(rd,
+                                             registers->read(rs1)
+                                                     >> (registers->read(rs2) & 0x3f));
+                        }
+                        break;
+                    case ARITH_FUNCT_SLT_MULHSU:
+                        if ((int64_t) registers->read(rs1) < (int64_t) registers->read(rs2)) {
+                            registers->write(rd, 1);
+                        } else {
+                            registers->write(rd, 0);
+                        }
+                        break;
+                    case ARITH_FUNCT_SLTU_MULHU:
+                        if ((uint64_t) registers->read(rs1) < (uint64_t) registers->read(rs2)) {
+                            registers->write(rd, 1);
+                        } else {
+                            registers->write(rd, 0);
+                        }
+                        break;
+                    case ARITH_FUNCT_XOR_DIV:
+                        registers->write(rd,
+                                         registers->read(rs1) ^ registers->read(rs2));
+                        break;
+                    case ARITH_FUNCT_OR_REM:
+                        registers->write(rd,
+                                         registers->read(rs1) | registers->read(rs2));
+                        break;
+                    case ARITH_FUNCT_AND_REMU:
+                        registers->write(rd,
+                                         registers->read(rs1) & registers->read(rs2));
+                        break;
+                    default:
+                        std::cerr << "Unknown arith funct: 0x" << std::hex << (int) funct3 << std::endl;
+                        return -1;
+                }
+            } else {
+                /* M extension */
+                __uint128_t tmp_128;
+                uint64_t tmp_64;
+                switch (funct3) {
+                    case ARITH_FUNCT_ADD_SUB_MUL:
+                        registers->write(rd,
+                                         registers->read(rs1) * registers->read(rs2));
+                        break;
+                    case ARITH_FUNCT_SLL_MULH:
+                        tmp_128 = ((int64_t) registers->read(rs1)) * ((int64_t) registers->read(rs2));
+                        tmp_64 = tmp_128 >> 64;
+                        registers->write(rd, tmp_64);
+                        break;
+                    case ARITH_FUNCT_SLT_MULHSU:
+                        tmp_128 = ((int64_t) registers->read(rs1)) * ((uint64_t) registers->read(rs2));
+                        tmp_64 = tmp_128 >> 64;
+                        registers->write(rd, tmp_64);
+                        break;
+                    case ARITH_FUNCT_SLTU_MULHU:
+                        tmp_128 = registers->read(rs1) * registers->read(rs2);
+                        tmp_64 = tmp_128 >> 64;
+                        registers->write(rd, tmp_64);
+                        break;
+                    case ARITH_FUNCT_SRL_SRA_DIVU:
+                        if (inst & (1 << 30)) {
+                            registers->write(rd,
+                                             (uint64_t) (((int64_t) registers->read(rs1))
+                                                     >> (registers->read(rs2) & 0x3f)));
+                        } else {
+                            registers->write(rd,
+                                             registers->read(rs1)
+                                                     >> (registers->read(rs2) & 0x3f));
+                        }
+                        break;
+
+                    case ARITH_FUNCT_XOR_DIV:
+                        registers->write(rd,
+                                         registers->read(rs1) ^ registers->read(rs2));
+                        break;
+                    case ARITH_FUNCT_OR_REM:
+                        registers->write(rd,
+                                         registers->read(rs1) | registers->read(rs2));
+                        break;
+                    case ARITH_FUNCT_AND_REMU:
+                        registers->write(rd,
+                                         registers->read(rs1) & registers->read(rs2));
+                        break;
+                    default:
+                        std::cerr << "Unknown arith funct: 0x" << std::hex << (int) funct3 << std::endl;
+                        return -1;
+                }
             }
         }
             break;
@@ -389,8 +443,7 @@ int inst_exec(uint32_t inst, cpu *machine) {
                     break;
                 case ARITH_FUNCT_SRLI_SRAI:
                     if (inst & (1 << 30)) {
-                        tmp = (uint64_t) ((((int64_t) registers->read(std::get<3>(res))) & 0xffffffff) >> shamt);
-                        tmp &= 0xffffffff;
+                        tmp = (uint64_t) (((int64_t) (registers->read(std::get<3>(res)) & 0xffffffff)) >> shamt);
                         sext_tmp = (int64_t) (tmp << 32);
                         sext_tmp >>= 32;
                         registers->write(std::get<1>(res), sext_tmp);
@@ -418,7 +471,7 @@ int inst_exec(uint32_t inst, cpu *machine) {
             uint64_t tmp;
             int64_t sext_tmp;
             switch (funct3) {
-                case ARITH_FUNCT_ADD_SUB:
+                case ARITH_FUNCT_ADD_SUB_MUL:
                     if (inst & (1 << 30)) {
                         /* SUB */
                         tmp = registers->read(rs1) - registers->read(rs2);
@@ -435,7 +488,7 @@ int inst_exec(uint32_t inst, cpu *machine) {
                         registers->write(rd, sext_tmp);
                     }
                     break;
-                case ARITH_FUNCT_SLL:
+                case ARITH_FUNCT_SLL_MULH:
                     tmp = registers->read(rs1)
                             << (registers->read(rs2) & 0x1f);
                     tmp &= 0xffffffff;
@@ -443,7 +496,7 @@ int inst_exec(uint32_t inst, cpu *machine) {
                     sext_tmp >>= 32;
                     registers->write(rd, sext_tmp);
                     break;
-                case ARITH_FUNCT_SRL_SRA:
+                case ARITH_FUNCT_SRL_SRA_DIVU:
                     if (inst & (1 << 30)) {
                         tmp = (uint64_t) ((((int64_t) registers->read(rs1)) & 0xffffffff)
                                 >> (registers->read(rs2) & 0x1f));
