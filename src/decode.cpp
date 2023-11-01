@@ -363,12 +363,13 @@ int inst_exec(uint32_t inst, cpu *machine) {
             break;
         case ARITHMETIC_IMMEDIATE_64: {
             /* return std::make_tuple(opcode, rd, funct3, rs1, imm); */
+            /* TODO: check the W instructions */
             auto res = inst_decode_i(inst);
             uint8_t funct3 = std::get<2>(res);
             auto imm = std::get<4>(res);
             auto imm_64 = (int64_t) ((uint64_t) imm << 48);
             imm_64 >>= 48;
-            uint8_t shamt = imm & 0x3f;
+            uint8_t shamt = imm & 0x1f;
             uint64_t tmp;
             int64_t sext_tmp;
             switch (funct3) {
@@ -388,13 +389,13 @@ int inst_exec(uint32_t inst, cpu *machine) {
                     break;
                 case ARITH_FUNCT_SRLI_SRAI:
                     if (inst & (1 << 30)) {
-                        tmp = (uint64_t) (((int64_t) registers->read(std::get<3>(res))) >> shamt);
+                        tmp = (uint64_t) ((((int64_t) registers->read(std::get<3>(res))) & 0xffffffff) >> shamt);
                         tmp &= 0xffffffff;
                         sext_tmp = (int64_t) (tmp << 32);
                         sext_tmp >>= 32;
                         registers->write(std::get<1>(res), sext_tmp);
                     } else {
-                        tmp = ((uint64_t) registers->read(std::get<3>(res))) >> shamt;
+                        tmp = ((uint64_t) registers->read(std::get<3>(res)) & 0xffffffff) >> shamt;
                         tmp &= 0xffffffff;
                         sext_tmp = (int64_t) (tmp << 32);
                         sext_tmp >>= 32;
@@ -436,7 +437,7 @@ int inst_exec(uint32_t inst, cpu *machine) {
                     break;
                 case ARITH_FUNCT_SLL:
                     tmp = registers->read(rs1)
-                            << (registers->read(rs2) & 0x3f);
+                            << (registers->read(rs2) & 0x1f);
                     tmp &= 0xffffffff;
                     sext_tmp = (int64_t) (tmp << 32);
                     sext_tmp >>= 32;
@@ -444,15 +445,15 @@ int inst_exec(uint32_t inst, cpu *machine) {
                     break;
                 case ARITH_FUNCT_SRL_SRA:
                     if (inst & (1 << 30)) {
-                        tmp = (uint64_t) (((int64_t) registers->read(rs1))
-                                >> (registers->read(rs2) & 0x3f));
+                        tmp = (uint64_t) ((((int64_t) registers->read(rs1)) & 0xffffffff)
+                                >> (registers->read(rs2) & 0x1f));
                         tmp &= 0xffffffff;
                         sext_tmp = (int64_t) (tmp << 32);
                         sext_tmp >>= 32;
                         registers->write(rd, sext_tmp);
                     } else {
-                        tmp = registers->read(rs1)
-                                >> (registers->read(rs2) & 0x3f);
+                        tmp = (registers->read(rs1) & 0xffffffff)
+                                >> (registers->read(rs2) & 0x1f);
                         tmp &= 0xffffffff;
                         sext_tmp = (int64_t) (tmp << 32);
                         sext_tmp >>= 32;
