@@ -21,6 +21,33 @@ const uint8_t RV32A = 0x2f;
 void decode(uint32_t inst) {
     uint8_t opcode = inst & 0x7f;
     switch (opcode) {
-        
+        case RV32I_LUI:
+            break;
     }
+}
+
+static uint32_t pow(uint32_t x, uint32_t y) {
+    uint32_t ans = 1;
+    for (uint32_t i = 0; i < y; i++) {
+        ans *= x;
+    }
+    return ans;
+}
+
+static uint32_t extract(uint32_t inst, uint8_t start, uint8_t end) {
+    return (inst >> start) & (pow(2, (end - start + 1)) - 1);
+}
+
+#define INST_EXT(end, begin)  extract(inst,begin,end)
+
+static void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2, uint8_t *funct7) {
+    *rd = INST_EXT(11, 7);
+    *funct3 = INST_EXT(14, 12);
+    *rs1 = INST_EXT(19, 15);
+    *rs2 = INST_EXT(24, 20);
+    *funct7 = INST_EXT(31, 25);
+}
+
+static void LUI(uint32_t inst) {
+
 }
