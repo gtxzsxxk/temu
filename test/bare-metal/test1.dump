@@ -1,0 +1,103 @@
+
+test1.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00000000 <_start>:
+   0:	00018193          	addi	x3,x3,0 # 2000200 <__global_pointer$>
+   4:	03000117          	auipc	x2,0x3000
+   8:	ffc10113          	addi	x2,x2,-4 # 3000000 <_estack>
+   c:	e0018513          	addi	x10,x3,-512 # 2000000 <b>
+  10:	e0818593          	addi	x11,x3,-504 # 2000008 <__bss_end__>
+  14:	09000293          	addi	x5,x0,144
+  18:	00b50c63          	beq	x10,x11,30 <_bss>
+
+0000001c <_copy_data>:
+  1c:	0002a303          	lw	x6,0(x5)
+  20:	00652023          	sw	x6,0(x10)
+  24:	00428293          	addi	x5,x5,4
+  28:	00450513          	addi	x10,x10,4
+  2c:	feb518e3          	bne	x10,x11,1c <_copy_data>
+
+00000030 <_bss>:
+  30:	e0818513          	addi	x10,x3,-504 # 2000008 <__bss_end__>
+  34:	e0818593          	addi	x11,x3,-504 # 2000008 <__bss_end__>
+  38:	09800293          	addi	x5,x0,152
+  3c:	00b50c63          	beq	x10,x11,54 <_entry>
+
+00000040 <_copy_bss>:
+  40:	0002a303          	lw	x6,0(x5)
+  44:	00052303          	lw	x6,0(x10)
+  48:	00428293          	addi	x5,x5,4
+  4c:	00450513          	addi	x10,x10,4
+  50:	feb518e3          	bne	x10,x11,40 <_copy_bss>
+
+00000054 <_entry>:
+  54:	004000ef          	jal	x1,58 <main>
+
+00000058 <main>:
+  58:	fe010113          	addi	x2,x2,-32
+  5c:	00812e23          	sw	x8,28(x2)
+  60:	02010413          	addi	x8,x2,32
+  64:	00400793          	addi	x15,x0,4
+  68:	fef42623          	sw	x15,-20(x8)
+  6c:	00600713          	addi	x14,x0,6
+  70:	e0e1a023          	sw	x14,-512(x3) # 2000000 <b>
+  74:	e001a703          	lw	x14,-512(x3) # 2000000 <b>
+  78:	fec42783          	lw	x15,-20(x8)
+  7c:	00f707b3          	add	x15,x14,x15
+  80:	00078513          	addi	x10,x15,0
+  84:	01c12403          	lw	x8,28(x2)
+  88:	02010113          	addi	x2,x2,32
+  8c:	00008067          	jalr	x0,0(x1)
+
+Disassembly of section .data:
+
+02000000 <b>:
+ 2000000:	0005                	.2byte	0x5
+ 2000002:	0000                	.2byte	0x0
+ 2000004:	0000                	.2byte	0x0
+	...
+
+Disassembly of section ._user_heap_stack:
+
+02000008 <._user_heap_stack>:
+	...
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	1b41                	.2byte	0x1b41
+   2:	0000                	.2byte	0x0
+   4:	7200                	.2byte	0x7200
+   6:	7369                	.2byte	0x7369
+   8:	01007663          	bgeu	x0,x16,14 <_start+0x14>
+   c:	0011                	.2byte	0x11
+   e:	0000                	.2byte	0x0
+  10:	1004                	.2byte	0x1004
+  12:	7205                	.2byte	0x7205
+  14:	3376                	.2byte	0x3376
+  16:	6932                	.2byte	0x6932
+  18:	7032                	.2byte	0x7032
+  1a:	0031                	.2byte	0x31
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+   0:	3a434347          	.4byte	0x3a434347
+   4:	2820                	.2byte	0x2820
+   6:	7542                	.2byte	0x7542
+   8:	6c69                	.2byte	0x6c69
+   a:	7264                	.2byte	0x7264
+   c:	20746f6f          	jal	x30,46a12 <_Min_Stack_Size+0x46912>
+  10:	672d                	.2byte	0x672d
+  12:	3765                	.2byte	0x3765
+  14:	3532                	.2byte	0x3532
+  16:	6262                	.2byte	0x6262
+  18:	69642d33          	.4byte	0x69642d33
+  1c:	7472                	.2byte	0x7472
+  1e:	2979                	.2byte	0x2979
+  20:	3120                	.2byte	0x3120
+  22:	2e32                	.2byte	0x2e32
+  24:	00302e33          	slt	x28,x0,x3
