@@ -7,12 +7,12 @@
 #include <stdint.h>
 #include "parameters.h"
 
-extern uint64_t registers[];
-extern uint64_t program_counter;
+extern uint32_t registers[];
+extern uint32_t program_counter;
 
 uint8_t *mem_get_rom_ptr();
-uint8_t mem_read_b(uint64_t addr);
-uint16_t mem_read_h(uint64_t addr);
-uint32_t mem_read_w(uint64_t addr);
+uint8_t mem_read_b(uint32_t addr);
+uint16_t mem_read_h(uint32_t addr);
+uint32_t mem_read_w(uint32_t addr);
 
 #endif //TEMU_MEM_H
