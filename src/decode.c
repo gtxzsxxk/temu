@@ -3,21 +3,20 @@
 //
 #include "mem.h"
 
-const uint8_t RV32I_LUI = 0x37;
-const uint8_t RV32I_AUIPC = 0x17;
-const uint8_t RV32I_JAL = 0x6f;
-const uint8_t RV32I_JALR = 0x67;
-const uint8_t RV32I_BRANCH = 0x63;
-const uint8_t RV32I_LOAD = 0x03;
-const uint8_t RV32I_STORE = 0x23;
-const uint8_t RV32I_ARITH_IMM = 0x13;
-const uint8_t RV32I_ARITH = 0x33;
-const uint8_t RV32I_ZIFENCEI_FENCE = 0x0f;
-const uint8_t RV32I_ZICSR_ECALL_EBREAK = 0x73;
+#define RV32I_LUI                               0x37
+#define RV32I_AUIPC                             0x17
+#define RV32I_JAL                               0x6f
+#define RV32I_JALR                              0x67
+#define RV32I_BRANCH                            0x63
+#define RV32I_LOAD                              0x03
+#define RV32I_STORE                             0x23
+#define RV32I_ARITH_IMM                         0x13
+#define RV32I_ARITH                             0x33
+#define RV32I_ZIFENCEI_FENCE                    0x0f
+#define RV32I_ZICSR_ECALL_EBREAK                0x73
+#define RV32A                                   0x2f
 
-const uint8_t RV32A = 0x2f;
-
-static uint32_t pow(uint32_t x, uint32_t y) {
+static uint32_t dec_pow(uint32_t x, uint32_t y) {
     uint32_t ans = 1;
     for (uint32_t i = 0; i < y; i++) {
         ans *= x;
@@ -26,7 +25,7 @@ static uint32_t pow(uint32_t x, uint32_t y) {
 }
 
 static uint32_t extract(uint32_t inst, uint8_t start, uint8_t end) {
-    return (inst >> start) & (pow(2, (end - start + 1)) - 1);
+    return (inst >> start) & (dec_pow(2, (end - start + 1)) - 1);
 }
 
 #define INST_EXT(end, begin)  extract(inst,begin,end)
@@ -330,15 +329,15 @@ DEC_FUNC(ARITH) {
 void decode(uint32_t inst) {
     uint8_t opcode = inst & 0x7f;
     switch (opcode) {
-        DECODE(LUI);
-        DECODE(AUIPC);
-        DECODE(JAL);
-        DECODE(JALR);
-        DECODE(BRANCH);
-        DECODE(LOAD);
-        DECODE(STORE);
-        DECODE(ARITH_IMM);
-        DECODE(ARITH);
+        DECODE(LUI)
+        DECODE(AUIPC)
+        DECODE(JAL)
+        DECODE(JALR)
+        DECODE(BRANCH)
+        DECODE(LOAD)
+        DECODE(STORE)
+        DECODE(ARITH_IMM)
+        DECODE(ARITH)
         default:
             /* Exception */
             break;
