@@ -126,3 +126,65 @@ DEC_FUNC(JALR) {
     mem_register_write(rd, program_counter + 4);
     program_counter = (mem_register_read(rs1) + sext_offset) & (~0x00000001);
 }
+
+DEC_FUNC(BRANCH) {
+    uint32_t imm;
+    uint8_t funct3;
+    uint8_t rs1;
+    uint8_t rs2;
+    INST_DEC(b, &imm, &funct3, &rs1, &rs2);
+    int32_t sext_offset = SEXT(imm, 31, 12);
+    switch (funct3) {
+        case 0:
+            /* BEQ */
+            if (mem_register_read(rs1) == mem_register_read(rs2)) {
+                program_counter += sext_offset;
+            } else {
+                program_counter += 4;
+            }
+            break;
+        case 1:
+            /* BNE */
+            if (mem_register_read(rs1) != mem_register_read(rs2)) {
+                program_counter += sext_offset;
+            } else {
+                program_counter += 4;
+            }
+            break;
+        case 4:
+            /* BLT */
+            if (((int32_t) mem_register_read(rs1)) < ((int32_t) mem_register_read(rs2))) {
+                program_counter += sext_offset;
+            } else {
+                program_counter += 4;
+            }
+            break;
+        case 5:
+            /* BGE */
+            if (((int32_t) mem_register_read(rs1)) >= ((int32_t) mem_register_read(rs2))) {
+                program_counter += sext_offset;
+            } else {
+                program_counter += 4;
+            }
+            break;
+        case 6:
+            /* BLTU */
+            if ((mem_register_read(rs1)) < (mem_register_read(rs2))) {
+                program_counter += sext_offset;
+            } else {
+                program_counter += 4;
+            }
+            break;
+        case 7:
+            /* BGEU */
+            if ((mem_register_read(rs1)) >= (mem_register_read(rs2))) {
+                program_counter += sext_offset;
+            } else {
+                program_counter += 4;
+            }
+            break;
+        default:
+            /* Raise illegal instruction interrupt */
+            break;
+    }
+}
