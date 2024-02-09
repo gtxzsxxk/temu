@@ -1,6 +1,7 @@
 //
 // Created by hanyuan on 2024/2/8.
 //
+#include <stdio.h>
 #include "mem.h"
 
 static uint32_t registers[32];
@@ -103,4 +104,12 @@ void mem_register_write(uint8_t rd, uint32_t value) {
     if (rd) {
         registers[rd] = value;
     }
+}
+
+void mem_debug_printreg(void) {
+    printf("Emulator registers debug print\n");
+    for (int i = 0; i < 32; i++) {
+        printf("x%d: 0x%08x\n", i, mem_register_read(i));
+    }
+    printf("PC: 0x%08x\n", program_counter);
 }
