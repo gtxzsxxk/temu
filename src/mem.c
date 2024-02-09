@@ -97,6 +97,10 @@ uint32_t mem_register_read(uint8_t rd) {
     if (rd == 0) {
         return 0;
     }
+    /* global pointer */
+    if (rd == 3) {
+        return 0x02000200;
+    }
     return registers[rd];
 }
 
@@ -111,5 +115,5 @@ void mem_debug_printreg(void) {
     for (int i = 0; i < 32; i++) {
         printf("x%d: 0x%08x\n", i, mem_register_read(i));
     }
-    printf("PC: 0x%08x\n", program_counter);
+    printf("PC: 0x%08x\n\n\n", program_counter);
 }
