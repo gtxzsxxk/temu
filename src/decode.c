@@ -40,6 +40,8 @@ static uint32_t extract(uint32_t inst, uint8_t start, uint8_t end) {
 
 #define INST_EXT(end, begin)  extract(inst,begin,end)
 #define INST_DEC(type, ...) decode_type_##type(inst, __VA_ARGS__)
+#define DEC_FUNC(OPCODE) static void decode_func_##OPCODE(uint32_t inst)
+#define SEXT(op, target_idx, source_idx) ((int32_t)(op << (target_idx - source_idx))) >> (target_idx - source_idx)
 
 static void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2, uint8_t *funct7) {
     *rd = INST_EXT(11, 7);
@@ -86,10 +88,26 @@ static void decode_type_j(uint32_t inst, uint32_t *imm, uint8_t *rd) {
     *rd = INST_EXT(11, 7);
 }
 
-static void LUI(uint32_t inst) {
+DEC_FUNC(LUI) {
     uint32_t imm;
     uint8_t rd;
     INST_DEC(u,&imm,&rd);
     imm &= ~0x00000fff;
     registers[rd] = imm;
+}
+
+DEC_FUNC(AUIPC) {
+    uint32_t imm;
+    uint8_t rd;
+    INST_DEC(u,&imm,&rd);
+    imm &= ~0x00000fff;
+    imm += program_counter;
+    registers[rd] = imm;
+}
+
+DEC_FUNC(JAL) {
+    uint32_t imm;
+    uint8_t rd;
+    INST_DEC(j,&imm,&rd);
+    int32_t sext_imm = SEXT(imm,31,20);
 }
