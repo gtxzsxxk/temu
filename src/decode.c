@@ -241,3 +241,45 @@ DEC_FUNC(STORE) {
         /* Raise illegal instruction exception */
     }
 }
+
+DEC_FUNC(ARITH_IMM) {
+    uint8_t rd, funct3, rs1;
+    uint16_t imm;
+    INST_DEC(i, &rd, &funct3, &rs1, &imm);
+    int32_t sext_imm = SEXT(imm, 31, 11);
+    if (funct3 == 0) {
+        /* ADDI */
+        mem_register_write(rd, mem_register_read(rs1) + sext_imm);
+    } else if (funct3 == 2) {
+        /* SLTI */
+        mem_register_write(rd, (int32_t) mem_register_read(rs1) < sext_imm);
+    } else if (funct3 == 3) {
+        /* SLTIU */
+        mem_register_write(rd, (uint32_t) mem_register_read(rs1) < (uint32_t) sext_imm);
+    } else if (funct3 == 4) {
+        /* XORI */
+        mem_register_write(rd, (uint32_t) mem_register_read(rs1) ^ (uint32_t) sext_imm);
+    } else if (funct3 == 6) {
+        /* ORI */
+        mem_register_write(rd, (uint32_t) mem_register_read(rs1) | (uint32_t) sext_imm);
+    } else if (funct3 == 7) {
+        /* ANDI */
+        mem_register_write(rd, (uint32_t) mem_register_read(rs1) & (uint32_t) sext_imm);
+    } else if (funct3 == 1) {
+        /* SLLI */
+        uint8_t shamt = imm & 0x1f;
+        mem_register_write(rd, (uint32_t) mem_register_read(rs1) << shamt);
+    } else if (funct3 == 5) {
+        /* SRLI and SRAI */
+        uint8_t shamt = imm & 0x1f;
+        if (!(inst >> 30)) {
+            /* SRLI */
+            mem_register_write(rd, (uint32_t) mem_register_read(rs1) >> shamt);
+        } else {
+            /* SRAI */
+            mem_register_write(rd, (int32_t) mem_register_read(rs1) >> shamt);
+        }
+    } else {
+        /* Raise illegal instruction exception */
+    }
+}
