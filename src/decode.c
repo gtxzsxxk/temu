@@ -41,7 +41,7 @@ static uint32_t extract(uint32_t inst, uint8_t start, uint8_t end) {
 #define INST_EXT(end, begin)  extract(inst,begin,end)
 #define INST_DEC(type, ...) decode_type_##type(inst, __VA_ARGS__)
 #define DEC_FUNC(OPCODE) static void decode_func_##OPCODE(uint32_t inst)
-#define SEXT(op, target_idx, source_idx) ((int32_t)(op << (target_idx - source_idx))) >> (target_idx - source_idx)
+#define SEXT(op, target_idx, source_idx) (((int32_t)(op << (target_idx - source_idx))) >> (target_idx - source_idx))
 
 static void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2, uint8_t *funct7) {
     *rd = INST_EXT(11, 7);
@@ -186,5 +186,58 @@ DEC_FUNC(BRANCH) {
         default:
             /* Raise illegal instruction interrupt */
             break;
+    }
+}
+
+DEC_FUNC(LOAD) {
+    uint8_t rd, funct3, rs1;
+    uint16_t imm;
+    INST_DEC(i, &rd, &funct3, &rs1, &imm);
+    int32_t sext_offset = SEXT(imm, 31, 11);
+    uint32_t target_addr = mem_register_read(rs1) + sext_offset;
+    if (funct3 == 0) {
+        /* LB */
+        uint8_t data = mem_read_b(target_addr);
+        uint32_t sext_data = SEXT(data, 31, 7);
+        mem_register_write(rd, sext_data);
+    } else if (funct3 == 1) {
+        /* LH */
+        uint16_t data = mem_read_h(target_addr);
+        uint32_t sext_data = SEXT(data, 31, 15);
+        mem_register_write(rd, sext_data);
+    } else if (funct3 == 2) {
+        /* LW */
+        uint32_t data = mem_read_w(target_addr);
+        mem_register_write(rd, data);
+    } else if (funct3 == 4) {
+        /* LBU */
+        uint8_t data = mem_read_b(target_addr);
+        mem_register_write(rd, data);
+    } else if (funct3 == 5) {
+        /* LHU */
+        uint16_t data = mem_read_h(target_addr);
+        mem_register_write(rd, data);
+    } else {
+        /* Raise illegal instruction exception */
+    }
+}
+
+DEC_FUNC(STORE) {
+    uint32_t imm;
+    uint8_t funct3, rs1, rs2;
+    INST_DEC(s, &imm, &funct3, &rs1, &rs2);
+    int32_t sext_offset = SEXT(imm, 31, 11);
+    uint32_t target_addr = mem_register_read(rs1) + sext_offset;
+    if (funct3 == 0) {
+        /* SB */
+        mem_write_b(target_addr, mem_register_read(rs2) & 0xff);
+    } else if (funct3 == 1) {
+        /* SH */
+        mem_write_h(target_addr, mem_register_read(rs2) & 0xffff);
+    } else if (funct3 == 2) {
+        /* SW */
+        mem_write_w(target_addr, mem_register_read(rs2));
+    } else {
+        /* Raise illegal instruction exception */
     }
 }
