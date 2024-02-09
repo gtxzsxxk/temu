@@ -116,4 +116,5 @@ void mem_debug_printreg(void) {
         printf("x%d: 0x%08x\n", i, mem_register_read(i));
     }
     printf("PC: 0x%08x\n\n\n", program_counter);
+    fflush(stdout);
 }
