@@ -25,9 +25,9 @@ uint8_t mem_read_b(uint32_t addr) {
 }
 
 uint16_t mem_read_h(uint32_t addr) {
-    if (addr >= ROM_START_ADDR && addr + 2 < ROM_START_ADDR + ROM_SIZE) {
+    if (addr >= ROM_START_ADDR && addr + 1 < ROM_START_ADDR + ROM_SIZE) {
         return rom_ptr[addr - ROM_START_ADDR] | (rom_ptr[addr - ROM_START_ADDR + 1] << 8);
-    } else if (addr >= RAM_START_ADDR && addr +2 < RAM_START_ADDR + RAM_SIZE) {
+    } else if (addr >= RAM_START_ADDR && addr + 1 < RAM_START_ADDR + RAM_SIZE) {
         return ram_ptr[addr - RAM_START_ADDR] | (ram_ptr[addr - RAM_START_ADDR + 1] << 8);
     } else {
         /* Illegal memory access interrupt */
@@ -36,13 +36,13 @@ uint16_t mem_read_h(uint32_t addr) {
 }
 
 uint32_t mem_read_w(uint32_t addr) {
-    if (addr >= ROM_START_ADDR && addr + 4 < ROM_START_ADDR + ROM_SIZE) {
+    if (addr >= ROM_START_ADDR && addr + 3 < ROM_START_ADDR + ROM_SIZE) {
         return
                 rom_ptr[addr - ROM_START_ADDR] |
                 (rom_ptr[addr - ROM_START_ADDR + 1] << 8) |
                 (rom_ptr[addr - ROM_START_ADDR + 2] << 16) |
                 (rom_ptr[addr - ROM_START_ADDR + 3] << 24);
-    } else if (addr >= RAM_START_ADDR && addr + 4 < RAM_START_ADDR + RAM_SIZE) {
+    } else if (addr >= RAM_START_ADDR && addr + 3 < RAM_START_ADDR + RAM_SIZE) {
         return
                 ram_ptr[addr - RAM_START_ADDR] |
                 (ram_ptr[addr - RAM_START_ADDR + 1] << 8) |
@@ -65,10 +65,10 @@ void mem_write_b(uint32_t addr, uint8_t data) {
 }
 
 void mem_write_h(uint32_t addr, uint16_t data) {
-    if (addr >= ROM_START_ADDR && addr + 2 < ROM_START_ADDR + ROM_SIZE) {
+    if (addr >= ROM_START_ADDR && addr + 1 < ROM_START_ADDR + ROM_SIZE) {
         rom_ptr[addr - ROM_START_ADDR] = data & 0xff;
         rom_ptr[addr - ROM_START_ADDR + 1] = (data >> 8) & 0xff;
-    } else if (addr >= RAM_START_ADDR && addr +2 < RAM_START_ADDR + RAM_SIZE) {
+    } else if (addr >= RAM_START_ADDR && addr + 1 < RAM_START_ADDR + RAM_SIZE) {
         ram_ptr[addr - RAM_START_ADDR] = data & 0xff;
         ram_ptr[addr - RAM_START_ADDR + 1] = (data >> 8) & 0xff;
     } else {
@@ -77,12 +77,12 @@ void mem_write_h(uint32_t addr, uint16_t data) {
 }
 
 void mem_write_w(uint32_t addr, uint32_t data) {
-    if (addr >= ROM_START_ADDR && addr + 4 < ROM_START_ADDR + ROM_SIZE) {
+    if (addr >= ROM_START_ADDR && addr + 3 < ROM_START_ADDR + ROM_SIZE) {
         rom_ptr[addr - ROM_START_ADDR] = data & 0xff;
         rom_ptr[addr - ROM_START_ADDR + 1] = (data >> 8) & 0xff;
         rom_ptr[addr - ROM_START_ADDR + 2] = (data >> 16) & 0xff;
         rom_ptr[addr - ROM_START_ADDR + 3] = (data >> 24) & 0xff;
-    } else if (addr >= RAM_START_ADDR && addr + 4 < RAM_START_ADDR + RAM_SIZE) {
+    } else if (addr >= RAM_START_ADDR && addr + 3 < RAM_START_ADDR + RAM_SIZE) {
         ram_ptr[addr - RAM_START_ADDR] = data & 0xff;
         ram_ptr[addr - RAM_START_ADDR + 1] = (data >> 8) & 0xff;
         ram_ptr[addr - RAM_START_ADDR + 2] = (data >> 16) & 0xff;
