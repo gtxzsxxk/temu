@@ -310,6 +310,25 @@ DEC_FUNC(ARITH) {
     program_counter += 4;
 }
 
+DEC_FUNC(ZICSR_ECALL_EBREAK) {
+    uint8_t rd, funct3, rs1;
+    uint16_t imm;
+    INST_DEC(i, &rd, &funct3, &rs1, &imm);
+    if (funct3 == 0x1) {
+        /* CSRRW */
+    } else if (funct3 == 0x2) {
+        /* CSRRS */
+    } else if (funct3 == 0x3) {
+        /* CSRRC */
+    } else if (funct3 == 0x5) {
+        /* CSRRWI */
+    } else if (funct3 == 0x6) {
+        /* CSRRSI */
+    } else if (funct3 == 0x7) {
+        /* CSRRCI */
+    }
+}
+
 void decode(uint32_t inst) {
     uint8_t opcode = inst & 0x7f;
     switch (opcode) {
