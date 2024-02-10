@@ -110,11 +110,11 @@ void mem_register_write(uint8_t rd, uint32_t value) {
     }
 }
 
-void mem_debug_printreg(void) {
+void mem_debug_printreg(uint32_t pc_prev_exec) {
     printf("Emulator registers debug print\n");
     for (int i = 0; i < 32; i++) {
         printf("x%d: 0x%08x\n", i, mem_register_read(i));
     }
-    printf("PC: 0x%08x\n\n\n", program_counter);
+    printf("PC: 0x%08x\n\n", pc_prev_exec);
     fflush(stdout);
 }
