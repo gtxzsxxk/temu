@@ -14,6 +14,7 @@
 #define CSR_MASK_READ 1 << 3
 #define CSR_MASK_WRITE 1 << 4
 
+/* === csrIndexGen match begin DO NOT MODIFY THIS LINE === */
 #define CSR_num_cycle 0xC00
 #define CSR_prv_cycle (CSR_MASK_USER | CSR_MASK_READ)
 
@@ -118,5 +119,6 @@
 
 #define CSR_num_mtinst 0x34A
 #define CSR_prv_mtinst (CSR_MASK_MACHINE | CSR_MASK_READ | CSR_MASK_WRITE)
+/* === csrIndexGen match end DO NOT MODIFY THIS LINE === */
 
 #endif //TEMU_ZICSR_H
