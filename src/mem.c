@@ -56,9 +56,7 @@ uint32_t mem_read_w(uint32_t addr) {
 }
 
 void mem_write_b(uint32_t addr, uint8_t data) {
-    if (addr >= ROM_START_ADDR && addr < ROM_START_ADDR + ROM_SIZE) {
-        rom_ptr[addr - ROM_START_ADDR] = data;
-    } else if (addr >= RAM_START_ADDR && addr < RAM_START_ADDR + RAM_SIZE) {
+    if (addr >= RAM_START_ADDR && addr < RAM_START_ADDR + RAM_SIZE) {
         ram_ptr[addr - RAM_START_ADDR] = data;
     } else {
         /* Illegal memory access interrupt */
@@ -66,10 +64,7 @@ void mem_write_b(uint32_t addr, uint8_t data) {
 }
 
 void mem_write_h(uint32_t addr, uint16_t data) {
-    if (addr >= ROM_START_ADDR && addr + 1 < ROM_START_ADDR + ROM_SIZE) {
-        rom_ptr[addr - ROM_START_ADDR] = data & 0xff;
-        rom_ptr[addr - ROM_START_ADDR + 1] = (data >> 8) & 0xff;
-    } else if (addr >= RAM_START_ADDR && addr + 1 < RAM_START_ADDR + RAM_SIZE) {
+    if (addr >= RAM_START_ADDR && addr + 1 < RAM_START_ADDR + RAM_SIZE) {
         ram_ptr[addr - RAM_START_ADDR] = data & 0xff;
         ram_ptr[addr - RAM_START_ADDR + 1] = (data >> 8) & 0xff;
     } else {
@@ -78,12 +73,7 @@ void mem_write_h(uint32_t addr, uint16_t data) {
 }
 
 void mem_write_w(uint32_t addr, uint32_t data) {
-    if (addr >= ROM_START_ADDR && addr + 3 < ROM_START_ADDR + ROM_SIZE) {
-        rom_ptr[addr - ROM_START_ADDR] = data & 0xff;
-        rom_ptr[addr - ROM_START_ADDR + 1] = (data >> 8) & 0xff;
-        rom_ptr[addr - ROM_START_ADDR + 2] = (data >> 16) & 0xff;
-        rom_ptr[addr - ROM_START_ADDR + 3] = (data >> 24) & 0xff;
-    } else if (addr >= RAM_START_ADDR && addr + 3 < RAM_START_ADDR + RAM_SIZE) {
+    if (addr >= RAM_START_ADDR && addr + 3 < RAM_START_ADDR + RAM_SIZE) {
         ram_ptr[addr - RAM_START_ADDR] = data & 0xff;
         ram_ptr[addr - RAM_START_ADDR + 1] = (data >> 8) & 0xff;
         ram_ptr[addr - RAM_START_ADDR + 2] = (data >> 16) & 0xff;
@@ -97,10 +87,6 @@ uint32_t mem_register_read(uint8_t rd) {
     if (rd == 0) {
         return 0;
     }
-//    /* global pointer */
-//    if (rd == 3) {
-//        return 0x02000200;
-//    }
     return registers[rd];
 }
 
