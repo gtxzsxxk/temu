@@ -96,8 +96,10 @@ DEC_FUNC(JALR) {
     uint8_t rd;
     INST_DEC(i, &rd, &funct3, &rs1, &imm);
     int32_t sext_offset = SEXT(imm, 31, 11);
-    mem_register_write(rd, program_counter + 4);
+    /* potential bug: jalr x5, 0(x5) */
+    uint32_t next_addr = program_counter + 4;
     program_counter = (mem_register_read(rs1) + sext_offset) & (~0x00000001);
+    mem_register_write(rd, next_addr);
 }
 
 DEC_FUNC(BRANCH) {
