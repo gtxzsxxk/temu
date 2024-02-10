@@ -11,11 +11,11 @@ void machine_start(void) {
     for (;;) {
         uint32_t instruction = mem_read_w(program_counter);
         mem_debug_printreg(program_counter);
-        decode(instruction);
 #ifdef RISCV_ISA_TESTS
         if ((instruction & 0x7f) == RV32I_ZICSR_ECALL_EBREAK) {
-            int a = 0;
+            return;
         }
 #endif
+        decode(instruction);
     }
 }
