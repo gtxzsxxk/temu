@@ -14,6 +14,10 @@ CFLAGS			+= -fno-omit-frame-pointer -fno-optimize-sibling-calls -fdata-sections
 CFLAGS			+= -mno-save-restore -mstrict-align -nostdlib
 CFLAGS			+= -Wl,--build-id=none -N -static-libgcc -lgcc -O0
 
+ifneq (${LM},)
+CFLAGS			+= -lm
+endif
+
 LD_SCRIPT	:=	bare-metal.LD
 
 OBJS += start.S
