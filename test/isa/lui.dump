@@ -1,0 +1,80 @@
+
+lui.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text.init:
+
+00000000 <_start>:
+   0:	00200193          	addi	x3,x0,2
+   4:	000000b7          	lui	x1,0x0
+   8:	00000393          	addi	x7,x0,0
+   c:	04709a63          	bne	x1,x7,60 <fail>
+
+00000010 <test_3>:
+  10:	00300193          	addi	x3,x0,3
+  14:	fffff0b7          	lui	x1,0xfffff
+  18:	4010d093          	srai	x1,x1,0x1
+  1c:	80000393          	addi	x7,x0,-2048
+  20:	04709063          	bne	x1,x7,60 <fail>
+
+00000024 <test_4>:
+  24:	00400193          	addi	x3,x0,4
+  28:	7ffff0b7          	lui	x1,0x7ffff
+  2c:	4140d093          	srai	x1,x1,0x14
+  30:	7ff00393          	addi	x7,x0,2047
+  34:	02709663          	bne	x1,x7,60 <fail>
+
+00000038 <test_5>:
+  38:	00500193          	addi	x3,x0,5
+  3c:	800000b7          	lui	x1,0x80000
+  40:	4140d093          	srai	x1,x1,0x14
+  44:	80000393          	addi	x7,x0,-2048
+  48:	00709c63          	bne	x1,x7,60 <fail>
+
+0000004c <test_6>:
+  4c:	00600193          	addi	x3,x0,6
+  50:	80000037          	lui	x0,0x80000
+  54:	00000393          	addi	x7,x0,0
+  58:	00701463          	bne	x0,x7,60 <fail>
+  5c:	02301063          	bne	x0,x3,7c <pass>
+
+00000060 <fail>:
+  60:	0ff0000f          	fence	iorw,iorw
+  64:	00018063          	beq	x3,x0,64 <fail+0x4>
+  68:	00119193          	slli	x3,x3,0x1
+  6c:	0011e193          	ori	x3,x3,1
+  70:	05d00893          	addi	x17,x0,93
+  74:	00018513          	addi	x10,x3,0
+  78:	00000073          	ecall
+
+0000007c <pass>:
+  7c:	0ff0000f          	fence	iorw,iorw
+  80:	00100193          	addi	x3,x0,1
+  84:	05d00893          	addi	x17,x0,93
+  88:	00000513          	addi	x10,x0,0
+  8c:	00000073          	ecall
+  90:	c0001073          	unimp
+	...
+
+Disassembly of section .tohost:
+
+00001000 <tohost>:
+	...
+
+00001040 <fromhost>:
+	...
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	1941                	.2byte	0x1941
+   2:	0000                	.2byte	0x0
+   4:	7200                	.2byte	0x7200
+   6:	7369                	.2byte	0x7369
+   8:	01007663          	bgeu	x0,x16,14 <test_3+0x4>
+   c:	0000000f          	fence	unknown,unknown
+  10:	7205                	.2byte	0x7205
+  12:	3376                	.2byte	0x3376
+  14:	6932                	.2byte	0x6932
+  16:	7032                	.2byte	0x7032
+  18:	0031                	.2byte	0x31
