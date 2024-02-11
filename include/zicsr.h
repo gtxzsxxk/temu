@@ -14,6 +14,9 @@
 #define CSR_MASK_READ 1 << 3
 #define CSR_MASK_WRITE 1 << 4
 
+#define CSR_RESET_VALUE(name, value) [CSR_idx_##name] = value,
+#define CSR_MATCH_DECLARE(name) [CSR_idx_##name] = CSR_prv_##name | (CSR_num_##name << 8),
+
 /* === csrIndexGen match begin DO NOT MODIFY THIS LINE === */
 #define CSR_num_sstatus 0x100
 #define CSR_prv_sstatus (CSR_MASK_SUPERVISOR | CSR_MASK_READ | CSR_MASK_WRITE)
