@@ -160,4 +160,8 @@
 
 /* === csrIndexGen match end DO NOT MODIFY THIS LINE === */
 
+void csr_csrrw(uint8_t rs1, uint8_t rd, uint16_t csr_number);
+void csr_csrrs(uint8_t rs1, uint8_t rd, uint16_t csr_number);
+void csr_csrrc(uint8_t rs1, uint8_t rd, uint16_t csr_number);
+
 #endif //TEMU_ZICSR_H
