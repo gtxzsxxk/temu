@@ -64,14 +64,21 @@ for i in range(0, codeLines.__len__()):
         break
 
 csrList.sort(key=lambda elem: eval(elem.csrNumber))
-fp = open(zicsrSource, "w")
-for i in range(0, startPos + 1):
-    fp.write(codeLines[i])
 
-for i in range(0, csrList.__len__()):
-    fp.write(csrList[i].to_c_definitions(i))
+writeFlag = input("Are you sure to write the result(Y/N): ")
 
-for i in range(endIndex, codeLines.__len__()):
-    fp.write(codeLines[i])
+if writeFlag == 'Y':
+    fp = open(zicsrSource, "w")
+    for i in range(0, startPos + 1):
+        fp.write(codeLines[i])
 
-fp.close()
+    for i in range(0, csrList.__len__()):
+        fp.write(csrList[i].to_c_definitions(i))
+
+    for i in range(endIndex, codeLines.__len__()):
+        fp.write(codeLines[i])
+
+    fp.close()
+
+for i in csrList:
+    print("CSR_PRIV_DECLARE(%s)" % i.csrName)
