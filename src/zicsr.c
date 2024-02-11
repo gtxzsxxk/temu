@@ -135,3 +135,44 @@ void csr_csrrc(uint8_t rs1, uint8_t rd, uint16_t csr_number) {
         csr_write(index, prev_value & (~mem_register_read(rs1)));
     }
 }
+
+void csr_csrrwi(uint8_t uimm, uint8_t rd, uint16_t csr_number) {
+    uint8_t index = csr_get_index_by_number(csr_number);
+    if (index == (uint8_t) -1) {
+        /* Raise exception */
+        return;
+    }
+    if (rd) {
+        uint32_t prev_value = csr_read(index);
+        csr_write(index, uimm);
+        mem_register_write(rd, prev_value);
+    } else {
+        csr_write(index, uimm);
+    }
+}
+
+void csr_csrrsi(uint8_t uimm, uint8_t rd, uint16_t csr_number) {
+    uint8_t index = csr_get_index_by_number(csr_number);
+    if (index == (uint8_t) -1) {
+        /* Raise exception */
+        return;
+    }
+    uint32_t prev_value = csr_read(index);
+    mem_register_write(rd, prev_value);
+    if (uimm) {
+        csr_write(index, prev_value | uimm);
+    }
+}
+
+void csr_csrrci(uint8_t uimm, uint8_t rd, uint16_t csr_number) {
+    uint8_t index = csr_get_index_by_number(csr_number);
+    if (index == (uint8_t) -1) {
+        /* Raise exception */
+        return;
+    }
+    uint32_t prev_value = csr_read(index);
+    mem_register_write(rd, prev_value);
+    if (uimm) {
+        csr_write(index, prev_value & (~uimm));
+    }
+}
