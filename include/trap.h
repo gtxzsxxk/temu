@@ -19,4 +19,8 @@
 #define EXCEPTION_LOAD_PAGEFAULT                    13
 #define EXCEPTION_STORE_PAGEFAULT                   15
 
+void trap_throw_interrupt(uint32_t cause);
+
+void trap_throw_exception(uint32_t cause);
+
 #endif //TEMU_TRAP_H

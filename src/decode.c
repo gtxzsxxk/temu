@@ -4,6 +4,7 @@
 #include "decode.h"
 #include "mem.h"
 #include "zicsr.h"
+#include "trap.h"
 
 static uint32_t dec_pow(uint32_t x, uint32_t y) {
     uint32_t ans = 1;
@@ -160,7 +161,7 @@ DEC_FUNC(BRANCH) {
             }
             break;
         default:
-            /* Raise illegal instruction interrupt */
+            trap_throw_exception(EXCEPTION_ILLEGAL_INST);
             break;
     }
 }
@@ -194,7 +195,7 @@ DEC_FUNC(LOAD) {
         uint16_t data = mem_read_h(target_addr);
         mem_register_write(rd, data);
     } else {
-        /* Raise illegal instruction exception */
+        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
     }
     program_counter += 4;
 }
@@ -215,7 +216,7 @@ DEC_FUNC(STORE) {
         /* SW */
         mem_write_w(target_addr, mem_register_read(rs2));
     } else {
-        /* Raise illegal instruction exception */
+        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
     }
     program_counter += 4;
 }
@@ -258,7 +259,7 @@ DEC_FUNC(ARITH_IMM) {
             mem_register_write(rd, (int32_t) mem_register_read(rs1) >> shamt);
         }
     } else {
-        /* Raise illegal instruction exception */
+        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
     }
 
     program_counter += 4;
@@ -305,7 +306,7 @@ DEC_FUNC(ARITH) {
         /* AND */
         mem_register_write(rd, (uint32_t) mem_register_read(rs1) & (uint32_t) mem_register_read(rs2));
     } else {
-        /* Raise illegal instruction exception */
+        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
     }
 
     program_counter += 4;
@@ -333,6 +334,17 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
     } else if (funct3 == 0x7) {
         /* CSRRCI */
         csr_csrrci(rs1, rd, imm);
+    } else if (!imm && !funct3 && !rd && !rs1) {
+        /* ECALL */
+        if(current_privilege == CSR_MASK_MACHINE) {
+            trap_throw_exception(EXCEPTION_ECALL_FROM_M);
+        } else if(current_privilege == CSR_MASK_SUPERVISOR) {
+            trap_throw_exception(EXCEPTION_ECALL_FROM_S);
+        } else if(current_privilege == CSR_MASK_USER) {
+            trap_throw_exception(EXCEPTION_ECALL_FROM_U);
+        } else {
+            trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        }
     }
 
     program_counter += 4;
@@ -352,7 +364,7 @@ void decode(uint32_t inst) {
         DECODE(ARITH)
         DECODE(ZICSR_ECALL_EBREAK)
         default:
-            /* Exception */
+            trap_throw_exception(EXCEPTION_ILLEGAL_INST);
             program_counter += 4;
             break;
     }
