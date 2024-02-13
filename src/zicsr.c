@@ -5,6 +5,8 @@
 #include "mem.h"
 #include "zicsr.h"
 
+uint8_t current_privilege = CSR_MASK_MACHINE;
+
 uint32_t control_status_registers[CSR_SIZE] = {
         CSR_RESET_VALUE(misa, 0x40140101)
         CSR_RESET_VALUE(mvendorid, 0x00000000)
