@@ -3,6 +3,7 @@
 //
 #include <stdio.h>
 #include "mem.h"
+#include "trap.h"
 
 static uint32_t registers[32];
 uint32_t program_counter = 0;
@@ -20,7 +21,7 @@ uint8_t mem_read_b(uint32_t addr) {
     } else if (addr >= RAM_START_ADDR && addr < RAM_START_ADDR + RAM_SIZE) {
         return ram_ptr[addr - RAM_START_ADDR];
     } else {
-        /* Illegal memory access interrupt */
+        trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT);
         return 0xff;
     }
 }
@@ -31,7 +32,7 @@ uint16_t mem_read_h(uint32_t addr) {
     } else if (addr >= RAM_START_ADDR && addr + 1 < RAM_START_ADDR + RAM_SIZE) {
         return ram_ptr[addr - RAM_START_ADDR] | (ram_ptr[addr - RAM_START_ADDR + 1] << 8);
     } else {
-        /* Illegal memory access interrupt */
+        trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT);
         return 0xffff;
     }
 }
@@ -50,7 +51,8 @@ uint32_t mem_read_w(uint32_t addr) {
                 (ram_ptr[addr - RAM_START_ADDR + 2] << 16) |
                 (ram_ptr[addr - RAM_START_ADDR + 3] << 24);
     } else {
-        /* Illegal memory access interrupt */
+        trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT);
+        /* TODO: add inst access fault support */
         return 0xffffffff;
     }
 }
@@ -59,7 +61,7 @@ void mem_write_b(uint32_t addr, uint8_t data) {
     if (addr >= RAM_START_ADDR && addr < RAM_START_ADDR + RAM_SIZE) {
         ram_ptr[addr - RAM_START_ADDR] = data;
     } else {
-        /* Illegal memory access interrupt */
+        trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT);
     }
 }
 
@@ -68,7 +70,7 @@ void mem_write_h(uint32_t addr, uint16_t data) {
         ram_ptr[addr - RAM_START_ADDR] = data & 0xff;
         ram_ptr[addr - RAM_START_ADDR + 1] = (data >> 8) & 0xff;
     } else {
-        /* Illegal memory access interrupt */
+        trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT);
     }
 }
 
@@ -79,7 +81,7 @@ void mem_write_w(uint32_t addr, uint32_t data) {
         ram_ptr[addr - RAM_START_ADDR + 2] = (data >> 16) & 0xff;
         ram_ptr[addr - RAM_START_ADDR + 3] = (data >> 24) & 0xff;
     } else {
-        /* Illegal memory access interrupt */
+        trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT);
     }
 }
 
