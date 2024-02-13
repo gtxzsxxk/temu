@@ -336,15 +336,24 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         csr_csrrci(rs1, rd, imm);
     } else if (!imm && !funct3 && !rd && !rs1) {
         /* ECALL */
-        if(current_privilege == CSR_MASK_MACHINE) {
+        if (current_privilege == CSR_MASK_MACHINE) {
             trap_throw_exception(EXCEPTION_ECALL_FROM_M);
-        } else if(current_privilege == CSR_MASK_SUPERVISOR) {
+        } else if (current_privilege == CSR_MASK_SUPERVISOR) {
             trap_throw_exception(EXCEPTION_ECALL_FROM_S);
-        } else if(current_privilege == CSR_MASK_USER) {
+        } else if (current_privilege == CSR_MASK_USER) {
             trap_throw_exception(EXCEPTION_ECALL_FROM_U);
         } else {
             trap_throw_exception(EXCEPTION_ILLEGAL_INST);
         }
+    } else if (!funct3 && !rd && !rs1 && imm == 0x102) {
+        /* SRET */
+    } else if (!funct3 && !rd && !rs1 && imm == 0x302) {
+        /* MRET */
+        trap_return_machine();
+        /* avoid incorrect pc */
+        program_counter -= 4;
+    } else if (!funct3 && !rd && !rs1 && imm == 0x105) {
+        /* WFI */
     }
 
     program_counter += 4;

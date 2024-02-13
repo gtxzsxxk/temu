@@ -28,3 +28,13 @@ void trap_throw_exception(uint32_t cause) {
         current_privilege = CSR_MASK_MACHINE;
     }
 }
+
+void trap_return_machine(void) {
+    current_privilege = (control_status_registers[CSR_idx_mstatus] >> mstatus_MPP) & 0x03;
+    if (control_status_registers[CSR_idx_mstatus] & (1 << mstatus_MPIE)) {
+        control_status_registers[CSR_idx_mstatus] |= (1 << mstatus_MIE);
+    } else {
+        control_status_registers[CSR_idx_mstatus] &= ~(1 << mstatus_MIE);
+    }
+    program_counter = control_status_registers[CSR_idx_mepc];
+}
