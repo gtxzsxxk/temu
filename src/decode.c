@@ -347,6 +347,9 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         }
     } else if (!funct3 && !rd && !rs1 && imm == 0x102) {
         /* SRET */
+        trap_return_supervisor();
+        /* avoid incorrect pc */
+        program_counter -= 4;
     } else if (!funct3 && !rd && !rs1 && imm == 0x302) {
         /* MRET */
         trap_return_machine();
