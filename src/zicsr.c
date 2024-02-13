@@ -68,34 +68,6 @@ const uint8_t csr_index_remap[0x10] = {
         [0xF] = CSR_idx_mvendorid,
 };
 
-inline uint8_t csr_get_mstatus_MIE(void) {
-    return (control_status_registers[CSR_idx_mstatus] >> 3) & 0x01;
-}
-
-inline uint8_t csr_get_mstatus_SIE(void) {
-    return (control_status_registers[CSR_idx_mstatus] >> 1) & 0x01;
-}
-
-inline uint8_t csr_get_mstatus_MPIE(void) {
-    return (control_status_registers[CSR_idx_mstatus] >> 7) & 0x01;
-}
-
-inline uint8_t csr_get_mstatus_SPIE(void) {
-    return (control_status_registers[CSR_idx_mstatus] >> 5) & 0x01;
-}
-
-inline uint8_t csr_get_mstatus_MPP(void) {
-    return (control_status_registers[CSR_idx_mstatus] >> 11) & 0x03;
-}
-
-inline uint8_t csr_get_mstatus_SPP(void) {
-    return (control_status_registers[CSR_idx_mstatus] >> 8) & 0x01;
-}
-
-inline uint8_t csr_get_mstatus_MPRV(void) {
-    return (control_status_registers[CSR_idx_mstatus] >> 17) & 0x01;
-}
-
 uint8_t csr_get_index_by_number(uint16_t csr_number) {
     uint8_t start_index = csr_index_remap[csr_number >> 8];
     if (start_index == 100) {
