@@ -355,8 +355,12 @@ DEC_FUNC(ARITH) {
             if (!divisor) {
                 mem_register_write(rd, dividend);
             } else {
-                int32_t res = dividend % divisor;
-                mem_register_write(rd, (uint32_t) res);
+                if ((uint32_t) dividend == 0x80000000) {
+                    mem_register_write(rd, 0);
+                } else {
+                    int32_t res = dividend % divisor;
+                    mem_register_write(rd, (uint32_t) res);
+                }
             }
         } else if (funct3 == 7) {
             /* REMU */
