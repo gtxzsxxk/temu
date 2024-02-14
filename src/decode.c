@@ -323,7 +323,7 @@ DEC_FUNC(ARITH) {
             mem_register_write(rd, ((uint64_t) res) >> 32);
         } else if (funct3 == 3) {
             /* MULHU */
-            uint64_t res = mem_register_read(rs1) * mem_register_read(rs2);
+            uint64_t res = (uint64_t)mem_register_read(rs1) * (uint64_t)mem_register_read(rs2);
             mem_register_write(rd, res >> 32);
         } else if (funct3 == 4) {
             /* DIV */
