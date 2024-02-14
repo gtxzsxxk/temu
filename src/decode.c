@@ -315,11 +315,11 @@ DEC_FUNC(ARITH) {
             mem_register_write(rd, mem_register_read(rs1) * mem_register_read(rs2));
         } else if (funct3 == 1) {
             /* MULH */
-            int64_t res = ((int32_t) mem_register_read(rs1)) * ((int32_t) mem_register_read(rs2));
+            int64_t res = (int64_t)((int32_t) mem_register_read(rs1)) * (int64_t)((int32_t) mem_register_read(rs2));
             mem_register_write(rd, ((uint64_t) res) >> 32);
         } else if (funct3 == 2) {
             /* MULHSU */
-            int64_t res = ((int32_t) mem_register_read(rs1)) * ((uint32_t) mem_register_read(rs2));
+            int64_t res = (int64_t)((int32_t) mem_register_read(rs1)) * ((uint32_t) mem_register_read(rs2));
             mem_register_write(rd, ((uint64_t) res) >> 32);
         } else if (funct3 == 3) {
             /* MULHU */
