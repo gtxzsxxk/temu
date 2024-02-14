@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "mem.h"
 #include "trap.h"
+#include "uart8250.h"
 
 static uint32_t registers[32];
 uint32_t program_counter = 0;
@@ -16,10 +17,12 @@ uint8_t *mem_get_rom_ptr() {
 }
 
 uint8_t mem_read_b(uint32_t addr) {
-    if (addr >= ROM_START_ADDR && addr < ROM_START_ADDR + ROM_SIZE) {
-        return rom_ptr[addr - ROM_START_ADDR];
-    } else if (addr >= RAM_START_ADDR && addr < RAM_START_ADDR + RAM_SIZE) {
-        return ram_ptr[addr - RAM_START_ADDR];
+    if (addr >= ROM_BASE_ADDR && addr < ROM_BASE_ADDR + ROM_SIZE) {
+        return rom_ptr[addr - ROM_BASE_ADDR];
+    } else if (addr >= RAM_BASE_ADDR && addr < RAM_BASE_ADDR + RAM_SIZE) {
+        return ram_ptr[addr - RAM_BASE_ADDR];
+    } else if (addr >= UART_BASE_ADDR && addr < UART_BASE_ADDR + UART_SIZE) {
+        return uart8250_read_b(addr - UART_BASE_ADDR);
     } else {
         trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT);
         return 0xff;
@@ -27,10 +30,10 @@ uint8_t mem_read_b(uint32_t addr) {
 }
 
 uint16_t mem_read_h(uint32_t addr) {
-    if (addr >= ROM_START_ADDR && addr + 1 < ROM_START_ADDR + ROM_SIZE) {
-        return rom_ptr[addr - ROM_START_ADDR] | (rom_ptr[addr - ROM_START_ADDR + 1] << 8);
-    } else if (addr >= RAM_START_ADDR && addr + 1 < RAM_START_ADDR + RAM_SIZE) {
-        return ram_ptr[addr - RAM_START_ADDR] | (ram_ptr[addr - RAM_START_ADDR + 1] << 8);
+    if (addr >= ROM_BASE_ADDR && addr + 1 < ROM_BASE_ADDR + ROM_SIZE) {
+        return rom_ptr[addr - ROM_BASE_ADDR] | (rom_ptr[addr - ROM_BASE_ADDR + 1] << 8);
+    } else if (addr >= RAM_BASE_ADDR && addr + 1 < RAM_BASE_ADDR + RAM_SIZE) {
+        return ram_ptr[addr - RAM_BASE_ADDR] | (ram_ptr[addr - RAM_BASE_ADDR + 1] << 8);
     } else {
         trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT);
         return 0xffff;
@@ -38,18 +41,18 @@ uint16_t mem_read_h(uint32_t addr) {
 }
 
 uint32_t mem_read_w(uint32_t addr) {
-    if (addr >= ROM_START_ADDR && addr + 3 < ROM_START_ADDR + ROM_SIZE) {
+    if (addr >= ROM_BASE_ADDR && addr + 3 < ROM_BASE_ADDR + ROM_SIZE) {
         return
-                rom_ptr[addr - ROM_START_ADDR] |
-                (rom_ptr[addr - ROM_START_ADDR + 1] << 8) |
-                (rom_ptr[addr - ROM_START_ADDR + 2] << 16) |
-                (rom_ptr[addr - ROM_START_ADDR + 3] << 24);
-    } else if (addr >= RAM_START_ADDR && addr + 3 < RAM_START_ADDR + RAM_SIZE) {
+                rom_ptr[addr - ROM_BASE_ADDR] |
+                (rom_ptr[addr - ROM_BASE_ADDR + 1] << 8) |
+                (rom_ptr[addr - ROM_BASE_ADDR + 2] << 16) |
+                (rom_ptr[addr - ROM_BASE_ADDR + 3] << 24);
+    } else if (addr >= RAM_BASE_ADDR && addr + 3 < RAM_BASE_ADDR + RAM_SIZE) {
         return
-                ram_ptr[addr - RAM_START_ADDR] |
-                (ram_ptr[addr - RAM_START_ADDR + 1] << 8) |
-                (ram_ptr[addr - RAM_START_ADDR + 2] << 16) |
-                (ram_ptr[addr - RAM_START_ADDR + 3] << 24);
+                ram_ptr[addr - RAM_BASE_ADDR] |
+                (ram_ptr[addr - RAM_BASE_ADDR + 1] << 8) |
+                (ram_ptr[addr - RAM_BASE_ADDR + 2] << 16) |
+                (ram_ptr[addr - RAM_BASE_ADDR + 3] << 24);
     } else {
         trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT);
         /* TODO: add inst access fault support */
@@ -58,28 +61,30 @@ uint32_t mem_read_w(uint32_t addr) {
 }
 
 void mem_write_b(uint32_t addr, uint8_t data) {
-    if (addr >= RAM_START_ADDR && addr < RAM_START_ADDR + RAM_SIZE) {
-        ram_ptr[addr - RAM_START_ADDR] = data;
+    if (addr >= RAM_BASE_ADDR && addr < RAM_BASE_ADDR + RAM_SIZE) {
+        ram_ptr[addr - RAM_BASE_ADDR] = data;
+    } else if (addr >= UART_BASE_ADDR && addr < UART_BASE_ADDR + UART_SIZE) {
+        uart8250_write_b(addr - RAM_BASE_ADDR, data);
     } else {
         trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT);
     }
 }
 
 void mem_write_h(uint32_t addr, uint16_t data) {
-    if (addr >= RAM_START_ADDR && addr + 1 < RAM_START_ADDR + RAM_SIZE) {
-        ram_ptr[addr - RAM_START_ADDR] = data & 0xff;
-        ram_ptr[addr - RAM_START_ADDR + 1] = (data >> 8) & 0xff;
+    if (addr >= RAM_BASE_ADDR && addr + 1 < RAM_BASE_ADDR + RAM_SIZE) {
+        ram_ptr[addr - RAM_BASE_ADDR] = data & 0xff;
+        ram_ptr[addr - RAM_BASE_ADDR + 1] = (data >> 8) & 0xff;
     } else {
         trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT);
     }
 }
 
 void mem_write_w(uint32_t addr, uint32_t data) {
-    if (addr >= RAM_START_ADDR && addr + 3 < RAM_START_ADDR + RAM_SIZE) {
-        ram_ptr[addr - RAM_START_ADDR] = data & 0xff;
-        ram_ptr[addr - RAM_START_ADDR + 1] = (data >> 8) & 0xff;
-        ram_ptr[addr - RAM_START_ADDR + 2] = (data >> 16) & 0xff;
-        ram_ptr[addr - RAM_START_ADDR + 3] = (data >> 24) & 0xff;
+    if (addr >= RAM_BASE_ADDR && addr + 3 < RAM_BASE_ADDR + RAM_SIZE) {
+        ram_ptr[addr - RAM_BASE_ADDR] = data & 0xff;
+        ram_ptr[addr - RAM_BASE_ADDR + 1] = (data >> 8) & 0xff;
+        ram_ptr[addr - RAM_BASE_ADDR + 2] = (data >> 16) & 0xff;
+        ram_ptr[addr - RAM_BASE_ADDR + 3] = (data >> 24) & 0xff;
     } else {
         trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT);
     }
