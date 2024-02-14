@@ -327,12 +327,17 @@ DEC_FUNC(ARITH) {
             mem_register_write(rd, res >> 32);
         } else if (funct3 == 4) {
             /* DIV */
+            int32_t dividend = (int32_t) mem_register_read(rs1);
             int32_t divisor = (int32_t) mem_register_read(rs2);
             if (!divisor) {
                 mem_register_write(rd, 0xffffffff);
             } else {
-                int32_t res = ((int32_t) mem_register_read(rs1)) / divisor;
-                mem_register_write(rd, (uint32_t) res);
+                if ((uint32_t) dividend == 0x80000000) {
+                    mem_register_write(rd, dividend);
+                } else {
+                    int32_t res = dividend / divisor;
+                    mem_register_write(rd, (uint32_t) res);
+                }
             }
         } else if (funct3 == 5) {
             /* DIVU */
