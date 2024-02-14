@@ -16,6 +16,10 @@ uint8_t *mem_get_rom_ptr() {
     return rom_ptr;
 }
 
+uint8_t *mem_get_ram_ptr() {
+    return ram_ptr;
+}
+
 uint8_t mem_read_b(uint32_t addr) {
     if (addr >= ROM_BASE_ADDR && addr < ROM_BASE_ADDR + ROM_SIZE) {
         return rom_ptr[addr - ROM_BASE_ADDR];
