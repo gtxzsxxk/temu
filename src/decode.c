@@ -322,7 +322,6 @@ void decode(uint32_t inst) {
         DECODE(ARITH)
         default:
             /* Exception */
-            program_counter += 4;
             break;
     }
 }
