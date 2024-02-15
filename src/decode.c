@@ -172,39 +172,32 @@ DEC_FUNC(LOAD) {
     INST_DEC(i, &rd, &funct3, &rs1, &imm);
     int32_t sext_offset = SEXT(imm, 31, 11);
     uint32_t target_addr = mem_register_read(rs1) + sext_offset;
-    uint8_t access_error_intr = 0;
     if (funct3 == 0) {
         /* LB */
-        uint8_t data = mem_read_b(target_addr, &access_error_intr);
+        uint8_t data = mem_read_b(target_addr);
         uint32_t sext_data = SEXT(data, 31, 7);
         mem_register_write(rd, sext_data);
     } else if (funct3 == 1) {
         /* LH */
-        uint16_t data = mem_read_h(target_addr, &access_error_intr);
+        uint16_t data = mem_read_h(target_addr);
         uint32_t sext_data = SEXT(data, 31, 15);
         mem_register_write(rd, sext_data);
     } else if (funct3 == 2) {
         /* LW */
-        uint32_t data = mem_read_w(target_addr, &access_error_intr);
+        uint32_t data = mem_read_w(target_addr);
         mem_register_write(rd, data);
     } else if (funct3 == 4) {
         /* LBU */
-        uint8_t data = mem_read_b(target_addr, &access_error_intr);
+        uint8_t data = mem_read_b(target_addr);
         mem_register_write(rd, data);
     } else if (funct3 == 5) {
         /* LHU */
-        uint16_t data = mem_read_h(target_addr, &access_error_intr);
+        uint16_t data = mem_read_h(target_addr);
         mem_register_write(rd, data);
     } else {
         trap_throw_exception(EXCEPTION_ILLEGAL_INST);
-        program_counter -= 4;
     }
-
-    if (access_error_intr) {
-        trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT);
-    } else {
-        program_counter += 4;
-    }
+    program_counter += 4;
 }
 
 DEC_FUNC(STORE) {
@@ -213,26 +206,19 @@ DEC_FUNC(STORE) {
     INST_DEC(s, &imm, &funct3, &rs1, &rs2);
     int32_t sext_offset = SEXT(imm, 31, 11);
     uint32_t target_addr = mem_register_read(rs1) + sext_offset;
-    uint8_t access_error_intr = 0;
     if (funct3 == 0) {
         /* SB */
-        mem_write_b(target_addr, mem_register_read(rs2) & 0xff, &access_error_intr);
+        mem_write_b(target_addr, mem_register_read(rs2) & 0xff);
     } else if (funct3 == 1) {
         /* SH */
-        mem_write_h(target_addr, mem_register_read(rs2) & 0xffff, &access_error_intr);
+        mem_write_h(target_addr, mem_register_read(rs2) & 0xffff);
     } else if (funct3 == 2) {
         /* SW */
-        mem_write_w(target_addr, mem_register_read(rs2), &access_error_intr);
+        mem_write_w(target_addr, mem_register_read(rs2));
     } else {
         trap_throw_exception(EXCEPTION_ILLEGAL_INST);
-        program_counter -= 4;
     }
-
-    if (access_error_intr) {
-        trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT);
-    } else {
-        program_counter += 4;
-    }
+    program_counter += 4;
 }
 
 DEC_FUNC(ARITH_IMM) {
@@ -274,7 +260,6 @@ DEC_FUNC(ARITH_IMM) {
         }
     } else {
         trap_throw_exception(EXCEPTION_ILLEGAL_INST);
-        program_counter -= 4;
     }
 
     program_counter += 4;
@@ -323,7 +308,6 @@ DEC_FUNC(ARITH) {
             mem_register_write(rd, (uint32_t) mem_register_read(rs1) & (uint32_t) mem_register_read(rs2));
         } else {
             trap_throw_exception(EXCEPTION_ILLEGAL_INST);
-            program_counter -= 4;
         }
     } else {
         if (funct3 == 0) {
@@ -398,25 +382,24 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
     uint8_t rd, funct3, rs1;
     uint16_t imm;
     INST_DEC(i, &rd, &funct3, &rs1, &imm);
-    uint8_t illegal_inst_intr = 0;
     if (funct3 == 0x1) {
         /* CSRRW */
-        csr_csrrw(rs1, rd, imm, &illegal_inst_intr);
+        csr_csrrw(rs1, rd, imm);
     } else if (funct3 == 0x2) {
         /* CSRRS */
-        csr_csrrs(rs1, rd, imm, &illegal_inst_intr);
+        csr_csrrs(rs1, rd, imm);
     } else if (funct3 == 0x3) {
         /* CSRRC */
-        csr_csrrc(rs1, rd, imm, &illegal_inst_intr);
+        csr_csrrc(rs1, rd, imm);
     } else if (funct3 == 0x5) {
         /* CSRRWI */
-        csr_csrrwi(rs1, rd, imm, &illegal_inst_intr);
+        csr_csrrwi(rs1, rd, imm);
     } else if (funct3 == 0x6) {
         /* CSRRSI */
-        csr_csrrsi(rs1, rd, imm, &illegal_inst_intr);
+        csr_csrrsi(rs1, rd, imm);
     } else if (funct3 == 0x7) {
         /* CSRRCI */
-        csr_csrrci(rs1, rd, imm, &illegal_inst_intr);
+        csr_csrrci(rs1, rd, imm);
     } else if (!imm && !funct3 && !rd && !rs1) {
         /* ECALL */
         if (current_privilege == CSR_MASK_MACHINE) {
@@ -428,7 +411,6 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         } else {
             trap_throw_exception(EXCEPTION_ILLEGAL_INST);
         }
-        program_counter -= 4;
     } else if (!funct3 && !rd && !rs1 && imm == 0x102) {
         /* SRET */
         trap_return_supervisor();
@@ -443,65 +425,50 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         /* TODO: WFI */
     }
 
-    if (illegal_inst_intr) {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
-    } else {
-        program_counter += 4;
-    }
+    program_counter += 4;
 }
 
 DEC_FUNC(ATOMIC) {
     uint8_t rd, funct3, rs1, rs2, funct7;
     INST_DEC(r, &rd, &funct3, &rs1, &rs2, &funct7);
     uint8_t typ = funct7 >> 2;
-    uint8_t access_error_intr = 0;
     if (funct3 == 0x2) {
         uint32_t addr = mem_register_read(rs1);
         uint32_t value = mem_register_read(rs2);
-        uint32_t t = mem_read_w(addr, &access_error_intr);
-        if (access_error_intr) {
-            trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT);
-            return;
-        } else {
-            mem_register_write(rd, t);
-            uint32_t res = 0;
-            if (typ == 0x01) {
-                /* AMOSWAP.W */
-                res = value;
-            } else if (typ == 0x00) {
-                /* AMOADD.W */
-                res = t + value;
-            } else if (typ == 0x04) {
-                /* AMOXOR.W */
-                res = t ^ value;
-            } else if (typ == 0x0C) {
-                /* AMOAND.W */
-                res = t & value;
-            } else if (typ == 0x08) {
-                /* AMOOR.W */
-                res = t | value;
-            } else if (typ == 0x10) {
-                /* AMOMIN.W */
-                res = (int32_t) t < (int32_t) value ? t : value;
-            } else if (typ == 0x14) {
-                /* AMOMAX.W */
-                res = (int32_t) t > (int32_t) value ? t : value;
-            } else if (typ == 0x18) {
-                /* AMOMINU.W */
-                res = t < value ? t : value;
-            } else if (typ == 0x1C) {
-                /* AMOMAXU.W */
-                res = t > value ? t : value;
-            }
-            mem_write_w(addr, res, &access_error_intr);
-            if (access_error_intr) {
-                trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT);
-                return;
-            }
+        uint32_t t = mem_read_w(addr);
+        mem_register_write(rd, t);
+        uint32_t res = 0;
+        if (typ == 0x01) {
+            /* AMOSWAP.W */
+            res = value;
+        } else if (typ == 0x00) {
+            /* AMOADD.W */
+            res = t + value;
+        } else if (typ == 0x04) {
+            /* AMOXOR.W */
+            res = t ^ value;
+        } else if (typ == 0x0C) {
+            /* AMOAND.W */
+            res = t & value;
+        } else if (typ == 0x08) {
+            /* AMOOR.W */
+            res = t | value;
+        } else if (typ == 0x10) {
+            /* AMOMIN.W */
+            res = (int32_t) t < (int32_t) value ? t : value;
+        } else if (typ == 0x14) {
+            /* AMOMAX.W */
+            res = (int32_t) t > (int32_t) value ? t : value;
+        } else if (typ == 0x18) {
+            /* AMOMINU.W */
+            res = t < value ? t : value;
+        } else if (typ == 0x1C) {
+            /* AMOMAXU.W */
+            res = t > value ? t : value;
         }
+        mem_write_w(addr, res);
     } else {
         trap_throw_exception(EXCEPTION_ILLEGAL_INST);
-        program_counter -= 4;
     }
 
     program_counter += 4;
@@ -528,6 +495,7 @@ void decode(uint32_t inst) {
         DECODE(ZIFENCEI_FENCE)
         default:
             trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+            program_counter += 4;
             break;
     }
 }
