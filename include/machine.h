@@ -6,6 +6,6 @@
 #define TEMU_MACHINE_H
 #include <stdint.h>
 
-void machine_start(uint32_t start, int printreg);
+void machine_start(uint32_t start);
 
 #endif //TEMU_MACHINE_H
