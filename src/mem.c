@@ -12,17 +12,12 @@ uint32_t program_counter = 0;
 static uint8_t rom_ptr[ROM_SIZE];
 static uint8_t ram_ptr[RAM_SIZE];
 
-uint8_t *mem_get_ptr(uint32_t addr, int *ok_flag) {
-    if (addr >= ROM_BASE_ADDR && addr < ROM_BASE_ADDR + ROM_SIZE) {
-        *ok_flag = MEM_PTR_ROM;
-        return &rom_ptr[addr - ROM_BASE_ADDR];
-    } else if (addr >= RAM_BASE_ADDR && addr < RAM_BASE_ADDR + RAM_SIZE) {
-        *ok_flag = MEM_PTR_RAM;
-        return &ram_ptr[addr - RAM_BASE_ADDR];
-    } else {
-        *ok_flag = -1;
-        return NULL;
-    }
+uint8_t *mem_get_rom_ptr() {
+    return rom_ptr;
+}
+
+uint8_t *mem_get_ram_ptr() {
+    return ram_ptr;
 }
 
 uint8_t mem_read_b(uint32_t addr) {
