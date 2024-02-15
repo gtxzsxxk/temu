@@ -22,6 +22,6 @@ void mem_write_w(uint32_t addr, uint32_t data);
 uint32_t mem_register_read(uint8_t rd);
 void mem_register_write(uint8_t rd, uint32_t value);
 
-void mem_debug_printreg(uint32_t pc_prev_exec);
+void mem_debug_printreg(void);
 
 #endif //TEMU_MEM_H
