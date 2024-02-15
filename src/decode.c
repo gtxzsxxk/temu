@@ -15,12 +15,8 @@ const uint8_t RV32I_ARITH = 0x33;
 const uint8_t RV32I_ZIFENCEI_FENCE = 0x0f;
 const uint8_t RV32I_ZICSR_ECALL_EBREAK = 0x73;
 
-const uint8_t RV32A = 0x2f;
 
 /* 返回值是对pc指针的改变量 */
 void decode(uint32_t inst) {
-    uint8_t opcode = inst & 0x7f;
-    switch (opcode) {
-        
-    }
+
 }
