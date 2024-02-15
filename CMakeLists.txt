@@ -15,4 +15,6 @@ add_executable(temu src/main.c
         src/zicsr.c
         include/zicsr.h
         src/trap.c
-        include/trap.h)
+        include/trap.h
+        include/uart8250.h
+        peripherals/uart8250.c)
