@@ -177,16 +177,16 @@ extern uint32_t control_status_registers[];
 
 uint8_t csr_get_index_by_number(uint16_t csr_number);
 
-void csr_csrrw(uint8_t rs1, uint8_t rd, uint16_t csr_number);
+void csr_csrrw(uint8_t rs1, uint8_t rd, uint16_t csr_number, uint8_t *intr);
 
-void csr_csrrs(uint8_t rs1, uint8_t rd, uint16_t csr_number);
+void csr_csrrs(uint8_t rs1, uint8_t rd, uint16_t csr_number, uint8_t *intr);
 
-void csr_csrrc(uint8_t rs1, uint8_t rd, uint16_t csr_number);
+void csr_csrrc(uint8_t rs1, uint8_t rd, uint16_t csr_number, uint8_t *intr);
 
-void csr_csrrwi(uint8_t uimm, uint8_t rd, uint16_t csr_number);
+void csr_csrrwi(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr);
 
-void csr_csrrsi(uint8_t uimm, uint8_t rd, uint16_t csr_number);
+void csr_csrrsi(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr);
 
-void csr_csrrci(uint8_t uimm, uint8_t rd, uint16_t csr_number);
+void csr_csrrci(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr);
 
 #endif //TEMU_ZICSR_H

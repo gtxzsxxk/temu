@@ -5,27 +5,36 @@
 #include "mem.h"
 #include "decode.h"
 #include "uart8250.h"
+#include "trap.h"
 
 #define RISCV_DEBUG
 #define RISCV_ISA_TESTS
 
 void machine_start(uint32_t start, int printreg) {
+    uint8_t access_error_intr;
     program_counter = start;
     for (;;) {
-        uint32_t instruction = mem_read_w(program_counter);
-
+        access_error_intr = 0;
+        uint32_t instruction = mem_read_w(program_counter, &access_error_intr);
+        if (access_error_intr) {
+            trap_throw_exception(EXCEPTION_INST_ACCESS_FAULT);
+        } else {
 #ifdef RISCV_DEBUG
-        if (printreg) {
-            mem_debug_printreg(program_counter);
-        }
+            if (printreg) {
+                mem_debug_printreg(program_counter);
+            }
 #ifdef RISCV_ISA_TESTS
-        if ((instruction & 0x7f) == RV32I_ZICSR_ECALL_EBREAK) {
-            return;
-        }
+            if (program_counter == 0x104) {
+                int a = 0;
+            }
+            if (instruction == 0x00000073) {
+                int a = 0;
+            }
 #endif
 #endif
 
-        decode(instruction);
+            decode(instruction);
+        }
         uart8250_tick();
     }
 }
