@@ -7,8 +7,8 @@
 
 #define CSR_SIZE 35
 
-#define CSR_MASK_USER 0
-#define CSR_MASK_SUPERVISOR 1
+#define CSR_MASK_USER 1
+#define CSR_MASK_SUPERVISOR 2
 #define CSR_MASK_MACHINE 3
 
 #define CSR_MASK_READ 1 << 3
@@ -167,11 +167,6 @@
 #define mstatus_MPP 11
 #define mstatus_SPP 8
 #define mstatus_MPRV 17
-
-extern uint8_t current_privilege;
-extern uint32_t control_status_registers[];
-
-uint8_t csr_get_index_by_number(uint16_t csr_number);
 
 void csr_csrrw(uint8_t rs1, uint8_t rd, uint16_t csr_number);
 
