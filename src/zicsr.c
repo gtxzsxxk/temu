@@ -117,10 +117,10 @@ void csr_csrrs(uint8_t rs1, uint8_t rd, uint16_t csr_number) {
         return;
     }
     uint32_t prev_value = csr_read(index);
+    mem_register_write(rd, prev_value);
     if (rs1) {
         csr_write(index, prev_value | mem_register_read(rs1));
     }
-    mem_register_write(rd, prev_value);
 }
 
 void csr_csrrc(uint8_t rs1, uint8_t rd, uint16_t csr_number) {
@@ -130,10 +130,10 @@ void csr_csrrc(uint8_t rs1, uint8_t rd, uint16_t csr_number) {
         return;
     }
     uint32_t prev_value = csr_read(index);
+    mem_register_write(rd, prev_value);
     if (rs1) {
         csr_write(index, prev_value & (~mem_register_read(rs1)));
     }
-    mem_register_write(rd, prev_value);
 }
 
 void csr_csrrwi(uint8_t uimm, uint8_t rd, uint16_t csr_number) {

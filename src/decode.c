@@ -334,8 +334,6 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         /* CSRRCI */
         csr_csrrci(rs1, rd, imm);
     }
-
-    program_counter += 4;
 }
 
 void decode(uint32_t inst) {
@@ -350,7 +348,6 @@ void decode(uint32_t inst) {
         DECODE(STORE)
         DECODE(ARITH_IMM)
         DECODE(ARITH)
-        DECODE(ZICSR_ECALL_EBREAK)
         default:
             /* Exception */
             program_counter += 4;
