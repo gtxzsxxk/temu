@@ -474,10 +474,6 @@ DEC_FUNC(ATOMIC) {
     program_counter += 4;
 }
 
-DEC_FUNC(ZIFENCEI_FENCE) {
-    program_counter += 4;
-}
-
 void decode(uint32_t inst) {
     uint8_t opcode = inst & 0x7f;
     switch (opcode) {
@@ -492,7 +488,6 @@ void decode(uint32_t inst) {
         DECODE(ARITH)
         DECODE(ZICSR_ECALL_EBREAK)
         DECODE(ATOMIC)
-        DECODE(ZIFENCEI_FENCE)
         default:
             trap_throw_exception(EXCEPTION_ILLEGAL_INST);
             program_counter += 4;
