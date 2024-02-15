@@ -3,13 +3,12 @@
 //
 #include "mem.h"
 #include "decode.h"
-#include "uart8250.h"
 
 #define RISCV_DEBUG
 #define RISCV_ISA_TESTS
 
 void machine_start(void) {
-    program_counter = ROM_BASE_ADDR;
+    program_counter = ROM_START_ADDR;
     for (;;) {
         uint32_t instruction = mem_read_w(program_counter);
 
@@ -23,6 +22,5 @@ void machine_start(void) {
 #endif
 
         decode(instruction);
-        uart8250_tick();
     }
 }
