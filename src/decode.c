@@ -17,6 +17,15 @@ const uint8_t RV32I_ZICSR_ECALL_EBREAK = 0x73;
 
 const uint8_t RV32A = 0x2f;
 
+/* 返回值是对pc指针的改变量 */
+void decode(uint32_t inst) {
+    uint8_t opcode = inst & 0x7f;
+    switch (opcode) {
+        case RV32I_LUI:
+            break;
+    }
+}
+
 static uint32_t pow(uint32_t x, uint32_t y) {
     uint32_t ans = 1;
     for (uint32_t i = 0; i < y; i++) {
@@ -32,7 +41,6 @@ static uint32_t extract(uint32_t inst, uint8_t start, uint8_t end) {
 #define INST_EXT(end, begin)  extract(inst,begin,end)
 #define INST_DEC(type, ...) decode_type_##type(inst, __VA_ARGS__)
 #define DEC_FUNC(OPCODE) static void decode_func_##OPCODE(uint32_t inst)
-#define DECODE(OPCODE) case RV32I_##OPCODE: decode_func_##OPCODE(inst); break;
 #define SEXT(op, target_idx, source_idx) (((int32_t)(op << (target_idx - source_idx))) >> (target_idx - source_idx))
 
 static void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2, uint8_t *funct7) {
@@ -212,7 +220,6 @@ DEC_FUNC(LOAD) {
     } else {
         /* Raise illegal instruction exception */
     }
-    program_counter += 4;
 }
 
 DEC_FUNC(STORE) {
@@ -233,7 +240,6 @@ DEC_FUNC(STORE) {
     } else {
         /* Raise illegal instruction exception */
     }
-    program_counter += 4;
 }
 
 DEC_FUNC(ARITH_IMM) {
@@ -276,8 +282,6 @@ DEC_FUNC(ARITH_IMM) {
     } else {
         /* Raise illegal instruction exception */
     }
-
-    program_counter += 4;
 }
 
 DEC_FUNC(ARITH) {
@@ -322,25 +326,5 @@ DEC_FUNC(ARITH) {
         mem_register_write(rd, (uint32_t) mem_register_read(rs1) & (uint32_t) mem_register_read(rs2));
     } else {
         /* Raise illegal instruction exception */
-    }
-
-    program_counter += 4;
-}
-
-void decode(uint32_t inst) {
-    uint8_t opcode = inst & 0x7f;
-    switch (opcode) {
-        DECODE(LUI);
-        DECODE(AUIPC);
-        DECODE(JAL);
-        DECODE(JALR);
-        DECODE(BRANCH);
-        DECODE(LOAD);
-        DECODE(STORE);
-        DECODE(ARITH_IMM);
-        DECODE(ARITH);
-        default:
-            /* Exception */
-            break;
     }
 }
