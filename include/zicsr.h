@@ -168,10 +168,6 @@
 #define mstatus_SPP 8
 #define mstatus_MPRV 17
 
-#define sstatus_SIE 1
-#define sstatus_SPIE 5
-#define sstatus_SPP 8
-
 extern uint8_t current_privilege;
 extern uint32_t control_status_registers[];
 

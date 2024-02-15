@@ -38,13 +38,3 @@ void trap_return_machine(void) {
     }
     program_counter = control_status_registers[CSR_idx_mepc];
 }
-
-void trap_return_supervisor(void) {
-    current_privilege = (control_status_registers[CSR_idx_sstatus] >> mstatus_SPP);
-    if (control_status_registers[CSR_idx_sstatus] & (1 << sstatus_SPIE)) {
-        control_status_registers[CSR_idx_sstatus] |= (1 << sstatus_SIE);
-    } else {
-        control_status_registers[CSR_idx_sstatus] &= ~(1 << sstatus_SIE);
-    }
-    program_counter = control_status_registers[CSR_idx_sepc];
-}
