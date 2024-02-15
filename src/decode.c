@@ -433,40 +433,52 @@ DEC_FUNC(ATOMIC) {
     INST_DEC(r, &rd, &funct3, &rs1, &rs2, &funct7);
     uint8_t typ = funct7 >> 2;
     if (funct3 == 0x2) {
-        uint32_t addr = mem_register_read(rs1);
-        uint32_t value = mem_register_read(rs2);
-        uint32_t t = mem_read_w(addr);
-        mem_register_write(rd, t);
-        uint32_t res = 0;
         if (typ == 0x01) {
             /* AMOSWAP.W */
-            res = value;
+            uint32_t t = mem_read_w(mem_register_read(rs1));
+            mem_write_w(mem_register_read(rs1), mem_register_read(rs2));
+            mem_register_write(rd, t);
         } else if (typ == 0x00) {
             /* AMOADD.W */
-            res = t + value;
+            uint32_t t = mem_read_w(mem_register_read(rs1)) + mem_register_read(rs2);
+            mem_register_write(rd, t);
         } else if (typ == 0x04) {
             /* AMOXOR.W */
-            res = t ^ value;
+            uint32_t t = mem_read_w(mem_register_read(rs1)) ^ mem_register_read(rs2);
+            mem_register_write(rd, t);
         } else if (typ == 0x0C) {
             /* AMOAND.W */
-            res = t & value;
+            uint32_t t = mem_read_w(mem_register_read(rs1)) & mem_register_read(rs2);
+            mem_register_write(rd, t);
         } else if (typ == 0x08) {
             /* AMOOR.W */
-            res = t | value;
+            uint32_t t = mem_read_w(mem_register_read(rs1)) | mem_register_read(rs2);
+            mem_register_write(rd, t);
         } else if (typ == 0x10) {
             /* AMOMIN.W */
-            res = (int32_t) t < (int32_t) value ? t : value;
+            int32_t cmp = (int32_t) mem_register_read(rs2);
+            int32_t t = (int32_t) mem_read_w(mem_register_read(rs1));
+            t = t < cmp ? t : cmp;
+            mem_register_write(rd, t);
         } else if (typ == 0x14) {
             /* AMOMAX.W */
-            res = (int32_t) t > (int32_t) value ? t : value;
+            int32_t cmp = (int32_t) mem_register_read(rs2);
+            int32_t t = (int32_t) mem_read_w(mem_register_read(rs1));
+            t = t > cmp ? t : cmp;
+            mem_register_write(rd, t);
         } else if (typ == 0x18) {
             /* AMOMINU.W */
-            res = t < value ? t : value;
+            uint32_t cmp = mem_register_read(rs2);
+            uint32_t t = mem_read_w(mem_register_read(rs1));
+            t = t < cmp ? t : cmp;
+            mem_register_write(rd, t);
         } else if (typ == 0x1C) {
             /* AMOMAXU.W */
-            res = t > value ? t : value;
+            uint32_t cmp = mem_register_read(rs2);
+            uint32_t t = mem_read_w(mem_register_read(rs1));
+            t = t > cmp ? t : cmp;
+            mem_register_write(rd, t);
         }
-        mem_write_w(addr, res);
     } else {
         trap_throw_exception(EXCEPTION_ILLEGAL_INST);
     }
