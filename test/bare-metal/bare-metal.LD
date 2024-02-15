@@ -9,7 +9,7 @@ ENTRY(_start)
 _estack = ORIGIN(RAM) + LENGTH(RAM); /* end of "RAM" Ram type memory */
 
 _Min_Heap_Size = 0x000080 ; /* required amount of heap */
-_Min_Stack_Size = 0x000400 ; /* required amount of stack */
+_Min_Stack_Size = 0x000100 ; /* required amount of stack */
 
 /* Memories definition */
 MEMORY
@@ -52,12 +52,11 @@ SECTIONS
   .data :
   {
     . = ALIGN(8);
-    PROVIDE( __global_pointer = . + 0x200);
+    PROVIDE( __global_pointer$ = . + 0x200);
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
     *(.sdata .sdata.* .gnu.linkonce.s.*)
-    *(.got .got.plt)
 
     . = ALIGN(8);
     _edata = .;        /* define a global symbol at data end */

@@ -1,6 +1,6 @@
     .global _start
 _start:
-    la gp, __global_pointer
+    la gp, __global_pointer$
     la sp, _estack
 
     la a0, _sdata
