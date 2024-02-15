@@ -3,7 +3,6 @@
 //
 #include "decode.h"
 #include "mem.h"
-#include "zicsr.h"
 
 static uint32_t dec_pow(uint32_t x, uint32_t y) {
     uint32_t ans = 1;
@@ -317,22 +316,16 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
     INST_DEC(i, &rd, &funct3, &rs1, &imm);
     if (funct3 == 0x1) {
         /* CSRRW */
-        csr_csrrw(rs1, rd, imm);
     } else if (funct3 == 0x2) {
         /* CSRRS */
-        csr_csrrs(rs1, rd, imm);
     } else if (funct3 == 0x3) {
         /* CSRRC */
-        csr_csrrc(rs1, rd, imm);
     } else if (funct3 == 0x5) {
         /* CSRRWI */
-        csr_csrrwi(rs1, rd, imm);
     } else if (funct3 == 0x6) {
         /* CSRRSI */
-        csr_csrrsi(rs1, rd, imm);
     } else if (funct3 == 0x7) {
         /* CSRRCI */
-        csr_csrrci(rs1, rd, imm);
     }
 }
 
