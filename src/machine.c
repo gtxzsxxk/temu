@@ -9,13 +9,15 @@
 #define RISCV_DEBUG
 #define RISCV_ISA_TESTS
 
-void machine_start(uint32_t start) {
+void machine_start(uint32_t start, int printreg) {
     program_counter = start;
     for (;;) {
         uint32_t instruction = mem_read_w(program_counter);
 
 #ifdef RISCV_DEBUG
-        mem_debug_printreg(program_counter);
+        if (printreg) {
+            mem_debug_printreg(program_counter);
+        }
 #ifdef RISCV_ISA_TESTS
         if ((instruction & 0x7f) == RV32I_ZICSR_ECALL_EBREAK) {
             return;

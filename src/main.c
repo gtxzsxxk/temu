@@ -73,6 +73,6 @@ int main(int argc, char **argv) {
     }
     fread(mem_ptr, mem_ptr_flag == MEM_PTR_RAM ? RAM_SIZE : ROM_SIZE - start_addr, 1, fp);
     fclose(fp);
-    machine_start(start_addr);
+    machine_start(start_addr, printreg);
     return 0;
 }
