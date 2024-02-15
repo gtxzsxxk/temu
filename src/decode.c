@@ -91,7 +91,7 @@ static void decode_type_j(uint32_t inst, uint32_t *imm, uint8_t *rd) {
 DEC_FUNC(LUI) {
     uint32_t imm;
     uint8_t rd;
-    INST_DEC(u, &imm, &rd);
+    INST_DEC(u,&imm,&rd);
     imm &= ~0x00000fff;
     registers[rd] = imm;
     program_counter += 4;
@@ -100,7 +100,7 @@ DEC_FUNC(LUI) {
 DEC_FUNC(AUIPC) {
     uint32_t imm;
     uint8_t rd;
-    INST_DEC(u, &imm, &rd);
+    INST_DEC(u,&imm,&rd);
     imm &= ~0x00000fff;
     imm += program_counter;
     registers[rd] = imm;
@@ -110,19 +110,7 @@ DEC_FUNC(AUIPC) {
 DEC_FUNC(JAL) {
     uint32_t imm;
     uint8_t rd;
-    INST_DEC(j, &imm, &rd);
-    int32_t sext_imm = SEXT(imm, 31, 20);
-    registers[rd] = program_counter + 4;
+    INST_DEC(j,&imm,&rd);
+    int32_t sext_imm = SEXT(imm,31,20);
     program_counter += sext_imm;
-}
-
-DEC_FUNC(JALR) {
-    uint16_t imm;
-    uint8_t rs1;
-    uint8_t funct3;
-    uint8_t rd;
-    INST_DEC(i, &rd, &funct3, &rs1, &imm);
-    int32_t sext_offset = SEXT(imm, 31, 11);
-    registers[rd] = program_counter + 4;
-    program_counter = (registers[rs1] + sext_offset) & (~0x00000001);
 }
