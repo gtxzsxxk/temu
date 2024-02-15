@@ -9,7 +9,7 @@ STRIP			:=	${CROSS_COMPILE}strip
 OBJDUMP			:=	${CROSS_COMPILE}objdump
 OBJCOPY			:=	${CROSS_COMPILE}objcopy
 
-CFLAGS			+= -march=rv32im_zicsr_zifencei -mabi=ilp32 -fno-pie -no-pie -fno-stack-protector -static
+CFLAGS			+= -march=rv32i_zicsr_zifencei -mabi=ilp32 -fno-pie -no-pie -fno-stack-protector -static
 CFLAGS			+= -fno-omit-frame-pointer -fno-optimize-sibling-calls -fdata-sections
 CFLAGS			+= -mno-save-restore -mstrict-align -nostdlib
 CFLAGS			+= -Wl,--build-id=none -N -static-libgcc -lgcc -O0
