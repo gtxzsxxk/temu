@@ -3,7 +3,7 @@
 //
 #include "mem.h"
 
-static uint32_t registers[32];
+uint32_t registers[32];
 uint32_t program_counter = 0;
 
 static uint8_t rom_ptr[ROM_SIZE];
@@ -51,18 +51,5 @@ uint32_t mem_read_w(uint32_t addr) {
     } else {
         /* Illegal memory access interrupt */
         return 0xffffffff;
-    }
-}
-
-uint32_t mem_register_read(uint8_t rd) {
-    if (rd == 0) {
-        return 0;
-    }
-    return registers[rd];
-}
-
-void mem_register_write(uint8_t rd, uint32_t value) {
-    if (rd) {
-        registers[rd] = value;
     }
 }

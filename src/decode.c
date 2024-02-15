@@ -93,7 +93,7 @@ DEC_FUNC(LUI) {
     uint8_t rd;
     INST_DEC(u, &imm, &rd);
     imm &= ~0x00000fff;
-    mem_register_write(rd, imm);
+    registers[rd] = imm;
     program_counter += 4;
 }
 
@@ -103,7 +103,7 @@ DEC_FUNC(AUIPC) {
     INST_DEC(u, &imm, &rd);
     imm &= ~0x00000fff;
     imm += program_counter;
-    mem_register_write(rd, imm);
+    registers[rd] = imm;
     program_counter += 4;
 }
 
@@ -112,7 +112,7 @@ DEC_FUNC(JAL) {
     uint8_t rd;
     INST_DEC(j, &imm, &rd);
     int32_t sext_imm = SEXT(imm, 31, 20);
-    mem_register_write(rd, program_counter + 4);
+    registers[rd] = program_counter + 4;
     program_counter += sext_imm;
 }
 
@@ -123,6 +123,6 @@ DEC_FUNC(JALR) {
     uint8_t rd;
     INST_DEC(i, &rd, &funct3, &rs1, &imm);
     int32_t sext_offset = SEXT(imm, 31, 11);
-    mem_register_write(rd, program_counter + 4);
-    program_counter = (mem_register_read(rs1) + sext_offset) & (~0x00000001);
+    registers[rd] = program_counter + 4;
+    program_counter = (registers[rs1] + sext_offset) & (~0x00000001);
 }
