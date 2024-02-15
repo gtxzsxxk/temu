@@ -22,10 +22,9 @@ OBJS += ${TEST_FILE}.S
 define create_elf
 	@echo "Using GNU Ld script: ${LD_SCRIPT}"
 	${CC} -T ${LD_SCRIPT} ${OBJS} -o ${TEST_FILE}.elf ${CFLAGS}
+#	${STRIP} ${TEST_FILE}.elf
 	${OBJDUMP} ${TEST_FILE}.elf > ${TEST_FILE}.dump -D -M no-aliases,numeric
 	${OBJCOPY} -O binary ${TEST_FILE}.elf ${TEST_FILE}.bin
-	rm ${TEST_FILE}.elf
-
 endef
 
 $(TEST_FILE): $(TEST_FILE).S $(LD_SCRIPT)
