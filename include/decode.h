@@ -17,7 +17,7 @@
 #define RV32I_ARITH                             0x33
 #define RV32I_ZIFENCEI_FENCE                    0x0f
 #define RV32I_ZICSR_ECALL_EBREAK                0x73
-#define RV32I_ATOMIC                            0x2f
+#define RV32A                                   0x2f
 
 #define INST_EXT(end, begin)  extract(inst,begin,end)
 #define INST_DEC(type, ...) decode_type_##type(inst, __VA_ARGS__)

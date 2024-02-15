@@ -315,15 +315,15 @@ DEC_FUNC(ARITH) {
             mem_register_write(rd, mem_register_read(rs1) * mem_register_read(rs2));
         } else if (funct3 == 1) {
             /* MULH */
-            int64_t res = (int64_t) ((int32_t) mem_register_read(rs1)) * (int64_t) ((int32_t) mem_register_read(rs2));
+            int64_t res = (int64_t)((int32_t) mem_register_read(rs1)) * (int64_t)((int32_t) mem_register_read(rs2));
             mem_register_write(rd, ((uint64_t) res) >> 32);
         } else if (funct3 == 2) {
             /* MULHSU */
-            int64_t res = (int64_t) ((int32_t) mem_register_read(rs1)) * ((uint32_t) mem_register_read(rs2));
+            int64_t res = (int64_t)((int32_t) mem_register_read(rs1)) * ((uint32_t) mem_register_read(rs2));
             mem_register_write(rd, ((uint64_t) res) >> 32);
         } else if (funct3 == 3) {
             /* MULHU */
-            uint64_t res = (uint64_t) mem_register_read(rs1) * (uint64_t) mem_register_read(rs2);
+            uint64_t res = (uint64_t)mem_register_read(rs1) * (uint64_t)mem_register_read(rs2);
             mem_register_write(rd, res >> 32);
         } else if (funct3 == 4) {
             /* DIV */
@@ -422,65 +422,7 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         /* avoid incorrect pc */
         program_counter -= 4;
     } else if (!funct3 && !rd && !rs1 && imm == 0x105) {
-        /* TODO: WFI */
-    }
-
-    program_counter += 4;
-}
-
-DEC_FUNC(ATOMIC) {
-    uint8_t rd, funct3, rs1, rs2, funct7;
-    INST_DEC(r, &rd, &funct3, &rs1, &rs2, &funct7);
-    uint8_t typ = funct7 >> 2;
-    if (funct3 == 0x2) {
-        if (typ == 0x01) {
-            /* AMOSWAP.W */
-            uint32_t t = mem_read_w(mem_register_read(rs1));
-            mem_write_w(mem_register_read(rs1), mem_register_read(rs2));
-            mem_register_write(rd, t);
-        } else if (typ == 0x00) {
-            /* AMOADD.W */
-            uint32_t t = mem_read_w(mem_register_read(rs1)) + mem_register_read(rs2);
-            mem_register_write(rd, t);
-        } else if (typ == 0x04) {
-            /* AMOXOR.W */
-            uint32_t t = mem_read_w(mem_register_read(rs1)) ^ mem_register_read(rs2);
-            mem_register_write(rd, t);
-        } else if (typ == 0x0C) {
-            /* AMOAND.W */
-            uint32_t t = mem_read_w(mem_register_read(rs1)) & mem_register_read(rs2);
-            mem_register_write(rd, t);
-        } else if (typ == 0x08) {
-            /* AMOOR.W */
-            uint32_t t = mem_read_w(mem_register_read(rs1)) | mem_register_read(rs2);
-            mem_register_write(rd, t);
-        } else if (typ == 0x10) {
-            /* AMOMIN.W */
-            int32_t cmp = (int32_t) mem_register_read(rs2);
-            int32_t t = (int32_t) mem_read_w(mem_register_read(rs1));
-            t = t < cmp ? t : cmp;
-            mem_register_write(rd, t);
-        } else if (typ == 0x14) {
-            /* AMOMAX.W */
-            int32_t cmp = (int32_t) mem_register_read(rs2);
-            int32_t t = (int32_t) mem_read_w(mem_register_read(rs1));
-            t = t > cmp ? t : cmp;
-            mem_register_write(rd, t);
-        } else if (typ == 0x18) {
-            /* AMOMINU.W */
-            uint32_t cmp = mem_register_read(rs2);
-            uint32_t t = mem_read_w(mem_register_read(rs1));
-            t = t < cmp ? t : cmp;
-            mem_register_write(rd, t);
-        } else if (typ == 0x1C) {
-            /* AMOMAXU.W */
-            uint32_t cmp = mem_register_read(rs2);
-            uint32_t t = mem_read_w(mem_register_read(rs1));
-            t = t > cmp ? t : cmp;
-            mem_register_write(rd, t);
-        }
-    } else {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        /* WFI */
     }
 
     program_counter += 4;
@@ -499,7 +441,6 @@ void decode(uint32_t inst) {
         DECODE(ARITH_IMM)
         DECODE(ARITH)
         DECODE(ZICSR_ECALL_EBREAK)
-        DECODE(ATOMIC)
         default:
             trap_throw_exception(EXCEPTION_ILLEGAL_INST);
             program_counter += 4;
