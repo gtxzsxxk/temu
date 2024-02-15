@@ -3,16 +3,15 @@
 
 class CsrInformation:
     def __init__(self, lines: list):
-        self.csrName = lines[0].split(' ')[1].split('_')[2].replace('\r\n', '').replace('\n', '')
+        self.csrName = lines[0].split(' ')[1].split('_')[2]
         for defineLine in lines:
             if defineLine.__contains__("_num_"):
-                self.csrNumber = defineLine.split(' ')[2].replace('\r\n', '').replace('\n', '')
+                self.csrNumber = defineLine.split(' ')[2]
             elif defineLine.__contains__("_prv_"):
-                self.csrPrivilege = (defineLine.replace("#define CSR_prv_" + self.csrName + " ", "")
-                                     .replace('\r\n', '').replace('\n', ''))
+                self.csrPrivilege = defineLine.replace("#define CSR_prv_" + self.csrName + " ", "")
 
     def __str__(self):
-        return "CSR NAME=%s\n    NUMBER=%s\n    PRIV=%s\n\n" % (self.csrName, self.csrNumber, self.csrPrivilege)
+        return "CSR NAME=%s\n    NUMBER=%s\n    PRIV=%s" % (self.csrName, self.csrNumber, self.csrPrivilege)
 
 
 zicsrSource = '../include/zicsr.h'
@@ -36,7 +35,6 @@ def read_csr_definitions():
         def_lines = [codeLines[def_index]]
         while codeLines[def_end_index] != '\r\n' and codeLines[def_end_index] != '\n':
             if codeLines[def_end_index].__contains__(matchEnd):
-                csrList.append(CsrInformation(def_lines))
                 return
             def_lines.append(codeLines[def_end_index])
             def_end_index += 1
