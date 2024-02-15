@@ -39,7 +39,6 @@ static uint32_t extract(uint32_t inst, uint8_t start, uint8_t end) {
 }
 
 #define INST_EXT(end, begin)  extract(inst,begin,end)
-#define INST_DEC(type, ...) decode_type_##type(inst, __VA_ARGS__)
 
 static void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2, uint8_t *funct7) {
     *rd = INST_EXT(11, 7);
@@ -87,9 +86,5 @@ static void decode_type_j(uint32_t inst, uint32_t *imm, uint8_t *rd) {
 }
 
 static void LUI(uint32_t inst) {
-    uint32_t imm;
-    uint8_t rd;
-    INST_DEC(u,&imm,&rd);
-    imm &= ~0x00000fff;
-    registers[rd] = imm;
+
 }
