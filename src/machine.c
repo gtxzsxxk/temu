@@ -1,7 +1,6 @@
 //
 // Created by hanyuan on 2024/2/8.
 //
-#include "machine.h"
 #include "mem.h"
 #include "decode.h"
 #include "uart8250.h"
@@ -9,8 +8,8 @@
 #define RISCV_DEBUG
 #define RISCV_ISA_TESTS
 
-void machine_start(uint32_t start) {
-    program_counter = start;
+void machine_start(void) {
+    program_counter = ROM_BASE_ADDR;
     for (;;) {
         uint32_t instruction = mem_read_w(program_counter);
 

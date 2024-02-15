@@ -10,7 +10,6 @@
 extern uint32_t program_counter;
 
 uint8_t *mem_get_rom_ptr();
-uint8_t *mem_get_ram_ptr();
 
 uint8_t mem_read_b(uint32_t addr);
 uint16_t mem_read_h(uint32_t addr);

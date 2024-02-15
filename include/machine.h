@@ -4,8 +4,7 @@
 
 #ifndef TEMU_MACHINE_H
 #define TEMU_MACHINE_H
-#include <stdint.h>
 
-void machine_start(uint32_t start);
+void machine_start(void);
 
 #endif //TEMU_MACHINE_H
