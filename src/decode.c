@@ -1,8 +1,20 @@
 //
 // Created by hanyuan on 2024/2/8.
 //
-#include "decode.h"
 #include "mem.h"
+
+#define RV32I_LUI                               0x37
+#define RV32I_AUIPC                             0x17
+#define RV32I_JAL                               0x6f
+#define RV32I_JALR                              0x67
+#define RV32I_BRANCH                            0x63
+#define RV32I_LOAD                              0x03
+#define RV32I_STORE                             0x23
+#define RV32I_ARITH_IMM                         0x13
+#define RV32I_ARITH                             0x33
+#define RV32I_ZIFENCEI_FENCE                    0x0f
+#define RV32I_ZICSR_ECALL_EBREAK                0x73
+#define RV32A                                   0x2f
 
 static uint32_t dec_pow(uint32_t x, uint32_t y) {
     uint32_t ans = 1;
@@ -15,6 +27,12 @@ static uint32_t dec_pow(uint32_t x, uint32_t y) {
 static uint32_t extract(uint32_t inst, uint8_t start, uint8_t end) {
     return (inst >> start) & (dec_pow(2, (end - start + 1)) - 1);
 }
+
+#define INST_EXT(end, begin)  extract(inst,begin,end)
+#define INST_DEC(type, ...) decode_type_##type(inst, __VA_ARGS__)
+#define DEC_FUNC(OPCODE) static void decode_func_##OPCODE(uint32_t inst)
+#define DECODE(OPCODE) case RV32I_##OPCODE: decode_func_##OPCODE(inst); break;
+#define SEXT(op, target_idx, source_idx) (((int32_t)(op << (target_idx - source_idx))) >> (target_idx - source_idx))
 
 static void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2, uint8_t *funct7) {
     *rd = INST_EXT(11, 7);
