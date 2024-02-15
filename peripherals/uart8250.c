@@ -90,6 +90,7 @@ void uart8250_tick(void) {
         if (tx_fifo_tail) {
             /* 发送当前的队首 */
             printf("%c", tx_fifo[0]);
+            fflush(stdout);
             /* 移位 */
             for (int i = 0; i < 32 - 1; i++) {
                 tx_fifo[i] = tx_fifo[i + 1];
