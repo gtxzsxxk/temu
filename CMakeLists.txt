@@ -8,7 +8,5 @@ include_directories(lib)
 include_directories(src)
 include_directories(src/*)
 
-add_executable(temu src/main.c
-        src/mem.c
-        src/machine.c
-        src/decode.c)
+add_executable(
+)
