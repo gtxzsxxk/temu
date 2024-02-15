@@ -94,7 +94,6 @@ DEC_FUNC(LUI) {
     INST_DEC(u,&imm,&rd);
     imm &= ~0x00000fff;
     registers[rd] = imm;
-    program_counter += 4;
 }
 
 DEC_FUNC(AUIPC) {
@@ -104,7 +103,6 @@ DEC_FUNC(AUIPC) {
     imm &= ~0x00000fff;
     imm += program_counter;
     registers[rd] = imm;
-    program_counter += 4;
 }
 
 DEC_FUNC(JAL) {
@@ -112,5 +110,4 @@ DEC_FUNC(JAL) {
     uint8_t rd;
     INST_DEC(j,&imm,&rd);
     int32_t sext_imm = SEXT(imm,31,20);
-    program_counter += sext_imm;
 }
