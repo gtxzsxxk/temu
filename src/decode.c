@@ -440,7 +440,8 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         /* avoid incorrect pc */
         program_counter -= 4;
     } else if (!funct3 && !rd && !rs1 && imm == 0x105) {
-        /* TODO: WFI */
+        /* WFI: does nothing. Spinning only. */
+        return;
     }
 
     if (illegal_inst_intr) {
