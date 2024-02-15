@@ -10,9 +10,6 @@ class CsrInformation:
             elif defineLine.__contains__("_prv_"):
                 self.csrPrivilege = defineLine.replace("#define CSR_prv_" + self.csrName + " ", "")
 
-    def __str__(self):
-        return "CSR NAME=%s\n    NUMBER=%s\n    PRIV=%s" % (self.csrName, self.csrNumber, self.csrPrivilege)
-
 
 zicsrSource = '../include/zicsr.h'
 matchBegin = '/* === csrIndexGen match begin DO NOT MODIFY THIS LINE === */'
@@ -24,30 +21,13 @@ fp.close()
 
 startIndex = 0
 endIndex = 0
-csrList = []
 
 
-def read_csr_definitions():
-    global csrList, startIndex
-    while not codeLines[startIndex + 1].__contains__(matchEnd):
-        def_index = startIndex + 1
-        def_end_index = def_index + 1
-        def_lines = [codeLines[def_index]]
-        while codeLines[def_end_index] != '\r\n' and codeLines[def_end_index] != '\n':
-            if codeLines[def_end_index].__contains__(matchEnd):
-                return
-            def_lines.append(codeLines[def_end_index])
-            def_end_index += 1
-        startIndex = def_end_index
-        csrList.append(CsrInformation(def_lines))
+def readCsrDefinitions():
 
 
 for i in range(0, codeLines.__len__()):
     if codeLines[i] == '':
         continue
-    if codeLines[i].__contains__(matchBegin):
+    if i == matchBegin:
         startIndex = i
-        read_csr_definitions()
-        break
-
-print(csrList)
