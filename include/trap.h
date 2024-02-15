@@ -19,6 +19,14 @@
 #define EXCEPTION_LOAD_PAGEFAULT                    13
 #define EXCEPTION_STORE_PAGEFAULT                   15
 
+#define INTERRUPT_SUPERVISOR_SOFTWARE               1
+#define INTERRUPT_MACHINE_SOFTWARE                  3
+#define INTERRUPT_SUPERVISOR_TIMER                  5
+#define INTERRUPT_MACHINE_TIMER                     7
+#define INTERRUPT_SUPERVISOR_EXTERNAL               9
+#define INTERRUPT_MACHINE_EXTERNAL                  11
+
+
 void trap_throw_interrupt(uint32_t cause);
 
 void trap_throw_exception(uint32_t cause);
