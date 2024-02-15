@@ -160,14 +160,6 @@
 
 /* === csrIndexGen match end DO NOT MODIFY THIS LINE === */
 
-#define mstatus_MIE 3
-#define mstatus_SIE 1
-#define mstatus_MPIE 7
-#define mstatus_SPIE 5
-#define mstatus_MPP 11
-#define mstatus_SPP 8
-#define mstatus_MPRV 17
-
 void csr_csrrw(uint8_t rs1, uint8_t rd, uint16_t csr_number);
 
 void csr_csrrs(uint8_t rs1, uint8_t rd, uint16_t csr_number);
