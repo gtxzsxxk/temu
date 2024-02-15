@@ -12,9 +12,9 @@ const uint8_t RV32I_LOAD = 0x03;
 const uint8_t RV32I_STORE = 0x23;
 const uint8_t RV32I_ARITH_IMM = 0x13;
 const uint8_t RV32I_ARITH = 0x33;
-const uint8_t RV32I_ZIFENCEI_FENCE = 0x0f;
-const uint8_t RV32I_ZICSR_ECALL_EBREAK = 0x73;
-
+const uint8_t RV32I_FENCE = 0x0f;
+const uint8_t RV32I_ECALL = 0x73;
+const uint8_t RV32I_EBREAK = 0x73;
 
 /* 返回值是对pc指针的改变量 */
 void decode(uint32_t inst) {
