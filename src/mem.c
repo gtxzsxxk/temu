@@ -97,10 +97,10 @@ uint32_t mem_register_read(uint8_t rd) {
     if (rd == 0) {
         return 0;
     }
-//    /* global pointer */
-//    if (rd == 3) {
-//        return 0x02000200;
-//    }
+    /* global pointer */
+    if (rd == 3) {
+        return 0x02000200;
+    }
     return registers[rd];
 }
 
