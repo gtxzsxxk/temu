@@ -11,8 +11,4 @@ include_directories(src/*)
 add_executable(temu src/main.c
         src/mem.c
         src/machine.c
-        src/decode.c
-        src/zicsr.c
-        include/zicsr.h
-        src/trap.c
-        include/trap.h)
+        src/decode.c)

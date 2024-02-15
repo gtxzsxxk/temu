@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include "mem.h"
 #include "zicsr.h"
-#include "trap.h"
 
 uint8_t current_privilege = CSR_MASK_MACHINE;
 
@@ -74,6 +73,7 @@ const uint8_t csr_index_remap[0x10] = {
 uint8_t csr_get_index_by_number(uint16_t csr_number) {
     uint8_t start_index = csr_index_remap[csr_number >> 8];
     if (start_index == 100) {
+        /* Raise exception */
         return -1;
     }
     for (; start_index < CSR_SIZE; start_index++) {
@@ -81,6 +81,7 @@ uint8_t csr_get_index_by_number(uint16_t csr_number) {
             return start_index;
         }
     }
+    /* Raise exception */
     return -1;
 }
 
@@ -99,7 +100,7 @@ void csr_write(uint16_t csr_index, uint32_t value) {
 void csr_csrrw(uint8_t rs1, uint8_t rd, uint16_t csr_number) {
     uint8_t index = csr_get_index_by_number(csr_number);
     if (index == (uint8_t) -1) {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        /* Raise exception */
         return;
     }
     if (rd) {
@@ -114,7 +115,7 @@ void csr_csrrw(uint8_t rs1, uint8_t rd, uint16_t csr_number) {
 void csr_csrrs(uint8_t rs1, uint8_t rd, uint16_t csr_number) {
     uint8_t index = csr_get_index_by_number(csr_number);
     if (index == (uint8_t) -1) {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        /* Raise exception */
         return;
     }
     uint32_t prev_value = csr_read(index);
@@ -127,7 +128,7 @@ void csr_csrrs(uint8_t rs1, uint8_t rd, uint16_t csr_number) {
 void csr_csrrc(uint8_t rs1, uint8_t rd, uint16_t csr_number) {
     uint8_t index = csr_get_index_by_number(csr_number);
     if (index == (uint8_t) -1) {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        /* Raise exception */
         return;
     }
     uint32_t prev_value = csr_read(index);
@@ -140,7 +141,7 @@ void csr_csrrc(uint8_t rs1, uint8_t rd, uint16_t csr_number) {
 void csr_csrrwi(uint8_t uimm, uint8_t rd, uint16_t csr_number) {
     uint8_t index = csr_get_index_by_number(csr_number);
     if (index == (uint8_t) -1) {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        /* Raise exception */
         return;
     }
     if (rd) {
@@ -155,7 +156,7 @@ void csr_csrrwi(uint8_t uimm, uint8_t rd, uint16_t csr_number) {
 void csr_csrrsi(uint8_t uimm, uint8_t rd, uint16_t csr_number) {
     uint8_t index = csr_get_index_by_number(csr_number);
     if (index == (uint8_t) -1) {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        /* Raise exception */
         return;
     }
     uint32_t prev_value = csr_read(index);
@@ -168,7 +169,7 @@ void csr_csrrsi(uint8_t uimm, uint8_t rd, uint16_t csr_number) {
 void csr_csrrci(uint8_t uimm, uint8_t rd, uint16_t csr_number) {
     uint8_t index = csr_get_index_by_number(csr_number);
     if (index == (uint8_t) -1) {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        /* Raise exception */
         return;
     }
     uint32_t prev_value = csr_read(index);
