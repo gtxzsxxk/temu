@@ -1,0 +1,75 @@
+
+jal.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text.init:
+
+00000000 <_start>:
+   0:	00200193          	addi	x3,x0,2
+   4:	00000093          	addi	x1,x0,0
+   8:	0100026f          	jal	x4,18 <target_2>
+
+0000000c <linkaddr_2>:
+   c:	00000013          	addi	x0,x0,0
+  10:	00000013          	addi	x0,x0,0
+  14:	0400006f          	jal	x0,54 <fail>
+
+00000018 <target_2>:
+  18:	00000117          	auipc	x2,0x0
+  1c:	ff410113          	addi	x2,x2,-12 # c <linkaddr_2>
+  20:	02411a63          	bne	x2,x4,54 <fail>
+
+00000024 <test_3>:
+  24:	00300193          	addi	x3,x0,3
+  28:	00100093          	addi	x1,x0,1
+  2c:	0140006f          	jal	x0,40 <test_3+0x1c>
+  30:	00108093          	addi	x1,x1,1
+  34:	00108093          	addi	x1,x1,1
+  38:	00108093          	addi	x1,x1,1
+  3c:	00108093          	addi	x1,x1,1
+  40:	00108093          	addi	x1,x1,1
+  44:	00108093          	addi	x1,x1,1
+  48:	00300393          	addi	x7,x0,3
+  4c:	00709463          	bne	x1,x7,54 <fail>
+  50:	02301063          	bne	x0,x3,70 <pass>
+
+00000054 <fail>:
+  54:	0ff0000f          	fence	iorw,iorw
+  58:	00018063          	beq	x3,x0,58 <fail+0x4>
+  5c:	00119193          	slli	x3,x3,0x1
+  60:	0011e193          	ori	x3,x3,1
+  64:	05d00893          	addi	x17,x0,93
+  68:	00018513          	addi	x10,x3,0
+  6c:	00000073          	ecall
+
+00000070 <pass>:
+  70:	0ff0000f          	fence	iorw,iorw
+  74:	00100193          	addi	x3,x0,1
+  78:	05d00893          	addi	x17,x0,93
+  7c:	00000513          	addi	x10,x0,0
+  80:	00000073          	ecall
+  84:	c0001073          	unimp
+	...
+
+Disassembly of section .tohost:
+
+00001000 <tohost>:
+	...
+
+00001040 <fromhost>:
+	...
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	1941                	.2byte	0x1941
+   2:	0000                	.2byte	0x0
+   4:	7200                	.2byte	0x7200
+   6:	7369                	.2byte	0x7369
+   8:	01007663          	bgeu	x0,x16,14 <linkaddr_2+0x8>
+   c:	0000000f          	fence	unknown,unknown
+  10:	7205                	.2byte	0x7205
+  12:	3376                	.2byte	0x3376
+  14:	6932                	.2byte	0x6932
+  16:	7032                	.2byte	0x7032
+  18:	0031                	.2byte	0x31
