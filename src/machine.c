@@ -1,6 +1,7 @@
 //
 // Created by hanyuan on 2024/2/8.
 //
+#include <termios.h>
 #include <unistd.h>
 #include "machine.h"
 #include "mem.h"
@@ -12,9 +13,21 @@
 #define RISCV_DEBUG
 #define RISCV_ISA_TESTS
 
-void machine_start(uint32_t start, int printreg) {
+static void set_terminal(void) {
+    static struct termios oldt, newt;
+    tcgetattr( STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON);
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+}
+
+_Noreturn void machine_start(uint32_t start, int printreg) {
     uint8_t access_error_intr;
     program_counter = start;
+
+    set_terminal();
+    uart8250_init();
+
     for (;;) {
         access_error_intr = 0;
         uint32_t instruction = mem_read_w(program_counter, &access_error_intr);
