@@ -14,11 +14,11 @@
 #define RISCV_ISA_TESTS
 
 static void set_terminal(void) {
-    static struct termios oldt, newt;
-    tcgetattr( STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON);
-    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+    static struct termios tm;
+    tcgetattr( STDIN_FILENO, &tm);
+    cfmakeraw(&tm);
+    tm.c_lflag &= ~(ICANON);
+    tcsetattr( STDIN_FILENO, TCSANOW, &tm);
 }
 
 _Noreturn void machine_start(uint32_t start, int printreg) {
