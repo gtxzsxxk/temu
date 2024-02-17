@@ -189,17 +189,15 @@ void csr_csrrci(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
     }
 }
 
-void zicnt_tick(void) {
-    /* TODO: clock management and simulation
-     * Here the clock is assumed to be 100MHz
-     * */
+void zicnt_cycle_tick(void) {
     cycle++;
-    if (cycle % 100 == 0) {
-        time++;
-    }
 
     control_status_registers[CSR_idx_cycle] = cycle & 0xffffffff;
     control_status_registers[CSR_idx_cycleh] = (cycle >> 32) & 0xffffffff;
+}
+
+void zicnt_time_tick(void) {
+    time++;
 
     control_status_registers[CSR_idx_time] = time & 0xffffffff;
     control_status_registers[CSR_idx_timeh] = (time >> 32) & 0xffffffff;

@@ -38,9 +38,10 @@ void machine_start(uint32_t start, int printreg) {
             decode(instruction);
         }
         uart8250_tick();
-        zicnt_tick();
+        zicnt_cycle_tick();
 
         if(zicnt_get_cycle() % SIM_YIELD_GAP == 0){
+            zicnt_time_tick();
             usleep(SIM_YIELD_TIME);
         }
     }
