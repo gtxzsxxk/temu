@@ -9,31 +9,9 @@
 
 static const char *usage = "Usage: temu [-ram/-rom/-addr 0x02000000] [-printreg] -exec=program.bin -with=0x03000000#u-boot.bin\r\n";
 
-static int load_binary(uint32_t addr, const char *path) {
-    int mem_ptr_flag;
-    FILE *fp = fopen(path, "r");
-    if (!fp) {
-        printf("Failed to access %s\r\n", path);
-        return -1;
-    }
+static int load_binary(uint32_t addr, const char *path);
 
-
-    uint8_t *mem_ptr = mem_get_ptr(addr, &mem_ptr_flag);
-    if (mem_ptr_flag == -1) {
-        printf("Failed to access memory at 0x%08x\r\n", addr);
-        return -1;
-    }
-    fread(mem_ptr, mem_ptr_flag == MEM_PTR_RAM ? RAM_SIZE : ROM_SIZE - addr, 1, fp);
-    fclose(fp);
-    return 0;
-}
-
-static int with_binary(const char *data) {
-    uint32_t addr;
-    char path[64];
-    sscanf(data, "%x#%s", &addr, path);
-    load_binary(addr, path);
-}
+static int with_binary(const char *data);
 
 int main(int argc, char **argv) {
     uint32_t start_addr = 0;
@@ -62,7 +40,7 @@ int main(int argc, char **argv) {
                     sscanf(optarg, "%x", &start_addr);
                     exec_flag = 1;
                 } else {
-                    printf(usage);
+                    printf("%s", usage);
                     return -1;
                 }
                 break;
@@ -74,34 +52,62 @@ int main(int argc, char **argv) {
                     strcpy(exec_path, optarg);
                     exec_flag = 1;
                 } else {
-                    printf(usage);
+                    printf("%s", usage);
                     return -1;
                 }
                 break;
             case 5:
                 if (optarg) {
                     if (with_binary(optarg) == -1) {
-                        printf(usage);
+                        printf("%s", usage);
                         return -1;
                     }
                 } else {
-                    printf(usage);
+                    printf("%s", usage);
                     return -1;
                 }
                 break;
+            default:
+                printf("%s", usage);
+                return -1;
         }
     }
 
     if (!exec_flag) {
-        printf(usage);
+        printf("%s", usage);
         return -1;
     }
 
     if (load_binary(start_addr, exec_path) == -1) {
-        printf(usage);
+        printf("%s", usage);
         return -1;
     }
 
     machine_start(start_addr, printreg);
+}
+
+static int load_binary(uint32_t addr, const char *path) {
+    int mem_ptr_flag;
+    FILE *fp = fopen(path, "r");
+    if (!fp) {
+        printf("Failed to access %s\r\n", path);
+        return -1;
+    }
+
+
+    uint8_t *mem_ptr = mem_get_ptr(addr, &mem_ptr_flag);
+    if (mem_ptr_flag == -1) {
+        printf("Failed to access memory at 0x%08x\r\n", addr);
+        return -1;
+    }
+    fread(mem_ptr, mem_ptr_flag == MEM_PTR_RAM ? RAM_SIZE : ROM_SIZE - addr, 1, fp);
+    fclose(fp);
     return 0;
+}
+
+static int with_binary(const char *data) {
+    uint32_t addr;
+    char path[64];
+    sscanf(data, "%x#%s", &addr, path);
+    return load_binary(addr, path);
 }
