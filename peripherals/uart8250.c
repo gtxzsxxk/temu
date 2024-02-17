@@ -1,11 +1,12 @@
 //
 // Created by hanyuan on 2024/2/14.
 //
+#include <unistd.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <pthread.h>
 #include "uart8250.h"
 
-uint8_t RCB = 0;
 uint8_t IER = 0x00;
 uint8_t IIR = 0xc1;
 uint8_t FCR = 0xc0;
@@ -17,16 +18,36 @@ uint8_t MSR = 0;
 uint16_t divisor;
 uint16_t div_cnt = 0;
 
-uint8_t tx_fifo[32];
+uint8_t tx_fifo[UART_FIFO_SIZE];
 uint8_t tx_fifo_tail = 0;
 
+uint8_t rx_fifo[UART_FIFO_SIZE];
+uint8_t rx_fifo_tail = 0;
+
+pthread_spinlock_t rx_fifo_lock;
+
+static uint8_t read_from_rx_fifo(void) {
+    pthread_spin_lock(&rx_fifo_lock);
+    uint8_t head = rx_fifo[0];
+    if (rx_fifo_tail) {
+        /* 移位 */
+        for (int i = 0; i < UART_FIFO_SIZE - 1; i++) {
+            rx_fifo[i] = rx_fifo[i + 1];
+        }
+        rx_fifo_tail--;
+    }
+    pthread_spin_unlock(&rx_fifo_lock);
+    return head;
+}
+
 uint8_t uart8250_read_b(uint8_t offset) {
+    uint8_t scratch;
     switch (offset) {
         case 0:
             if (LCR >> 7) {
                 return divisor & 0x00ff;
             }
-            return RCB;
+            return read_from_rx_fifo();
         case 1:
             if (LCR >> 7) {
                 return (divisor >> 8) & 0x00ff;
@@ -37,7 +58,9 @@ uint8_t uart8250_read_b(uint8_t offset) {
         case 3:
             return LCR;
         case 5:
-            return LSR;
+            scratch = LSR;
+            LSR &= ~(1 << 1);
+            return scratch;
         case 6:
             return MSR;
         default:
@@ -53,7 +76,7 @@ void uart8250_write_b(uint8_t offset, uint8_t data) {
                 divisor &= 0xff00;
                 divisor |= data;
             } else {
-                if (tx_fifo_tail < 32) {
+                if (tx_fifo_tail < UART_FIFO_SIZE) {
                     tx_fifo[tx_fifo_tail++] = data;
                     /* 1 << 5: Transmit FIFO empty */
                     LSR &= ~(1 << 5);
@@ -92,7 +115,7 @@ void uart8250_tick(void) {
             printf("%c", tx_fifo[0]);
             fflush(stdout);
             /* 移位 */
-            for (int i = 0; i < 32 - 1; i++) {
+            for (int i = 0; i < UART_FIFO_SIZE - 1; i++) {
                 tx_fifo[i] = tx_fifo[i + 1];
             }
             /* 指针移位 */
@@ -108,5 +131,37 @@ void uart8250_tick(void) {
         }
     } else {
         div_cnt++;
+    }
+}
+
+int uart8250_init(void) {
+    pthread_t listening_thd;
+
+    pthread_spin_init(&rx_fifo_lock, PTHREAD_PROCESS_PRIVATE);
+
+    if (pthread_create(&listening_thd, NULL, uart8250_listening, NULL)) {
+        printf("Failed to create uart listening thread\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+_Noreturn void *uart8250_listening(void *ptr) {
+    for (;;) {
+        int ch = getchar();
+        pthread_spin_lock(&rx_fifo_lock);
+        if (rx_fifo_tail >= UART_FIFO_SIZE - 1) {
+            /* FIFO is full */
+            LSR |= 1 << 1;
+        } else {
+            rx_fifo[rx_fifo_tail++] = ch;
+        }
+        if (rx_fifo_tail >= 1) {
+            LSR |= 1;
+        } else {
+            LSR &= ~1;
+        }
+        pthread_spin_unlock(&rx_fifo_lock);
     }
 }
