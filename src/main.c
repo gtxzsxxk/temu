@@ -7,7 +7,7 @@
 #include "machine.h"
 #include "mem.h"
 
-static const char *usage = "Usage: temu [-ram/-rom/-addr 0x02000000] [-printreg] -exec=program.bin -with=0x03000000!u-boot.bin\r\n";
+static const char *usage = "Usage: temu [-ram/-rom/-addr 0x02000000] [-printreg] -exec=program.bin -with=0x03000000#u-boot.bin\r\n";
 
 static int load_binary(uint32_t addr, const char *path) {
     int mem_ptr_flag;
@@ -31,7 +31,7 @@ static int load_binary(uint32_t addr, const char *path) {
 static int with_binary(const char *data) {
     uint32_t addr;
     char path[64];
-    sscanf(data, "%x!%s", &addr, path);
+    sscanf(data, "%x#%s", &addr, path);
     load_binary(addr, path);
 }
 
