@@ -1,11 +1,13 @@
 //
 // Created by hanyuan on 2024/2/8.
 //
+#include <unistd.h>
 #include "machine.h"
 #include "mem.h"
 #include "decode.h"
 #include "uart8250.h"
 #include "trap.h"
+#include "zicsr.h"
 
 #define RISCV_DEBUG
 #define RISCV_ISA_TESTS
@@ -36,5 +38,10 @@ void machine_start(uint32_t start, int printreg) {
             decode(instruction);
         }
         uart8250_tick();
+        zicnt_tick();
+
+        if(zicnt_get_cycle() % SIM_YIELD_GAP == 0){
+            usleep(SIM_YIELD_TIME);
+        }
     }
 }

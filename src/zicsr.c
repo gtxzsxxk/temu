@@ -1,16 +1,23 @@
 //
 // Created by hanyuan on 2024/2/10.
 //
+#include <sys/time.h>
 #include "mem.h"
 #include "zicsr.h"
 
 uint8_t current_privilege = CSR_MASK_MACHINE;
 
+static uint64_t cycle = 0;
+static uint64_t time = 0;
+
 uint32_t control_status_registers[CSR_SIZE] = {
         CSR_RESET_VALUE(misa, 0x40140101)
         CSR_RESET_VALUE(mvendorid, 0x00000000)
         CSR_RESET_VALUE(mhartid, 0x00000000)
-
+        CSR_RESET_VALUE(cycle, 0x00000000)
+        CSR_RESET_VALUE(cycleh, 0x00000000)
+        CSR_RESET_VALUE(time, 0x00000000)
+        CSR_RESET_VALUE(timeh, 0x00000000)
 };
 const uint32_t csr_match[CSR_SIZE] = {
         CSR_MATCH_DECLARE(sstatus)
@@ -180,4 +187,24 @@ void csr_csrrci(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
     if (uimm) {
         csr_write(index, prev_value & (~uimm));
     }
+}
+
+void zicnt_tick(void) {
+    /* TODO: clock management and simulation
+     * Here the clock is assumed to be 100MHz
+     * */
+    cycle++;
+    if (cycle % 100 == 0) {
+        time++;
+    }
+
+    control_status_registers[CSR_idx_cycle] = cycle & 0xffffffff;
+    control_status_registers[CSR_idx_cycleh] = (cycle >> 32) & 0xffffffff;
+
+    control_status_registers[CSR_idx_time] = time & 0xffffffff;
+    control_status_registers[CSR_idx_timeh] = (time >> 32) & 0xffffffff;
+}
+
+uint64_t zicnt_get_cycle(void) {
+    return cycle;
 }

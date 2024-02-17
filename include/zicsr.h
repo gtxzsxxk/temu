@@ -189,4 +189,8 @@ void csr_csrrsi(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr);
 
 void csr_csrrci(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr);
 
+void zicnt_tick(void);
+
+uint64_t zicnt_get_cycle(void);
+
 #endif //TEMU_ZICSR_H
