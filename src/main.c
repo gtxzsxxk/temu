@@ -7,7 +7,13 @@
 #include "machine.h"
 #include "mem.h"
 
-static const char *usage = "Usage: temu [-ram/-rom/-addr 0x02000000] [-printreg] -exec=program.bin -with=0x03000000#u-boot.bin\r\n";
+static const char *usage = "Usage: temu [-ram/-rom/-addr 0x02000000] [-printreg] -exec=program.bin [-with=addr#file.bin]\n\n"
+                           "Example:\n"
+                           "--ram\n"
+                           "--exec=fw_jump.bin\n"
+                           "--with=0x0204b000#u-boot.bin\n"
+                           "--with=0x02048800#u-boot.dtb\n"
+                           "--with=0x028cb000#Image.gz\n";
 
 static int load_binary(uint32_t addr, const char *path);
 
