@@ -32,9 +32,9 @@ _Noreturn void machine_start(uint32_t start, int printreg) {
         if (access_error_intr) {
             trap_throw_exception(EXCEPTION_INST_ACCESS_FAULT);
         } else {
+            machine_debug(instruction, printreg);
             decode(instruction);
         }
-        machine_debug(instruction, printreg);
         machine_tick();
     }
 }
@@ -62,7 +62,7 @@ static void machine_debug(uint32_t instruction, int printreg) {
         mem_debug_printreg(program_counter);
     }
 #ifdef RISCV_ISA_TESTS
-    if (program_counter == 0xbfdffc4) {
+    if (program_counter == 0x23d46e8) {
         int a = 0;
     }
     if (instruction == 0x00000073) {
