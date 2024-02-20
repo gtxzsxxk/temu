@@ -201,6 +201,10 @@ DEC_FUNC(LOAD) {
     }
 
     if (access_error_intr) {
+        if (access_error_intr == 2) {
+            trap_throw_exception(EXCEPTION_LOAD_PAGEFAULT);
+            return;
+        }
         trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT);
     } else {
         program_counter += 4;
@@ -229,6 +233,10 @@ DEC_FUNC(STORE) {
     }
 
     if (access_error_intr) {
+        if (access_error_intr == 2) {
+            trap_throw_exception(EXCEPTION_STORE_PAGEFAULT);
+            return;
+        }
         trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT);
     } else {
         program_counter += 4;

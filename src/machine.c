@@ -30,7 +30,11 @@ _Noreturn void machine_start(uint32_t start, int printreg) {
         access_error_intr = 0;
         uint32_t instruction = mem_read_w(program_counter, &access_error_intr);
         if (access_error_intr) {
-            trap_throw_exception(EXCEPTION_INST_ACCESS_FAULT);
+            if (access_error_intr == 2) {
+                trap_throw_exception(EXCEPTION_INST_PAGEFAULT);
+            } else {
+                trap_throw_exception(EXCEPTION_INST_ACCESS_FAULT);
+            }
         } else {
             machine_debug(instruction, printreg);
             decode(instruction);
