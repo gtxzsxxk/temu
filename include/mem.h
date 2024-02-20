@@ -7,10 +7,9 @@
 
 #include <stdint.h>
 #include "parameters.h"
+#include "vm.h"
 
 extern uint32_t program_counter;
-
-uint8_t *mem_get_ptr(uint32_t addr, int *ok_flag);
 
 uint8_t mem_read_b(uint32_t addr, uint8_t *intr);
 

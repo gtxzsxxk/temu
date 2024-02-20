@@ -101,7 +101,7 @@ static int load_binary(uint32_t addr, const char *path) {
     }
 
 
-    uint8_t *mem_ptr = mem_get_ptr(addr, &mem_ptr_flag);
+    uint8_t *mem_ptr = pm_get_ptr(addr, &mem_ptr_flag);
     if (mem_ptr_flag == -1) {
         printf("Failed to access memory at 0x%08x\r\n", addr);
         return -1;
