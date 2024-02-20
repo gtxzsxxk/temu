@@ -11,7 +11,50 @@ static uint8_t rom_ptr[ROM_SIZE];
 static uint8_t ram_ptr[RAM_SIZE];
 
 uint8_t vm_on(void) {
-    return control_status_registers[CSR_idx_satp] >> 31;
+    return current_privilege <= CSR_MASK_SUPERVISOR && control_status_registers[CSR_idx_satp];
+}
+
+uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flags) {
+    uint32_t pgtable = SV32_ROOT(control_status_registers[CSR_idx_satp]);
+    uint32_t pte;
+    uint8_t intr;
+    for (int i = 1; i >= 0; i--) {
+        pte = pm_read_w(pgtable + SV32_VPN(vaddr, i) * 4, &intr);
+        if (!PTE_MATCH(pte, PTE_V) || (!PTE_MATCH(pte, PTE_R) && PTE_MATCH(pte, PTE_W)) ||
+            (((pte >> 10) & 0x01) && i == 1)) {
+            if (page_fault) {
+                *page_fault = 1;
+            }
+            return 0xffffffff;
+        }
+        if (PTE_MATCH(pte, PTE_R) || PTE_MATCH(pte, PTE_X)) {
+            /* leaf */
+            if ((pte & access_flags) != access_flags ||
+                ~((pte | PTE_X) && (access_flags | PTE_R) &&
+                  (control_status_registers[CSR_idx_mstatus] >> mstatus_MXR)) ||
+                ((control_status_registers[CSR_idx_mstatus] >> mstatus_SUM) == 0 && PTE_MATCH(pte, PTE_U) &&
+                 current_privilege == CSR_MASK_SUPERVISOR)) {
+                if (page_fault) {
+                    *page_fault = 1;
+                }
+                return 0x00000000;
+            }
+
+            pte |= (1 << PTE_A);
+            if (access_flags | PTE_W) {
+                pte |= (1 << PTE_D);
+            }
+            /* the INTR shouldn't be 1 */
+            pm_write_w(pgtable + SV32_VPN(vaddr, i) * 4, pte, NULL);
+            uint32_t pa = SV32_PTE2PA(pte) + SV32_VOFFSET(vaddr);
+        }
+        pgtable = SV32_PTE2PA(pte);
+    }
+
+    if (page_fault) {
+        *page_fault = 1;
+    }
+    return 0xffffffff;
 }
 
 uint8_t *pm_get_ptr(uint32_t addr, int *ok_flag) {
