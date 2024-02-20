@@ -13,7 +13,12 @@ uint8_t mem_read_b(uint32_t addr, uint8_t *intr) {
         *intr = 0;
     }
 
-    uint32_t addr_translated = addr;
+    uint8_t page_fault = 0;
+    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_R) : addr;
+    if (page_fault) {
+        *intr = 2;
+        return 0xff;
+    }
 
     if (addr_translated >= UART_BASE_ADDR && addr_translated < UART_BASE_ADDR + UART_SIZE) {
         return uart8250_read_b(addr_translated - UART_BASE_ADDR);
@@ -26,7 +31,12 @@ uint16_t mem_read_h(uint32_t addr, uint8_t *intr) {
         *intr = 0;
     }
 
-    uint32_t addr_translated = addr;
+    uint8_t page_fault = 0;
+    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_R) : addr;
+    if (page_fault) {
+        *intr = 2;
+        return 0xffff;
+    }
 
     return pm_read_h(addr_translated, intr);
 }
@@ -36,7 +46,12 @@ uint32_t mem_read_w(uint32_t addr, uint8_t *intr) {
         *intr = 0;
     }
 
-    uint32_t addr_translated = addr;
+    uint8_t page_fault = 0;
+    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_R) : addr;
+    if (page_fault) {
+        *intr = 2;
+        return 0xffffffff;
+    }
 
     return pm_read_w(addr_translated, intr);
 }
@@ -46,7 +61,12 @@ void mem_write_b(uint32_t addr, uint8_t data, uint8_t *intr) {
         *intr = 0;
     }
 
-    uint32_t addr_translated = addr;
+    uint8_t page_fault = 0;
+    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_W) : addr;
+    if (page_fault) {
+        *intr = 2;
+        return;
+    }
 
     if (addr_translated >= UART_BASE_ADDR && addr_translated < UART_BASE_ADDR + UART_SIZE) {
         uart8250_write_b(addr_translated - RAM_BASE_ADDR, data);
@@ -61,7 +81,12 @@ void mem_write_h(uint32_t addr, uint16_t data, uint8_t *intr) {
         *intr = 0;
     }
 
-    uint32_t addr_translated = addr;
+    uint8_t page_fault = 0;
+    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_W) : addr;
+    if (page_fault) {
+        *intr = 2;
+        return;
+    }
 
     pm_write_h(addr_translated, data, intr);
 }
@@ -71,7 +96,12 @@ void mem_write_w(uint32_t addr, uint32_t data, uint8_t *intr) {
         *intr = 0;
     }
 
-    uint32_t addr_translated = addr;
+    uint8_t page_fault = 0;
+    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_W) : addr;
+    if (page_fault) {
+        *intr = 2;
+        return;
+    }
 
     pm_write_w(addr_translated, data, intr);
 }

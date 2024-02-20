@@ -24,6 +24,10 @@
 #define SV32_PTE2PA(pte)        ((pte >> 10) << 12)
 #define SV32_VPN(addr, idx)     (addr >> (idx==1 ? 22 : 12))
 
+uint8_t vm_on(void);
+
+uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flags);
+
 uint8_t *pm_get_ptr(uint32_t addr, int *ok_flag);
 
 uint8_t pm_read_b(uint32_t addr, uint8_t *intr);

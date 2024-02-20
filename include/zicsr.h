@@ -167,6 +167,8 @@
 #define mstatus_MPP 11
 #define mstatus_SPP 8
 #define mstatus_MPRV 17
+#define mstatus_SUM  18
+#define mstatus_MXR  19
 
 #define sstatus_SIE 1
 #define sstatus_SPIE 5
