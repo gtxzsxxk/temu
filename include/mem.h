@@ -8,9 +8,6 @@
 #include <stdint.h>
 #include "parameters.h"
 
-#define MEM_PTR_ROM         1
-#define MEM_PTR_RAM         2
-
 extern uint32_t program_counter;
 
 uint8_t *mem_get_ptr(uint32_t addr, int *ok_flag);
