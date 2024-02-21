@@ -16,7 +16,9 @@ uint8_t mem_read_b(uint32_t addr, uint8_t *intr) {
     uint8_t page_fault = 0;
     uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_R) : addr;
     if (page_fault) {
-        *intr = 2;
+        if (intr) {
+            *intr = 2;
+        }
         return 0xff;
     }
 
@@ -34,7 +36,9 @@ uint16_t mem_read_h(uint32_t addr, uint8_t *intr) {
     uint8_t page_fault = 0;
     uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_R) : addr;
     if (page_fault) {
-        *intr = 2;
+        if (intr) {
+            *intr = 2;
+        }
         return 0xffff;
     }
 
@@ -49,7 +53,9 @@ uint32_t mem_read_w(uint32_t addr, uint8_t *intr) {
     uint8_t page_fault = 0;
     uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_R) : addr;
     if (page_fault) {
-        *intr = 2;
+        if (intr) {
+            *intr = 2;
+        }
         return 0xffffffff;
     }
 
@@ -64,7 +70,9 @@ void mem_write_b(uint32_t addr, uint8_t data, uint8_t *intr) {
     uint8_t page_fault = 0;
     uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_W) : addr;
     if (page_fault) {
-        *intr = 2;
+        if (intr) {
+            *intr = 2;
+        }
         return;
     }
 
@@ -84,7 +92,9 @@ void mem_write_h(uint32_t addr, uint16_t data, uint8_t *intr) {
     uint8_t page_fault = 0;
     uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_W) : addr;
     if (page_fault) {
-        *intr = 2;
+        if (intr) {
+            *intr = 2;
+        }
         return;
     }
 
@@ -99,7 +109,9 @@ void mem_write_w(uint32_t addr, uint32_t data, uint8_t *intr) {
     uint8_t page_fault = 0;
     uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_W) : addr;
     if (page_fault) {
-        *intr = 2;
+        if (intr) {
+            *intr = 2;
+        }
         return;
     }
 
@@ -139,7 +151,7 @@ void mem_debug_printaddr(uint32_t addr, uint8_t no_vaddr) {
     uint32_t addr_temp = addr;
     uint8_t (*read)(uint32_t, uint8_t *) = no_vaddr ? pm_read_b : mem_read_b;
     for (int i = 0; i < 16; i++) {
-        printf("0x%08x:\t%02x %02x %02x %02x %02x %02x %02x %02x\t\t%c%c%c%c%c%c%c%c\n",
+        printf("0x%08x:\t\t%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\t\t%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
                addr_temp,
                read(addr_temp + 0, NULL),
                read(addr_temp + 1, NULL),
@@ -149,6 +161,14 @@ void mem_debug_printaddr(uint32_t addr, uint8_t no_vaddr) {
                read(addr_temp + 5, NULL),
                read(addr_temp + 6, NULL),
                read(addr_temp + 7, NULL),
+               read(addr_temp + 8, NULL),
+               read(addr_temp + 9, NULL),
+               read(addr_temp + 10, NULL),
+               read(addr_temp + 11, NULL),
+               read(addr_temp + 12, NULL),
+               read(addr_temp + 13, NULL),
+               read(addr_temp + 14, NULL),
+               read(addr_temp + 15, NULL),
                char_print(read(addr_temp + 0, NULL)),
                char_print(read(addr_temp + 1, NULL)),
                char_print(read(addr_temp + 2, NULL)),
@@ -156,9 +176,17 @@ void mem_debug_printaddr(uint32_t addr, uint8_t no_vaddr) {
                char_print(read(addr_temp + 4, NULL)),
                char_print(read(addr_temp + 5, NULL)),
                char_print(read(addr_temp + 6, NULL)),
-               char_print(read(addr_temp + 7, NULL))
+               char_print(read(addr_temp + 7, NULL)),
+               char_print(read(addr_temp + 8, NULL)),
+               char_print(read(addr_temp + 9, NULL)),
+               char_print(read(addr_temp + 10, NULL)),
+               char_print(read(addr_temp + 11, NULL)),
+               char_print(read(addr_temp + 12, NULL)),
+               char_print(read(addr_temp + 13, NULL)),
+               char_print(read(addr_temp + 14, NULL)),
+               char_print(read(addr_temp + 15, NULL))
         );
-        addr_temp += 8;
+        addr_temp += 16;
     }
     fflush(stdout);
 }
