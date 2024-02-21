@@ -29,7 +29,7 @@
 
 void trap_throw_interrupt(uint32_t cause);
 
-void trap_throw_exception(uint32_t cause);
+void trap_throw_exception(uint32_t cause, uint32_t tval);
 
 void trap_return_machine(void);
 

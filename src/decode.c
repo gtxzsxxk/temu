@@ -161,7 +161,7 @@ DEC_FUNC(BRANCH) {
             }
             break;
         default:
-            trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+            trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
             break;
     }
 }
@@ -196,16 +196,16 @@ DEC_FUNC(LOAD) {
         uint16_t data = mem_read_h(target_addr, &access_error_intr);
         mem_register_write(rd, data);
     } else {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
         program_counter -= 4;
     }
 
     if (access_error_intr) {
         if (access_error_intr == 2) {
-            trap_throw_exception(EXCEPTION_LOAD_PAGEFAULT);
+            trap_throw_exception(EXCEPTION_LOAD_PAGEFAULT, target_addr);
             return;
         }
-        trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT);
+        trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT, target_addr);
     } else {
         program_counter += 4;
     }
@@ -228,16 +228,16 @@ DEC_FUNC(STORE) {
         /* SW */
         mem_write_w(target_addr, mem_register_read(rs2), &access_error_intr);
     } else {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
         program_counter -= 4;
     }
 
     if (access_error_intr) {
         if (access_error_intr == 2) {
-            trap_throw_exception(EXCEPTION_STORE_PAGEFAULT);
+            trap_throw_exception(EXCEPTION_STORE_PAGEFAULT, target_addr);
             return;
         }
-        trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT);
+        trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT, target_addr);
     } else {
         program_counter += 4;
     }
@@ -281,7 +281,7 @@ DEC_FUNC(ARITH_IMM) {
             mem_register_write(rd, (int32_t) mem_register_read(rs1) >> shamt);
         }
     } else {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
         program_counter -= 4;
     }
 
@@ -330,7 +330,7 @@ DEC_FUNC(ARITH) {
             /* AND */
             mem_register_write(rd, (uint32_t) mem_register_read(rs1) & (uint32_t) mem_register_read(rs2));
         } else {
-            trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+            trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
             program_counter -= 4;
         }
     } else {
@@ -428,13 +428,13 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
     } else if (!imm && !funct3 && !rd && !rs1) {
         /* ECALL */
         if (current_privilege == CSR_MASK_MACHINE) {
-            trap_throw_exception(EXCEPTION_ECALL_FROM_M);
+            trap_throw_exception(EXCEPTION_ECALL_FROM_M, 0);
         } else if (current_privilege == CSR_MASK_SUPERVISOR) {
-            trap_throw_exception(EXCEPTION_ECALL_FROM_S);
+            trap_throw_exception(EXCEPTION_ECALL_FROM_S, 0);
         } else if (current_privilege == CSR_MASK_USER) {
-            trap_throw_exception(EXCEPTION_ECALL_FROM_U);
+            trap_throw_exception(EXCEPTION_ECALL_FROM_U, 0);
         } else {
-            trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+            trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
         }
         program_counter -= 4;
     } else if (!funct3 && !rd && !rs1 && imm == 0x102) {
@@ -453,7 +453,7 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
     }
 
     if (illegal_inst_intr) {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
     } else {
         program_counter += 4;
     }
@@ -469,7 +469,7 @@ DEC_FUNC(ATOMIC) {
         uint32_t value = mem_register_read(rs2);
         uint32_t t = mem_read_w(addr, &access_error_intr);
         if (access_error_intr) {
-            trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT);
+            trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT, addr);
             return;
         } else {
             mem_register_write(rd, t);
@@ -504,12 +504,12 @@ DEC_FUNC(ATOMIC) {
             }
             mem_write_w(addr, res, &access_error_intr);
             if (access_error_intr) {
-                trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT);
+                trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT, addr);
                 return;
             }
         }
     } else {
-        trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+        trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
         program_counter -= 4;
     }
 
@@ -536,7 +536,7 @@ void decode(uint32_t inst) {
         DECODE(ATOMIC)
         DECODE(ZIFENCEI_FENCE)
         default:
-            trap_throw_exception(EXCEPTION_ILLEGAL_INST);
+            trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
             break;
     }
 }

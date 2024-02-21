@@ -11,11 +11,12 @@ void trap_throw_interrupt(uint32_t cause) {
 
 }
 
-void trap_throw_exception(uint32_t cause) {
-    if((1 << cause) & control_status_registers[CSR_idx_medeleg]) {
+void trap_throw_exception(uint32_t cause, uint32_t tval) {
+    if ((1 << cause) & control_status_registers[CSR_idx_medeleg]) {
         /* delegate to supervisor mode */
         /* set cause */
         control_status_registers[CSR_idx_scause] = cause;
+        control_status_registers[CSR_idx_stval] = tval;
         control_status_registers[CSR_idx_scause] &= 0x7fffffff;
         /* set previous interrupt enable */
         control_status_registers[CSR_idx_mstatus] |= (1 << mstatus_SPIE);
@@ -34,10 +35,10 @@ void trap_throw_exception(uint32_t cause) {
         control_status_registers[CSR_idx_mstatus] |= ((current_privilege & 0x01) << mstatus_SPP);
 
         current_privilege = CSR_MASK_SUPERVISOR;
-    }
-    else {
+    } else {
         /* set cause */
         control_status_registers[CSR_idx_mcause] = cause;
+        control_status_registers[CSR_idx_mtval] = tval;
         control_status_registers[CSR_idx_mcause] &= 0x7fffffff;
         /* set previous interrupt enable */
         control_status_registers[CSR_idx_mstatus] |= (1 << mstatus_MPIE);
