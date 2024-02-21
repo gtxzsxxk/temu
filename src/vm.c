@@ -10,12 +10,19 @@
 static uint8_t rom_ptr[ROM_SIZE];
 static uint8_t ram_ptr[RAM_SIZE];
 
+/* To simulate sfence.vma */
+static uint32_t satp = 0;
+
 uint8_t vm_on(void) {
-    return current_privilege <= CSR_MASK_SUPERVISOR && control_status_registers[CSR_idx_satp];
+    return current_privilege <= CSR_MASK_SUPERVISOR && satp;
+}
+
+void vm_flush(void) {
+    satp = control_status_registers[CSR_idx_satp];
 }
 
 uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flags) {
-    uint32_t pgtable = SV32_ROOT(control_status_registers[CSR_idx_satp]);
+    uint32_t pgtable = SV32_ROOT(satp);
     uint32_t pte;
     uint8_t intr;
     for (int i = 1; i >= 0; i--) {
