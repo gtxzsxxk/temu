@@ -19,7 +19,7 @@
 
 #define PTE_MATCH(pte, flag)    ((pte >> flag) & 0x01)
 
-#define SV32_ROOT(addr)         (addr & ~(0x00000fff))
+#define SV32_ROOT(addr)         (addr << 12)
 #define SV32_VOFFSET(addr)      (addr & 0x00000fff)
 #define SV32_PTE2PA(pte)        ((pte >> 10) << 12)
 #define SV32_VPN(addr, idx)     (addr >> (idx==1 ? 22 : 12))

@@ -29,11 +29,12 @@ uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flag
         }
         if (PTE_MATCH(pte, PTE_R) || PTE_MATCH(pte, PTE_X)) {
             /* leaf */
-            if ((pte & access_flags) != access_flags ||
-                ~((pte | PTE_X) && (access_flags | PTE_R) &&
-                  (control_status_registers[CSR_idx_mstatus] >> mstatus_MXR)) ||
+            if ((pte & (1 << access_flags)) != (1 << access_flags) ||
+                (PTE_MATCH(pte, PTE_X) && !PTE_MATCH(pte, PTE_R) && (access_flags == PTE_R) &&
+                 !(control_status_registers[CSR_idx_mstatus] >> mstatus_MXR)) ||
                 ((control_status_registers[CSR_idx_mstatus] >> mstatus_SUM) == 0 && PTE_MATCH(pte, PTE_U) &&
-                 current_privilege == CSR_MASK_SUPERVISOR)) {
+                 current_privilege == CSR_MASK_SUPERVISOR) ||
+                (i == 1 && (pte >> 12) & 0x3ff)) {
                 if (page_fault) {
                     *page_fault = 1;
                 }
@@ -47,6 +48,12 @@ uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flag
             /* the INTR shouldn't be 1 */
             pm_write_w(pgtable + SV32_VPN(vaddr, i) * 4, pte, NULL);
             uint32_t pa = SV32_PTE2PA(pte) + SV32_VOFFSET(vaddr);
+            if (i == 1) {
+                /* superpage */
+                pa &= ~(0x3ff << 12);
+                pa |= ((vaddr >> 12) & 0x3ff) << 12;
+            }
+            return pa;
         }
         pgtable = SV32_PTE2PA(pte);
     }
