@@ -127,3 +127,38 @@ void mem_debug_printreg(uint32_t pc_prev_exec) {
     printf("PC: 0x%08x\n\n", pc_prev_exec);
     fflush(stdout);
 }
+
+static uint8_t __inline__ char_print(uint8_t data) {
+    if (data >= 0x20 && data <= 0x7E) {
+        return data;
+    }
+    return '.';
+}
+
+void mem_debug_printaddr(uint32_t addr, uint8_t no_vaddr) {
+    uint32_t addr_temp = addr;
+    uint8_t (*read)(uint32_t, uint8_t *) = no_vaddr ? pm_read_b : mem_read_b;
+    for (int i = 0; i < 16; i++) {
+        printf("0x%08x:\t%02x %02x %02x %02x %02x %02x %02x %02x\t\t%c%c%c%c%c%c%c%c\n",
+               addr_temp,
+               read(addr_temp + 0, NULL),
+               read(addr_temp + 1, NULL),
+               read(addr_temp + 2, NULL),
+               read(addr_temp + 3, NULL),
+               read(addr_temp + 4, NULL),
+               read(addr_temp + 5, NULL),
+               read(addr_temp + 6, NULL),
+               read(addr_temp + 7, NULL),
+               char_print(read(addr_temp + 0, NULL)),
+               char_print(read(addr_temp + 1, NULL)),
+               char_print(read(addr_temp + 2, NULL)),
+               char_print(read(addr_temp + 3, NULL)),
+               char_print(read(addr_temp + 4, NULL)),
+               char_print(read(addr_temp + 5, NULL)),
+               char_print(read(addr_temp + 6, NULL)),
+               char_print(read(addr_temp + 7, NULL))
+        );
+        addr_temp += 8;
+    }
+    fflush(stdout);
+}
