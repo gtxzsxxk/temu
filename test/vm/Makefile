@@ -21,7 +21,7 @@ OBJS += ${TEST_FILE}.S entry.S string.c vm.c
 
 define create_elf
 	@echo "Using GNU Ld script: ${LD_SCRIPT}"
-	${CC} -T ${LD_SCRIPT} ${OBJS} -o ${TEST_FILE}.elf ${CFLAGS} -DENTROPY=0x$$(shell echo \$$@ | md5sum | cut -c 1-7)
+	${CC} -T ${LD_SCRIPT} ${OBJS} -o ${TEST_FILE}.elf ${CFLAGS} -DENTROPY=0x$$(echo \$$@ | md5sum | cut -c 1-7)
 	${OBJDUMP} ${TEST_FILE}.elf > ${TEST_FILE}.dump -D -M no-aliases,numeric
 	${OBJCOPY} -O binary ${TEST_FILE}.elf ${TEST_FILE}.bin
 	rm ${TEST_FILE}.elf

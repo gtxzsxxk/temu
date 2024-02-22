@@ -147,17 +147,6 @@ void handle_fault(uintptr_t addr, uintptr_t cause)
     assert(addr >= PGSIZE && addr < MAX_TEST_PAGES * PGSIZE);
     addr = addr/PGSIZE*PGSIZE;
 
-    if (user_llpt[addr/PGSIZE]) {
-        if (!(user_llpt[addr/PGSIZE] & PTE_A)) {
-            user_llpt[addr/PGSIZE] |= PTE_A;
-        } else {
-            assert(!(user_llpt[addr/PGSIZE] & PTE_D) && cause == CAUSE_STORE_PAGE_FAULT);
-            user_llpt[addr/PGSIZE] |= PTE_D;
-        }
-        flush_page(addr);
-        return;
-    }
-
     freelist_t* node = freelist_head;
     assert(node);
     freelist_head = node->next;
@@ -170,18 +159,12 @@ void handle_fault(uintptr_t addr, uintptr_t cause)
         new_pte = (node->addr >> PGSHIFT << PTE_PPN_SHIFT) | filter_encodings;
     }
 
-    user_llpt[addr/PGSIZE] = new_pte | PTE_A | PTE_D;
-    flush_page(addr);
-
     assert(user_mapping[addr/PGSIZE].addr == 0);
     user_mapping[addr/PGSIZE] = *node;
 
     uintptr_t sstatus = set_csr(sstatus, SSTATUS_SUM);
     memcpy((void*)addr, uva2kva(addr), PGSIZE);
     write_csr(sstatus, sstatus);
-
-    user_llpt[addr/PGSIZE] = new_pte;
-    flush_page(addr);
 
     asm volatile ("fence.i");
 }
@@ -303,6 +286,6 @@ void vm_boot(uintptr_t test_addr)
 
     trapframe_t tf;
     memset(&tf, 0, sizeof(tf));
-    tf.epc = test_addr - DRAM_BASE;
+    tf.epc = test_addr - DRAM_BASE - MEGAPAGE_SIZE;
     pop_tf(&tf);
 }
