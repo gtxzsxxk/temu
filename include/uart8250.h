@@ -5,7 +5,7 @@
 #ifndef TEMU_UART8250_H
 #define TEMU_UART8250_H
 
-#define UART_FIFO_SIZE 32
+#define UART_FIFO_SIZE 128
 
 uint8_t uart8250_read_b(uint8_t offset);
 
