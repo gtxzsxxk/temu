@@ -150,7 +150,7 @@ static uint8_t __inline__ char_print(uint8_t data) {
 void mem_debug_printaddr(uint32_t addr, uint8_t no_vaddr) {
     uint32_t addr_temp = addr;
     uint8_t (*read)(uint32_t, uint8_t *) = no_vaddr ? pm_read_b : mem_read_b;
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 256; i++) {
         printf("0x%08x:\t\t%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\t\t%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
                addr_temp,
                read(addr_temp + 0, NULL),
