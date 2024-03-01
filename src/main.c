@@ -9,11 +9,11 @@
 
 static const char *usage = "Usage: temu [-ram/-rom/-addr 0x02000000] [-printreg] -exec=program.bin [-with=addr#file.bin]\n\n"
                            "Example:\n"
-                           "--ram\n"
+                           "--addr=0x80db5000\n"
                            "--exec=fw_jump.bin\n"
-                           "--with=0x0204b000#u-boot.bin\n"
-                           "--with=0x02048800#u-boot.dtb\n"
-                           "--with=0x028cb000#uImage.gz";
+                           "--with=0x80000000#u-boot.bin\n"
+                           "--with=0x80dfd800#u-boot.dtb\n"
+                           "--with=0x80ab5000#uImage.gz\n";
 
 static int load_binary(uint32_t addr, const char *path);
 
