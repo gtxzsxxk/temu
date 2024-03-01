@@ -460,6 +460,9 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
 }
 
 DEC_FUNC(ATOMIC) {
+    /* TODO: implement the reservation set */
+    static uint32_t reservation_set;
+    static uint8_t reservation_valid = 0;
     uint8_t rd, funct3, rs1, rs2, funct7;
     INST_DEC(r, &rd, &funct3, &rs1, &rs2, &funct7);
     uint8_t typ = funct7 >> 2;
@@ -467,6 +470,23 @@ DEC_FUNC(ATOMIC) {
     if (funct3 == 0x2) {
         uint32_t addr = mem_register_read(rs1);
         uint32_t value = mem_register_read(rs2);
+        if (typ == 0x03) {
+            /* SC.W */
+            if (reservation_valid && reservation_set == addr) {
+                reservation_valid = 0;
+                mem_write_w(addr, value, &access_error_intr);
+                if (access_error_intr) {
+                    trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT, addr);
+                    return;
+                }
+                mem_register_write(rd, 0);
+            } else {
+                mem_register_write(rd, 1);
+                reservation_valid = 0;
+            }
+            program_counter += 4;
+            return;
+        }
         uint32_t t = mem_read_w(addr, &access_error_intr);
         if (access_error_intr) {
             trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT, addr);
@@ -501,6 +521,15 @@ DEC_FUNC(ATOMIC) {
             } else if (typ == 0x1C) {
                 /* AMOMAXU.W */
                 res = t > value ? t : value;
+            } else if (typ == 0x02) {
+                /* LR.W */
+                reservation_valid = 1;
+                reservation_set = addr;
+                program_counter += 4;
+                return;
+            } else {
+                trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
+                return;
             }
             mem_write_w(addr, res, &access_error_intr);
             if (access_error_intr) {
