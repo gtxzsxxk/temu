@@ -20,8 +20,7 @@ uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flag
     uint8_t intr;
     for (int i = 1; i >= 0; i--) {
         pte = pm_read_w(pgtable + SV32_VPN(vaddr, i) * 4, &intr);
-        if (!PTE_MATCH(pte, PTE_V) || (!PTE_MATCH(pte, PTE_R) && PTE_MATCH(pte, PTE_W)) ||
-            (((pte >> 10) & 0x01) && i == 1)) {
+        if (!PTE_MATCH(pte, PTE_V) || (!PTE_MATCH(pte, PTE_R) && PTE_MATCH(pte, PTE_W))) {
             if (page_fault) {
                 *page_fault = 1;
             }
@@ -34,7 +33,7 @@ uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flag
                  !(control_status_registers[CSR_idx_mstatus] >> mstatus_MXR)) ||
                 ((control_status_registers[CSR_idx_mstatus] >> mstatus_SUM) == 0 && PTE_MATCH(pte, PTE_U) &&
                  current_privilege == CSR_MASK_SUPERVISOR) ||
-                (i == 1 && (pte >> 12) & 0x3ff)) {
+                (i == 1 && (pte >> 10) & 0x3ff)) {
                 if (page_fault) {
                     *page_fault = 1;
                 }
