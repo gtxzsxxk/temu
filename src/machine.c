@@ -116,7 +116,9 @@ static void machine_tick(void) {
 
     if (zicnt_get_cycle() % SIM_YIELD_GAP == 0) {
         zicnt_time_tick();
-        usleep(SIM_YIELD_TIME);
+#if !SIM_FULL_SPEED
+            usleep(SIM_YIELD_TIME);
+#endif
     }
 }
 

@@ -13,6 +13,8 @@
 #define UART_BASE_ADDR          0x12500000
 #define UART_SIZE               0x00000100
 
+/* 全速模式（仅调试） */
+#define SIM_FULL_SPEED          1
 /* 均摊时钟 in MHz */
 #define SIM_EVENLY_DIV_CLOCK    100
 /* 缩放比例 */
