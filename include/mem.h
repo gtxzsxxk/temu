@@ -31,4 +31,6 @@ void mem_debug_printreg(uint32_t pc_prev_exec);
 
 void mem_debug_printaddr(uint32_t addr, uint8_t no_vaddr);
 
+void mem_debug_printstring(uint32_t addr, uint8_t no_vaddr);
+
 #endif //TEMU_MEM_H

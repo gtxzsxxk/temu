@@ -190,3 +190,18 @@ void mem_debug_printaddr(uint32_t addr, uint8_t no_vaddr) {
     }
     fflush(stdout);
 }
+
+void mem_debug_printstring(uint32_t addr, uint8_t no_vaddr) {
+    uint32_t addr_temp = addr;
+    uint8_t (*read)(uint32_t, uint8_t *) = no_vaddr ? pm_read_b : mem_read_b;
+    printf("\n===debug string print @ %08x\n", addr);
+    for (int i = 0; i < 256; i++) {
+        uint8_t data = read(addr_temp + i, NULL);
+        if (!data) {
+            break;
+        }
+        printf("%c", data);
+    }
+    printf("\n===end of debug string print\n");
+    fflush(stdout);
+}
