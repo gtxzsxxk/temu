@@ -79,6 +79,8 @@ _Noreturn void machine_start(uint32_t start, int printreg) {
         if (access_error_intr) {
             if (access_error_intr == 2) {
                 trap_throw_exception(EXCEPTION_INST_PAGEFAULT, program_counter);
+            } else if (access_error_intr == 3) {
+                trap_throw_exception(EXCEPTION_INST_ADDR_MISALIGNED, program_counter);
             } else {
                 trap_throw_exception(EXCEPTION_INST_ACCESS_FAULT, program_counter);
             }

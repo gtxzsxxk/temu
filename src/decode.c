@@ -203,9 +203,11 @@ DEC_FUNC(LOAD) {
     if (access_error_intr) {
         if (access_error_intr == 2) {
             trap_throw_exception(EXCEPTION_LOAD_PAGEFAULT, target_addr);
-            return;
+        } else if (access_error_intr == 3) {
+            trap_throw_exception(EXCEPTION_LOAD_ADDR_MISALIGNED, target_addr);
+        } else {
+            trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT, target_addr);
         }
-        trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT, target_addr);
     } else {
         program_counter += 4;
     }
@@ -235,9 +237,11 @@ DEC_FUNC(STORE) {
     if (access_error_intr) {
         if (access_error_intr == 2) {
             trap_throw_exception(EXCEPTION_STORE_PAGEFAULT, target_addr);
-            return;
+        } else if (access_error_intr == 3) {
+            trap_throw_exception(EXCEPTION_STORE_ADDR_MISALIGNED, target_addr);
+        } else {
+            trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT, target_addr);
         }
-        trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT, target_addr);
     } else {
         program_counter += 4;
     }

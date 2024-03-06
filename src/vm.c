@@ -90,6 +90,12 @@ uint8_t pm_read_b(uint32_t addr, uint8_t *intr) {
 }
 
 uint16_t pm_read_h(uint32_t addr, uint8_t *intr) {
+    if (addr % 2) {
+        if (intr) {
+            *intr = 3;
+        }
+        return 0xff;
+    }
     if (addr >= ROM_BASE_ADDR && addr + 1 < ROM_BASE_ADDR + ROM_SIZE) {
         return rom_ptr[addr - ROM_BASE_ADDR] | (rom_ptr[addr - ROM_BASE_ADDR + 1] << 8);
     } else if (addr >= RAM_BASE_ADDR && addr + 1 < RAM_BASE_ADDR + RAM_SIZE) {
@@ -103,6 +109,12 @@ uint16_t pm_read_h(uint32_t addr, uint8_t *intr) {
 }
 
 uint32_t pm_read_w(uint32_t addr, uint8_t *intr) {
+    if (addr % 4) {
+        if (intr) {
+            *intr = 3;
+        }
+        return 0xff;
+    }
     if (addr >= ROM_BASE_ADDR && addr + 3 < ROM_BASE_ADDR + ROM_SIZE) {
         return
                 rom_ptr[addr - ROM_BASE_ADDR] |
@@ -135,6 +147,11 @@ void pm_write_b(uint32_t addr, uint8_t data, uint8_t *intr) {
 }
 
 void pm_write_h(uint32_t addr, uint16_t data, uint8_t *intr) {
+    if (addr % 2) {
+        if (intr) {
+            *intr = 3;
+        }
+    }
     if (addr >= RAM_BASE_ADDR && addr + 1 < RAM_BASE_ADDR + RAM_SIZE) {
         ram_ptr[addr - RAM_BASE_ADDR] = data & 0xff;
         ram_ptr[addr - RAM_BASE_ADDR + 1] = (data >> 8) & 0xff;
@@ -146,6 +163,11 @@ void pm_write_h(uint32_t addr, uint16_t data, uint8_t *intr) {
 }
 
 void pm_write_w(uint32_t addr, uint32_t data, uint8_t *intr) {
+    if (addr % 4) {
+        if (intr) {
+            *intr = 3;
+        }
+    }
     if (addr >= RAM_BASE_ADDR && addr + 3 < RAM_BASE_ADDR + RAM_SIZE) {
         ram_ptr[addr - RAM_BASE_ADDR] = data & 0xff;
         ram_ptr[addr - RAM_BASE_ADDR + 1] = (data >> 8) & 0xff;
