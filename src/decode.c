@@ -177,24 +177,34 @@ DEC_FUNC(LOAD) {
         /* LB */
         uint8_t data = mem_read_b(target_addr, &access_error_intr);
         uint32_t sext_data = SEXT(data, 31, 7);
-        mem_register_write(rd, sext_data);
+        if (!access_error_intr) {
+            mem_register_write(rd, sext_data);
+        }
     } else if (funct3 == 1) {
         /* LH */
         uint16_t data = mem_read_h(target_addr, &access_error_intr);
         uint32_t sext_data = SEXT(data, 31, 15);
-        mem_register_write(rd, sext_data);
+        if (!access_error_intr) {
+            mem_register_write(rd, sext_data);
+        }
     } else if (funct3 == 2) {
         /* LW */
         uint32_t data = mem_read_w(target_addr, &access_error_intr);
-        mem_register_write(rd, data);
+        if (!access_error_intr) {
+            mem_register_write(rd, data);
+        }
     } else if (funct3 == 4) {
         /* LBU */
         uint8_t data = mem_read_b(target_addr, &access_error_intr);
-        mem_register_write(rd, data);
+        if (!access_error_intr) {
+            mem_register_write(rd, data);
+        }
     } else if (funct3 == 5) {
         /* LHU */
         uint16_t data = mem_read_h(target_addr, &access_error_intr);
-        mem_register_write(rd, data);
+        if (!access_error_intr) {
+            mem_register_write(rd, data);
+        }
     } else {
         trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
         program_counter -= 4;
