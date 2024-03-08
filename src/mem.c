@@ -56,7 +56,24 @@ uint32_t mem_read_w(uint32_t addr, uint8_t *intr) {
         if (intr) {
             *intr = 2;
         }
-        return 0xffffffff;
+        return 0x4444ffff;
+    }
+
+    return pm_read_w(addr_translated, intr);
+}
+
+uint32_t mem_read_inst(uint32_t addr, uint8_t *intr) {
+    if (intr) {
+        *intr = 0;
+    }
+
+    uint8_t page_fault = 0;
+    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_X) : addr;
+    if (page_fault) {
+        if (intr) {
+            *intr = 2;
+        }
+        return 0x5555ffff;
     }
 
     return pm_read_w(addr_translated, intr);
