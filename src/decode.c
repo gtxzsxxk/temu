@@ -492,7 +492,14 @@ DEC_FUNC(ATOMIC) {
                 reservation_valid = 0;
                 mem_write_w(addr, value, &access_error_intr);
                 if (access_error_intr) {
-                    trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT, addr);
+                    mem_register_write(rd, 1);
+                    if (access_error_intr == 2) {
+                        trap_throw_exception(EXCEPTION_STORE_PAGEFAULT, addr);
+                    } else if (access_error_intr == 3) {
+                        trap_throw_exception(EXCEPTION_STORE_ADDR_MISALIGNED, addr);
+                    } else {
+                        trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT, addr);
+                    }
                     return;
                 }
                 mem_register_write(rd, 0);
