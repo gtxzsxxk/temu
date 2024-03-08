@@ -462,7 +462,9 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         /* avoid incorrect pc */
         program_counter -= 4;
     } else if (!funct3 && !rd && !rs1 && imm == 0x105) {
-        /* WFI: does nothing. Spinning only. */
+        /* WFI */
+        in_wfi = 1;
+        wfi_next_pc = program_counter + 4;
         return;
     }
 
