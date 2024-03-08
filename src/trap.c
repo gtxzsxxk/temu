@@ -66,6 +66,7 @@ void trap_return_machine(void) {
     } else {
         control_status_registers[CSR_idx_mstatus] &= ~(1 << mstatus_MIE);
     }
+    control_status_registers[CSR_idx_mstatus] |= (1 << mstatus_MPIE);
     program_counter = control_status_registers[CSR_idx_mepc];
 }
 
@@ -76,5 +77,6 @@ void trap_return_supervisor(void) {
     } else {
         control_status_registers[CSR_idx_sstatus] &= ~(1 << sstatus_SIE);
     }
+    control_status_registers[CSR_idx_sstatus] |= (1 << sstatus_SPIE);
     program_counter = control_status_registers[CSR_idx_sepc];
 }
