@@ -89,7 +89,7 @@ void uart8250_write_b(uint8_t offset, uint8_t data) {
                 divisor &= 0x00ff;
                 divisor |= (data << 8);
             } else {
-                IER = data;
+                IER = data & 0x0f;
             }
             break;
         case 2:
