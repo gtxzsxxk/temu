@@ -116,12 +116,14 @@ static void machine_tick(void) {
     uart8250_tick();
     zicnt_cycle_tick();
 
-    if (zicnt_get_cycle() % SIM_YIELD_GAP == 0) {
+    if (zicnt_get_cycle() % (SIM_YIELD_GAP / 10000) == 0) {
         zicnt_time_tick();
 #if !SIM_FULL_SPEED
-            usleep(SIM_YIELD_TIME);
+        usleep(SIM_YIELD_TIME);
 #endif
     }
+
+    trap_take_interrupt();
 }
 
 static void machine_debug(uint32_t instruction, int printreg) {

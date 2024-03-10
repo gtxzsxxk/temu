@@ -1,14 +1,15 @@
 //
 // Created by hanyuan on 2024/2/10.
 //
-#include <sys/time.h>
 #include "mem.h"
+#include "trap.h"
 #include "zicsr.h"
 
 uint8_t current_privilege = CSR_MASK_MACHINE;
 
 static uint64_t cycle = 0;
 static uint64_t time = 0;
+static uint64_t timecmp = 0xffffffffffffffff;
 
 uint32_t control_status_registers[CSR_SIZE] = {
         CSR_RESET_VALUE(misa, 0x40140101)
@@ -18,6 +19,8 @@ uint32_t control_status_registers[CSR_SIZE] = {
         CSR_RESET_VALUE(cycleh, 0x00000000)
         CSR_RESET_VALUE(time, 0x00000000)
         CSR_RESET_VALUE(timeh, 0x00000000)
+        CSR_RESET_VALUE(stimecmp, 0x00000000)
+        CSR_RESET_VALUE(stimecmph, 0x00000000)
 };
 const uint32_t csr_match[CSR_SIZE] = {
         CSR_MATCH_DECLARE(sstatus)
@@ -30,6 +33,8 @@ const uint32_t csr_match[CSR_SIZE] = {
         CSR_MATCH_DECLARE(scause)
         CSR_MATCH_DECLARE(stval)
         CSR_MATCH_DECLARE(sip)
+        CSR_MATCH_DECLARE(stimecmp)
+        CSR_MATCH_DECLARE(stimecmph)
         CSR_MATCH_DECLARE(satp)
         CSR_MATCH_DECLARE(mstatus)
         CSR_MATCH_DECLARE(misa)
@@ -39,6 +44,7 @@ const uint32_t csr_match[CSR_SIZE] = {
         CSR_MATCH_DECLARE(mtvec)
         CSR_MATCH_DECLARE(mcounteren)
         CSR_MATCH_DECLARE(mstatush)
+        CSR_MATCH_DECLARE(mcountinhibit)
         CSR_MATCH_DECLARE(mscratch)
         CSR_MATCH_DECLARE(mepc)
         CSR_MATCH_DECLARE(mcause)
@@ -55,6 +61,8 @@ const uint32_t csr_match[CSR_SIZE] = {
         CSR_MATCH_DECLARE(mimpid)
         CSR_MATCH_DECLARE(mhartid)
         CSR_MATCH_DECLARE(mconfigptr)
+        CSR_MATCH_DECLARE(menvcfg)
+        CSR_MATCH_DECLARE(menvcfgh)
 };
 const uint8_t csr_index_remap[0x10] = {
         [0x0] = 100,
@@ -77,6 +85,9 @@ const uint8_t csr_index_remap[0x10] = {
 };
 
 uint8_t csr_get_index_by_number(uint16_t csr_number) {
+    if(csr_number == CSR_num_sstatus) {
+        int a = 0;
+    }
     uint8_t start_index = csr_index_remap[csr_number >> 8];
     if (start_index == 100) {
         return -1;
@@ -198,6 +209,14 @@ void zicnt_cycle_tick(void) {
 
 void zicnt_time_tick(void) {
     time++;
+
+    timecmp = (((uint64_t) control_status_registers[CSR_idx_stimecmph]) << 32) | control_status_registers[CSR_idx_stimecmp];
+
+    if (time > timecmp && timecmp > 0) {
+        trap_throw_interrupt(INTERRUPT_SUPERVISOR_TIMER);
+    } else {
+        trap_clear_interrupt_pending(INTERRUPT_SUPERVISOR_TIMER);
+    }
 
     control_status_registers[CSR_idx_time] = time & 0xffffffff;
     control_status_registers[CSR_idx_timeh] = (time >> 32) & 0xffffffff;
