@@ -119,7 +119,7 @@ void trap_throw_exception(uint32_t cause, uint32_t tval) {
         /* disable interrupt */
         control_status_registers[CSR_idx_sstatus] &= ~(1 << mstatus_SIE);
 
-        control_status_registers[CSR_idx_sepc] = program_counter;
+        control_status_registers[CSR_idx_sepc] = trap_get_program_counter();
         program_counter = control_status_registers[CSR_idx_stvec];
         if (control_status_registers[CSR_idx_stvec] & 0x01) {
             /* Vectored */
@@ -145,7 +145,7 @@ void trap_throw_exception(uint32_t cause, uint32_t tval) {
         /* disable interrupt */
         control_status_registers[CSR_idx_mstatus] &= ~(1 << mstatus_MIE);
 
-        control_status_registers[CSR_idx_mepc] = program_counter;
+        control_status_registers[CSR_idx_mepc] = trap_get_program_counter();
         program_counter = control_status_registers[CSR_idx_mtvec];
         if (control_status_registers[CSR_idx_mtvec] & 0x01) {
             /* Vectored */

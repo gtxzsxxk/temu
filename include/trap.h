@@ -26,6 +26,10 @@
 #define INTERRUPT_SUPERVISOR_EXTERNAL               9
 #define INTERRUPT_MACHINE_EXTERNAL                  11
 
+extern uint8_t in_wfi;
+extern uint32_t wfi_next_pc;
+
+void trap_clear_interrupt_pending(uint32_t cause);
 
 void trap_throw_interrupt(uint32_t cause);
 
