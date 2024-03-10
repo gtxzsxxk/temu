@@ -14,6 +14,20 @@ uint8_t vm_on(void) {
     return current_privilege <= CSR_MASK_SUPERVISOR && control_status_registers[CSR_idx_satp];
 }
 
+static inline uint8_t vm_status_read_mxr() {
+    if (current_privilege == CSR_MASK_MACHINE) {
+        return (control_status_registers[CSR_idx_mstatus] >> mstatus_MXR);
+    }
+    return (control_status_registers[CSR_idx_sstatus] >> mstatus_MXR);
+}
+
+static inline uint8_t vm_status_read_sum() {
+    if (current_privilege == CSR_MASK_MACHINE) {
+        return (control_status_registers[CSR_idx_mstatus] >> mstatus_SUM);
+    }
+    return (control_status_registers[CSR_idx_sstatus] >> mstatus_SUM);
+}
+
 uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flags) {
     uint32_t pgtable = SV32_ROOT(control_status_registers[CSR_idx_satp]);
     uint32_t pte;
@@ -24,20 +38,20 @@ uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flag
             if (page_fault) {
                 *page_fault = 1;
             }
-            return 0xffffffff;
+            return 0xabababab;
         }
         if (PTE_MATCH(pte, PTE_R) || PTE_MATCH(pte, PTE_X)) {
             /* leaf */
             if ((pte & (1 << access_flags)) != (1 << access_flags) ||
                 (PTE_MATCH(pte, PTE_X) && !PTE_MATCH(pte, PTE_R) && (access_flags == PTE_R) &&
-                 !(control_status_registers[CSR_idx_mstatus] >> mstatus_MXR)) ||
-                ((control_status_registers[CSR_idx_mstatus] >> mstatus_SUM) == 0 && PTE_MATCH(pte, PTE_U) &&
+                 !vm_status_read_mxr()) ||
+                (vm_status_read_sum() == 0 && PTE_MATCH(pte, PTE_U) &&
                  current_privilege == CSR_MASK_SUPERVISOR) ||
                 (i == 1 && (pte >> 10) & 0x3ff)) {
                 if (page_fault) {
                     *page_fault = 1;
                 }
-                return 0x00000000;
+                return 0xcdcdcdcd;
             }
 
             pte |= (1 << PTE_A);
@@ -60,7 +74,7 @@ uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flag
     if (page_fault) {
         *page_fault = 1;
     }
-    return 0xffffffff;
+    return 0xefefefef;
 }
 
 uint8_t *pm_get_ptr(uint32_t addr, int *ok_flag) {
@@ -132,7 +146,7 @@ uint32_t pm_read_w(uint32_t addr, uint8_t *intr) {
             *intr = 1;
         }
 
-        return 0xffffffff;
+        return 0x6666ffff;
     }
 }
 
