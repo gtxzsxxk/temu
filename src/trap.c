@@ -19,9 +19,9 @@ void trap_throw_exception(uint32_t cause, uint32_t tval) {
         control_status_registers[CSR_idx_stval] = tval;
         control_status_registers[CSR_idx_scause] &= 0x7fffffff;
         /* set previous interrupt enable */
-        control_status_registers[CSR_idx_mstatus] |= (1 << mstatus_SPIE);
+        control_status_registers[CSR_idx_sstatus] |= (1 << mstatus_SPIE);
         /* disable interrupt */
-        control_status_registers[CSR_idx_mstatus] &= ~(1 << mstatus_SIE);
+        control_status_registers[CSR_idx_sstatus] &= ~(1 << mstatus_SIE);
 
         control_status_registers[CSR_idx_sepc] = program_counter;
         program_counter = control_status_registers[CSR_idx_stvec];
@@ -31,8 +31,12 @@ void trap_throw_exception(uint32_t cause, uint32_t tval) {
         }
 
         /* Set SPP only */
-        control_status_registers[CSR_idx_mstatus] &= ~(1 << mstatus_SPP);
-        control_status_registers[CSR_idx_mstatus] |= ((current_privilege & 0x01) << mstatus_SPP);
+        if (current_privilege == CSR_MASK_USER) {
+            control_status_registers[CSR_idx_sstatus] &= ~(1 << mstatus_SPP);
+        }
+        if (current_privilege > CSR_MASK_USER) {
+            control_status_registers[CSR_idx_sstatus] |= ((current_privilege & 0x01) << mstatus_SPP);
+        }
 
         current_privilege = CSR_MASK_SUPERVISOR;
     } else {
