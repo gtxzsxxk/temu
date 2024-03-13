@@ -52,6 +52,33 @@ static void clear_tx_fifo(void) {
     tx_fifo_tail = 0;
 }
 
+static void throw_interrupt(uint8_t cause) {
+    if (!(IIR & 0x01)) {
+        /* Is pending, check the priority */
+        if (current_pending_int != 0xff) {
+            if (INT_PRIOR[cause] > INT_PRIOR[current_pending_int]) {
+                return;
+            }
+        }
+    }
+    if (!(IER & (1 << cause))) {
+        /* Disabled interrupt */
+        return;
+    }
+    IIR |= (IIR_VALUE[cause] << 1);
+    IIR &= ~1;
+    current_pending_int = cause;
+    plic_throw_interrupt(PLIC_INT_LINE_UART);
+}
+
+static void clear_interrupt(uint8_t cause) {
+    if (current_pending_int == cause) {
+        IIR |= 0x01;
+        current_pending_int = 0xff;
+        plic_clear_pending(PLIC_INT_LINE_UART);
+    }
+}
+
 uint8_t uart8250_read_b(uint8_t offset) {
     uint8_t scratch;
     switch (offset) {
@@ -69,6 +96,8 @@ uint8_t uart8250_read_b(uint8_t offset) {
             return IIR;
         case 3:
             return LCR;
+        case 4:
+            return MCR;
         case 5:
             scratch = LSR;
             LSR &= ~(1 << 1);
