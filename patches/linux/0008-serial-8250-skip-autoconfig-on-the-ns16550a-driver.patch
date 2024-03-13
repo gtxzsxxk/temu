@@ -1,0 +1,26 @@
+From 6f4f7080ab52c71ac0148250e3777fa6eae1418a Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Wed, 13 Mar 2024 23:48:07 +0800
+Subject: [PATCH 8/8] serial 8250: skip autoconfig on the ns16550a driver
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ drivers/tty/serial/8250/8250_dw.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/tty/serial/8250/8250_dw.c b/drivers/tty/serial/8250/8250_dw.c
+index 2d1f350a4bea..b072aa48123a 100644
+--- a/drivers/tty/serial/8250/8250_dw.c
++++ b/drivers/tty/serial/8250/8250_dw.c
+@@ -629,6 +629,8 @@ static int dw8250_probe(struct platform_device *pdev)
+ 	if (data->uart_16550_compatible)
+ 		p->handle_irq = NULL;
+ 
++	data->skip_autocfg = 1;
++
+ 	if (!data->skip_autocfg)
+ 		dw8250_setup_port(p);
+ 
+-- 
+2.34.1
+

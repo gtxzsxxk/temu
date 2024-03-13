@@ -1,0 +1,65 @@
+From 2b1115efca9159895c278d28de4a3f577fbd6ed3 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Wed, 13 Mar 2024 23:35:32 +0800
+Subject: [PATCH 7/8] Revert "serial 8250: add skip autoconfig flag and cancel
+ loop tests"
+
+This reverts commit bc8609bcb878a5cafa734cd442ea642c582e0232.
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ drivers/tty/serial/8250/8250_dw.c | 9 +--------
+ 1 file changed, 1 insertion(+), 8 deletions(-)
+
+diff --git a/drivers/tty/serial/8250/8250_dw.c b/drivers/tty/serial/8250/8250_dw.c
+index 84bd019d2ffc..2d1f350a4bea 100644
+--- a/drivers/tty/serial/8250/8250_dw.c
++++ b/drivers/tty/serial/8250/8250_dw.c
+@@ -514,8 +514,6 @@ static int dw8250_probe(struct platform_device *pdev)
+ 	int err;
+ 	u32 val;
+ 
+-	pr_err("Serial probe1\n");
+-
+ 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	if (!regs)
+ 		return dev_err_probe(dev, -EINVAL, "no registers defined\n");
+@@ -533,7 +531,7 @@ static int dw8250_probe(struct platform_device *pdev)
+ 	p->handle_irq	= dw8250_handle_irq;
+ 	p->pm		= dw8250_do_pm;
+ 	p->type		= PORT_8250;
+-	p->flags	= UPF_SHARE_IRQ | UPF_FIXED_PORT | UPF_SKIP_TEST;
++	p->flags	= UPF_SHARE_IRQ | UPF_FIXED_PORT;
+ 	p->dev		= dev;
+ 	p->iotype	= UPIO_MEM;
+ 	p->serial_in	= dw8250_serial_in;
+@@ -542,7 +540,6 @@ static int dw8250_probe(struct platform_device *pdev)
+ 	p->set_termios	= dw8250_set_termios;
+ 
+ 	p->membase = devm_ioremap(dev, regs->start, resource_size(regs));
+-	pr_err("devm_ioremap membase %lu regs->start %u resource_size(regs) %u\n", (unsigned long)p->membase, regs->start, resource_size(regs));
+ 	if (!p->membase)
+ 		return -ENOMEM;
+ 
+@@ -632,8 +629,6 @@ static int dw8250_probe(struct platform_device *pdev)
+ 	if (data->uart_16550_compatible)
+ 		p->handle_irq = NULL;
+ 
+-	data->skip_autocfg = 1;
+-
+ 	if (!data->skip_autocfg)
+ 		dw8250_setup_port(p);
+ 
+@@ -644,9 +639,7 @@ static int dw8250_probe(struct platform_device *pdev)
+ 		up->dma = &data->data.dma;
+ 	}
+ 
+-	pr_err("%s: p->type %d\n",__func__, p->type);
+ 	data->data.line = serial8250_register_8250_port(up);
+-	pr_err("serial8250_register_8250_port: %d\n", data->data.line);
+ 	if (data->data.line < 0)
+ 		return data->data.line;
+ 
+-- 
+2.34.1
+

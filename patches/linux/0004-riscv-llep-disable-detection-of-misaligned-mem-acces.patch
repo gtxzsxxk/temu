@@ -1,0 +1,25 @@
+From 764d188d0b4ba0360686e6d9dce21e5653b70615 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Fri, 8 Mar 2024 19:40:49 +0800
+Subject: [PATCH 4/8] riscv: llep: disable detection of misaligned mem access
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ arch/riscv/kernel/cpufeature.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/riscv/kernel/cpufeature.c b/arch/riscv/kernel/cpufeature.c
+index 89920f84d0a3..844b1377afd7 100644
+--- a/arch/riscv/kernel/cpufeature.c
++++ b/arch/riscv/kernel/cpufeature.c
+@@ -708,6 +708,7 @@ unsigned long riscv_get_elf_hwcap(void)
+ 
+ static int check_unaligned_access(void *param)
+ {
++	return 0;
+ 	int cpu = smp_processor_id();
+ 	u64 start_cycles, end_cycles;
+ 	u64 word_cycles;
+-- 
+2.34.1
+

@@ -1,0 +1,30 @@
+From 64dab6ab286d5b36d880e7a17a2f2c66a482b145 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Mon, 12 Feb 2024 23:38:30 +0800
+Subject: [PATCH 1/8] riscv: add have kernel compression algorithms selects in
+ Kconfig
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ arch/riscv/Kconfig | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
+index bffbd869a068..6664f0c7fb9f 100644
+--- a/arch/riscv/Kconfig
++++ b/arch/riscv/Kconfig
+@@ -129,6 +129,11 @@ config RISCV
+ 	select HAVE_GCC_PLUGINS
+ 	select HAVE_GENERIC_VDSO if MMU && 64BIT
+ 	select HAVE_IRQ_TIME_ACCOUNTING
++	select HAVE_KERNEL_GZIP
++	select HAVE_KERNEL_LZ4
++	select HAVE_KERNEL_LZMA
++	select HAVE_KERNEL_LZO
++	select HAVE_KERNEL_XZ
+ 	select HAVE_KPROBES if !XIP_KERNEL
+ 	select HAVE_KPROBES_ON_FTRACE if !XIP_KERNEL
+ 	select HAVE_KRETPROBES if !XIP_KERNEL
+-- 
+2.34.1
+
