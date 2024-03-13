@@ -123,6 +123,10 @@ static void machine_tick(void) {
 #endif
     }
 
+    if (zicnt_get_cycle() % (16) == 0) {
+        uart8250_tick();
+    }
+
     trap_take_interrupt();
 }
 
