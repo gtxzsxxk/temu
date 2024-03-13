@@ -1,5 +1,3 @@
-[Temu Running Binaries](https://cloud.tsinghua.edu.cn/f/8638fe2edb6d4762a7c1/?dl=1)
-
 # TEMU (Tailored Emulator)
 
 本项目的英文全称为`Tailored Emulator`，其中的字母`T`绝对与清华大学没有任何关系。本命名为致敬`QEMU`用。
@@ -75,18 +73,109 @@ gzip -c uImage > uImage.gz
 ### Executing program (Using U-Boot Example)
 
 * 确保你拥有`RISC-V`指令集的二进制文件，本项目目前仅支持装载`bin`，即`objcopy`的输出，暂时不支持直接加载ELF，且加载ELF对于系统级别的模拟意义不大
+* 这些二进制文件可以在这里下载：[TEMU Booting Binaries](https://cloud.tsinghua.edu.cn/f/8638fe2edb6d4762a7c1/?dl=1)，可以直接使用`wget`下载到`linux`中。
 * 这里给出使用`TEMU`加载`OpenSBI`，`U-Boot`，`Kernel`二进制文件的使用例。
 
-#### Usage
+#### Usage (32MiB Version)
 ```
-Usage: temu [-ram/-rom/-addr 0x02000000] [-printreg] -exec=program.bin [-with=addr#file.bin]
+Usage: temu [-ram/-rom/-addr 0x80000000] [-printreg] -exec=program.bin [-with=addr#file.bin]
 
 Example:
---addr=0x80db5000
+--addr=0x81fa0000
 --exec=fw_jump.bin
 --with=0x80000000#u-boot.bin
---with=0x80dfd800#u-boot.dtb
---with=0x80ab5000#uImage.gz
+--with=0x81ffd800#u-boot.dtb
+--with=0x813a0000#uImage.gz
+```
+
+使用以下命令启动`TEMU`：
+
+```
+./temu --addr=0x81fa0000 --exec=fw_jump.bin \
+--with=0x80000000#u-boot.bin \
+--with=0x81ffd800#u-boot.dtb \
+--with=0x813a0000#uImage.gz
+```
+
+如果成功启动，`TEMU`首先会打印`OpenSBI`的启动信息，接着打印`U-Boot`的信息。
+
+```
+OpenSBI v1.4
+   ____                    _____ ____ _____
+  / __ \                  / ____|  _ \_   _|
+ | |  | |_ __   ___ _ __ | (___ | |_) || |
+ | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
+ | |__| | |_) |  __/ | | |____) | |_) || |_
+  \____/| .__/ \___|_| |_|_____/|____/_____|
+        | |
+        |_|
+
+Platform Name             : Low-speed Linux Experimental Platform
+Platform Features         : medeleg
+Platform HART Count       : 1
+Platform IPI Device       : ---
+Platform Timer Device     : --- @ 0Hz
+Platform Console Device   : uart8250
+Platform HSM Device       : ---
+Platform PMU Device       : ---
+Platform Reboot Device    : ---
+Platform Shutdown Device  : ---
+Platform Suspend Device   : ---
+Platform CPPC Device      : ---
+Firmware Base             : 0x81fa0000
+Firmware Size             : 178 KB
+Firmware RW Offset        : 0x20000
+Firmware RW Size          : 50 KB
+Firmware Heap Offset      : 0x24000
+Firmware Heap Size        : 34 KB (total), 2 KB (reserved), 8 KB (used), 23 KB (free)
+Firmware Scratch Size     : 4096 B (total), 160 B (used), 3936 B (free)
+Runtime SBI Version       : 2.0
+
+Domain0 Name              : root
+Domain0 Boot HART         : 0
+Domain0 HARTs             : 0*
+Domain0 Region00          : 0x12500000-0x12500fff M: (I,R,W) S/U: (R,W)
+Domain0 Region01          : 0x81fc0000-0x81fcffff M: (R,W) S/U: ()
+Domain0 Region02          : 0x81fa0000-0x81fbffff M: (R,X) S/U: ()
+Domain0 Region03          : 0x00000000-0xffffffff M: () S/U: (R,W,X)
+Domain0 Next Address      : 0x80000000
+Domain0 Next Arg1         : 0x81ffd800
+Domain0 Next Mode         : S-mode
+Domain0 SysReset          : yes
+Domain0 SysSuspend        : yes
+
+Boot HART ID              : 0
+Boot HART Domain          : root
+Boot HART Priv Version    : v1.12
+Boot HART Base ISA        : rv32ia
+Boot HART ISA Extensions  : sstc,zicntr
+Boot HART PMP Count       : 0
+Boot HART PMP Granularity : 0 bits
+Boot HART PMP Address Bits: 0
+Boot HART MHPM Info       : 0 (0x00000000)
+Boot HART Debug Triggers  : 0 triggers
+Boot HART MIDELEG         : 0x00000222
+Boot HART MEDELEG         : 0x0000b109
+
+
+U-Boot 2024.04-rc2-g4e147dba9e-dirty (Mar 07 2024 - 23:15:04 +0800)Low-speed Linux Experimental Platform
+
+DRAM:  31.6 MiB
+Core:  11 devices, 8 uclasses, devicetree: separate
+Loading Environment from nowhere... OK
+In:    uart@12500000
+Out:   uart@12500000
+Err:   uart@12500000
+Net:   No ethernet found.
+llep@temu => 
+```
+
+在`U-Boot Command-Line Interface`下输入以下命令：
+
+```
+unzip 0x813a0000 0x80000000 # 解压uImage.gz到0x80000000
+setenv bootargs earlycon=sbi console=ttyS0,115200 root=/dev/ram0 # 设置启动参数
+bootm 0x80000000 - 0x81ffd800 # 从0x80000000启动，传递0x81ffd800（设备树地址），作为参数
 ```
 
 ## Help
