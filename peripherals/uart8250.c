@@ -100,7 +100,9 @@ uint8_t uart8250_read_b(uint8_t offset) {
             return MCR;
         case 5:
             scratch = LSR;
+            pthread_spin_lock(&rx_fifo_lock);
             LSR &= ~(1 << 1);
+            pthread_spin_unlock(&rx_fifo_lock);
             return scratch;
         case 6:
             return MSR;
@@ -120,8 +122,10 @@ void uart8250_write_b(uint8_t offset, uint8_t data) {
                 if (tx_fifo_tail < UART_FIFO_SIZE) {
                     tx_fifo[tx_fifo_tail++] = data;
                     /* 1 << 5: Transmit FIFO empty */
+                    pthread_spin_lock(&rx_fifo_lock);
                     LSR &= ~(1 << 5);
                     LSR &= ~(1 << 6);
+                    pthread_spin_unlock(&rx_fifo_lock);
                 }
             }
             break;
@@ -200,12 +204,16 @@ void uart8250_tick(void) {
             tx_fifo_tail--;
             if (tx_fifo_tail == 0) {
                 /* 1 << 6: Transmitter empty */
+                pthread_spin_lock(&rx_fifo_lock);
                 LSR |= (1 << 6);
+                pthread_spin_unlock(&rx_fifo_lock);
             }
         }
         if (!tx_fifo_tail) {
             /* 1 << 5: Transmit FIFO empty */
+            pthread_spin_lock(&rx_fifo_lock);
             LSR |= (1 << 5);
+            pthread_spin_unlock(&rx_fifo_lock);
         }
     } else {
         div_cnt++;
