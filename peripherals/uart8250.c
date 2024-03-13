@@ -100,6 +100,34 @@ void uart8250_write_b(uint8_t offset, uint8_t data) {
             break;
         case 4:
             MCR = data;
+            if (LOOPBACK_MODE_ON) {
+                /* Out2 */
+                if (MCR & (1 << 3)) {
+                    MSR |= 0x80;
+                } else {
+                    MSR &= ~0x80;
+                }
+                /* Out1 */
+                if (MCR & (1 << 2)) {
+                    MSR |= 0x40;
+                } else {
+                    MSR &= ~0x40;
+                }
+                /* RTS */
+                if (MCR & (1 << 1)) {
+                    MSR |= 0x10;
+                } else {
+                    MSR &= ~0x10;
+                }
+                /* DTR */
+                if (MCR & (1 << 0)) {
+                    MSR |= 0x20;
+                } else {
+                    MSR &= ~0x20;
+                }
+            } else {
+                MSR &= ~0xc0;
+            }
             break;
         default:
             /* exception */
@@ -112,8 +140,11 @@ void uart8250_tick(void) {
         div_cnt = 0;
         if (tx_fifo_tail) {
             /* 发送当前的队首 */
-            printf("%c", tx_fifo[0]);
-            fflush(stdout);
+            if (LOOPBACK_MODE_ON) {
+                write_rx_fifo(tx_fifo[0]);
+            } else {
+                printf("%c", tx_fifo[0]);
+            }
             /* 移位 */
             for (int i = 0; i < UART_FIFO_SIZE - 1; i++) {
                 tx_fifo[i] = tx_fifo[i + 1];
