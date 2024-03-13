@@ -96,11 +96,11 @@ _Noreturn void machine_start(uint32_t start, int printreg) {
 #include <stdlib.h>
 
 void digest(uint32_t addr, uint32_t len) {
-    FILE *fp = fopen("out.bin","w");
+    FILE *fp = fopen("out.bin", "w");
 
-    for(uint32_t i = addr; i < addr + len;i++){
-        uint8_t dat = pm_read_b(i,NULL);
-        fwrite(&dat,1,1,fp);
+    for (uint32_t i = addr; i < addr + len; i++) {
+        uint8_t dat = pm_read_b(i, NULL);
+        fwrite(&dat, 1, 1, fp);
     }
     fclose(fp);
 }
@@ -113,7 +113,6 @@ static void machine_pre_boot(uint32_t start) {
 }
 
 static void machine_tick(void) {
-    uart8250_tick();
     zicnt_cycle_tick();
 
     if (zicnt_get_cycle() % (SIM_YIELD_GAP / 10000) == 0) {
