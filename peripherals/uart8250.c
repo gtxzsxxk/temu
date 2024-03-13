@@ -6,6 +6,37 @@
 #include <stdio.h>
 #include <pthread.h>
 #include "uart8250.h"
+#include "plic-simple.h"
+
+#define FCR_INT_TRIGGER_LEVEL           (FCR >> 6)
+#define LOOPBACK_MODE_ON                (MCR & (1 << 4))
+#define INT_READ_DATA_AVAILABLE          0
+#define INT_TRANSMIT_HOLDING_EMPTY       1
+#define INT_RECEIVER_LINE_STATUS         2
+#define INT_MODERN_STATUS                3
+
+const uint8_t IIR_VALUE[] = {
+        [INT_READ_DATA_AVAILABLE] = 0x2,
+        [INT_TRANSMIT_HOLDING_EMPTY] = 0x1,
+        [INT_RECEIVER_LINE_STATUS] = 0x3,
+        [INT_MODERN_STATUS] = 0x0,
+};
+
+const uint8_t INT_PRIOR[] = {
+        [INT_READ_DATA_AVAILABLE] = 0x2,
+        [INT_TRANSMIT_HOLDING_EMPTY] = 0x4,
+        [INT_RECEIVER_LINE_STATUS] = 0x1,
+        [INT_MODERN_STATUS] = 0x5,
+};
+
+const uint8_t FCR_TRIGGER_LEVLEL[] = {
+        [0x0] = 1,
+        [0x1] = 4,
+        [0x2] = 8,
+        [0x3] = 14,
+};
+
+uint8_t current_pending_int = 0xff;
 
 uint8_t IER = 0x00;
 uint8_t IIR = 0xc1;
@@ -26,6 +57,18 @@ uint8_t rx_fifo_tail = 0;
 
 pthread_spinlock_t rx_fifo_lock;
 
+static void throw_interrupt(uint8_t cause);
+
+static void clear_interrupt(uint8_t cause);
+
+static void write_rx_fifo(uint8_t data) {
+    pthread_spin_lock(&rx_fifo_lock);
+    if (rx_fifo_tail < UART_FIFO_SIZE) {
+        rx_fifo[rx_fifo_tail++] = data;
+    }
+    pthread_spin_unlock(&rx_fifo_lock);
+}
+
 static uint8_t read_from_rx_fifo(void) {
     pthread_spin_lock(&rx_fifo_lock);
     uint8_t head = rx_fifo[0];
@@ -35,6 +78,14 @@ static uint8_t read_from_rx_fifo(void) {
             rx_fifo[i] = rx_fifo[i + 1];
         }
         rx_fifo_tail--;
+    }
+    if (rx_fifo_tail) {
+        LSR |= 1;
+    } else {
+        LSR &= ~1;
+    }
+    if (rx_fifo_tail < FCR_TRIGGER_LEVLEL[FCR_INT_TRIGGER_LEVEL]) {
+        clear_interrupt(INT_READ_DATA_AVAILABLE);
     }
     pthread_spin_unlock(&rx_fifo_lock);
     return head;
@@ -93,7 +144,9 @@ uint8_t uart8250_read_b(uint8_t offset) {
             }
             return IER;
         case 2:
-            return IIR;
+            scratch = IIR;
+            clear_interrupt(INT_TRANSMIT_HOLDING_EMPTY);
+            return scratch;
         case 3:
             return LCR;
         case 4:
@@ -103,6 +156,7 @@ uint8_t uart8250_read_b(uint8_t offset) {
             pthread_spin_lock(&rx_fifo_lock);
             LSR &= ~(1 << 1);
             pthread_spin_unlock(&rx_fifo_lock);
+            clear_interrupt(INT_RECEIVER_LINE_STATUS);
             return scratch;
         case 6:
             return MSR;
@@ -125,6 +179,7 @@ void uart8250_write_b(uint8_t offset, uint8_t data) {
                     pthread_spin_lock(&rx_fifo_lock);
                     LSR &= ~(1 << 5);
                     LSR &= ~(1 << 6);
+                    clear_interrupt(INT_TRANSMIT_HOLDING_EMPTY);
                     pthread_spin_unlock(&rx_fifo_lock);
                 }
             }
@@ -206,6 +261,7 @@ void uart8250_tick(void) {
                 /* 1 << 6: Transmitter empty */
                 pthread_spin_lock(&rx_fifo_lock);
                 LSR |= (1 << 6);
+                fflush(stdout);
                 pthread_spin_unlock(&rx_fifo_lock);
             }
         }
@@ -213,6 +269,7 @@ void uart8250_tick(void) {
             /* 1 << 5: Transmit FIFO empty */
             pthread_spin_lock(&rx_fifo_lock);
             LSR |= (1 << 5);
+            throw_interrupt(INT_TRANSMIT_HOLDING_EMPTY);
             pthread_spin_unlock(&rx_fifo_lock);
         }
     } else {
@@ -240,6 +297,7 @@ _Noreturn void *uart8250_listening(void *ptr) {
         if (rx_fifo_tail >= UART_FIFO_SIZE - 1) {
             /* FIFO is full */
             LSR |= 1 << 1;
+            throw_interrupt(INT_RECEIVER_LINE_STATUS);
         } else {
             rx_fifo[rx_fifo_tail++] = ch;
         }
@@ -248,6 +306,7 @@ _Noreturn void *uart8250_listening(void *ptr) {
         } else {
             LSR &= ~1;
         }
+        throw_interrupt(INT_READ_DATA_AVAILABLE);
         pthread_spin_unlock(&rx_fifo_lock);
     }
 }
