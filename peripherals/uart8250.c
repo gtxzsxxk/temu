@@ -40,6 +40,18 @@ static uint8_t read_from_rx_fifo(void) {
     return head;
 }
 
+static void clear_rx_fifo(void) {
+    /* TODO: But it doesn’t clear the shift register, i.e. receiving of the current character continues. */
+    pthread_spin_lock(&rx_fifo_lock);
+    rx_fifo_tail = 0;
+    pthread_spin_unlock(&rx_fifo_lock);
+}
+
+static void clear_tx_fifo(void) {
+    /* TODO: The shift register is not cleared, i.e. transmitting of the current character continues. */
+    tx_fifo_tail = 0;
+}
+
 uint8_t uart8250_read_b(uint8_t offset) {
     uint8_t scratch;
     switch (offset) {
@@ -94,6 +106,12 @@ void uart8250_write_b(uint8_t offset, uint8_t data) {
             break;
         case 2:
             FCR = data;
+            if (FCR & (1 << 1)) {
+                clear_rx_fifo();
+            }
+            if (FCR & (1 << 2)) {
+                clear_tx_fifo();
+            }
             break;
         case 3:
             LCR = data;
