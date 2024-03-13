@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "mem.h"
 #include "uart8250.h"
+#include "plic-simple.h"
 
 static uint32_t registers[32];
 uint32_t program_counter = 0;
@@ -59,6 +60,9 @@ uint32_t mem_read_w(uint32_t addr, uint8_t *intr) {
         return 0x4444ffff;
     }
 
+    if (addr_translated >= PLIC_BASE_ADDR && addr_translated < PLIC_BASE_ADDR + PLIC_SIZE) {
+        return plic_read_w(addr_translated - PLIC_BASE_ADDR);
+    }
     return pm_read_w(addr_translated, intr);
 }
 
@@ -94,7 +98,7 @@ void mem_write_b(uint32_t addr, uint8_t data, uint8_t *intr) {
     }
 
     if (addr_translated >= UART_BASE_ADDR && addr_translated < UART_BASE_ADDR + UART_SIZE) {
-        uart8250_write_b(addr_translated - RAM_BASE_ADDR, data);
+        uart8250_write_b(addr_translated - UART_BASE_ADDR, data);
         return;
     }
 
@@ -131,7 +135,10 @@ void mem_write_w(uint32_t addr, uint32_t data, uint8_t *intr) {
         }
         return;
     }
-
+    if (addr_translated >= PLIC_BASE_ADDR && addr_translated < PLIC_BASE_ADDR + PLIC_SIZE) {
+        plic_write_w(addr_translated - PLIC_BASE_ADDR, data);
+        return;
+    }
     pm_write_w(addr_translated, data, intr);
 }
 

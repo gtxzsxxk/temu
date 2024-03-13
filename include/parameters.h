@@ -13,6 +13,9 @@
 #define UART_BASE_ADDR          0x12500000
 #define UART_SIZE               0x00000100
 
+#define PLIC_BASE_ADDR          0x0c000000
+#define PLIC_SIZE               0x00400000
+
 /* 全速模式（仅调试） */
 #define SIM_FULL_SPEED          1
 /* 均摊时钟 in MHz */

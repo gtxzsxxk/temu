@@ -19,4 +19,6 @@ add_executable(temu src/main.c
         include/uart8250.h
         peripherals/uart8250.c
         src/vm.c
-        include/vm.h)
+        include/vm.h
+        peripherals/plic-simple.c
+        include/plic-simple.h)
