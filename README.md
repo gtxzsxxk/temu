@@ -2,6 +2,9 @@
 
 本项目的英文全称为`Tailored Emulator`，其中的字母`T`绝对与清华大学没有任何关系。本命名为致敬`QEMU`用。
 
+- [快餐：进入内核演示](#jumping-to-kernel)
+- [存储器与内存映射](#内存映射)
+
 ## Description
 
 该项目是一个基于`C`语言编写的`RISC-V`模拟器，支持`rv32ima_zicsr_zicnt_sstc`架构和`sv32`内存分页结构。模拟器实现了**指令级别**的模拟，即使用`C`执行其描述的内存操作与运算等。本模拟器虚拟了SoC的常见体系结构，支持运行主线`Linux`。我们模拟的SoC，在本文档中，都会基于`OpenSBI`+`U-Boot`的方式来进行内核启动前的工作。
@@ -77,6 +80,9 @@ gzip -c uImage > uImage.gz
 * 这里给出使用`TEMU`加载`OpenSBI`，`U-Boot`，`Kernel`二进制文件的使用例。
 
 #### Usage (32MiB Version)
+
+##### Preparations
+
 ```
 Usage: temu [-ram/-rom/-addr 0x80000000] [-printreg] -exec=program.bin [-with=addr#file.bin]
 
@@ -169,6 +175,8 @@ Err:   uart@12500000
 Net:   No ethernet found.
 llep@temu => 
 ```
+
+##### Jumping to Kernel
 
 在`U-Boot Command-Line Interface`下输入以下命令：
 
@@ -302,31 +310,55 @@ hart isa        : rv32ima
 # 
 ```
 
-## Help
+## Documentation (TODO)
 
-Any advise for common problems or issues.
-```
-command to run if program contains helper info
-```
+### CPU Architect
+
+#### 支持的ISA
+
+### 内存映射
+
+| 类型       | Base Address | Size |
+| --------  | ---------    | ---- |
+| ROM       | 0x0000_0000  | 64KiB|
+| RAM       | 0x8000_0000  | 32MiB|
+| UART       | 0x1250_0000  | 0x100|
+| PLIC       | 0x0c00_0000  | 0x400000|
+
+对于`OpenSBI`+`U-Boot`+`Linux`启动方案，RAM在上电时应该由`TEMU`模拟`first stage bootloader`，将二进制文件加载到以下位置。
+
+| 地址 | 可用空间 | 描述 |
+| --- | ------- | --- |
+|0x8000_0000| (x) |上电时这里为u-boot.bin。u-boot重定位后，内核将被解压到此处，并从此处开始运行|
+|0x813a_0000| 10MiB | 压缩过的内核，即uImage.gz，存储于此地址|
+|0x81da_0000| 2MiB  | U-Boot将在上电后从0x8000_0000重定位至此处|
+|0x81fa_0000| 384KiB| OpenSBI的固定地址。这一段逻辑上是只读的 |
+|0x81ff_d800| 10KiB | 设备树的二进制文件 |
+
+在`32MiB`内存方案下，内核可用的内存大小约为**30.625MiB**
+
+
+### MMU模型
+
+### CSR寄存器支持
+
+### 异常与中断
+
+### ZICNT扩展
+
+### SSTC扩展
+
+### uart 16550a
+
+### PLIC中断控制器
 
 ## Authors
 
-Contributors names and contact info
-
-ex. Dominique Pizzie  
-ex. [@DomPizzie](https://twitter.com/dompizzie)
+Obvious.
 
 ## Version History
 
-* 0.2
-    * Various bug fixes and optimizations
-    * See [commit change]() or See [release history]()
-* 0.1
-    * Initial Release
-
-## License
-
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
+This is blamed to git history.
 
 ## Acknowledgments
 
