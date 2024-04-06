@@ -1,0 +1,68 @@
+From ec25381efa3e1eefe30e1cf47563b2bd3166f673 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Fri, 1 Mar 2024 12:34:35 +0800
+Subject: [PATCH 13/15] llep: configs: set RAM base address at 0x80000000 and
+ size to 16MiB and new location
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ .config                | 8 ++++----
+ include/configs/llep.h | 4 ++--
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/.config b/.config
+index 5916b342cf..e881061cd1 100644
+--- a/.config
++++ b/.config
+@@ -37,13 +37,13 @@ CONFIG_SYS_DCACHE_OFF=y
+ CONFIG_USE_ARCH_MEMCPY=y
+ CONFIG_USE_ARCH_MEMMOVE=y
+ CONFIG_USE_ARCH_MEMSET=y
+-CONFIG_TEXT_BASE=0x0204b000
++CONFIG_TEXT_BASE=0x80000000
+ CONFIG_SYS_MALLOC_LEN=0x8000
+ CONFIG_SYS_MALLOC_F_LEN=0x4000
+ CONFIG_NR_DRAM_BANKS=1
+ CONFIG_ENV_SOURCE_FILE=""
+ CONFIG_HAS_CUSTOM_SYS_INIT_SP_ADDR=y
+-CONFIG_CUSTOM_SYS_INIT_SP_ADDR=0x0204b000
++CONFIG_CUSTOM_SYS_INIT_SP_ADDR=0x80a00000
+ CONFIG_ENV_SIZE=0x2000
+ # CONFIG_DM_GPIO is not set
+ CONFIG_DEFAULT_DEVICE_TREE="llep"
+@@ -62,7 +62,7 @@ CONFIG_DEBUG_UART_CLOCK=1152000
+ CONFIG_IDENT_STRING="Low-speed Linux Experimental Platform"
+ CONFIG_SYS_CLK_FREQ=0
+ CONFIG_SYS_MEM_TOP_HIDE=0x0
+-CONFIG_SYS_LOAD_ADDR=0x0204b000
++CONFIG_SYS_LOAD_ADDR=0x80000000
+ CONFIG_BUILD_TARGET=""
+ CONFIG_32BIT=y
+ # CONFIG_PCI is not set
+@@ -150,7 +150,7 @@ CONFIG_SYS_SRAM_SIZE=0x0
+ # CONFIG_MP is not set
+ CONFIG_HAVE_TEXT_BASE=y
+ # CONFIG_HAVE_SYS_UBOOT_START is not set
+-CONFIG_SYS_UBOOT_START=0x0204b000
++CONFIG_SYS_UBOOT_START=0x80000000
+ # CONFIG_DYNAMIC_SYS_CLK_FREQ is not set
+ # CONFIG_API is not set
+ 
+diff --git a/include/configs/llep.h b/include/configs/llep.h
+index 95811172ae..88bd0a99d8 100644
+--- a/include/configs/llep.h
++++ b/include/configs/llep.h
+@@ -8,8 +8,8 @@
+ 
+ #include <linux/sizes.h>
+ 
+-#define CFG_SYS_SDRAM_BASE		0x02000000
+-#define CFG_SYS_SDRAM_SIZE		0x01000000
++#define CFG_SYS_SDRAM_BASE		0x80000000
++#define CFG_SYS_SDRAM_SIZE		0x00fa0000
+ #define RISCV_SMODE_TIMER_FREQ		10000
+ 
+ /* Environment options */
+-- 
+2.34.1
+

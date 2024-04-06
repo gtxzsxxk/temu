@@ -1,0 +1,248 @@
+From 5c5e5156582116772d99ac2b6eb9880ed0fac7da Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Sat, 17 Feb 2024 13:19:50 +0800
+Subject: [PATCH 06/15] dts: add cpus, memory and timer node to support
+ initcalls
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ .config                 | 65 ++++++++++-------------------------------
+ arch/riscv/dts/llep.dts | 16 ++++++++++
+ 2 files changed, 31 insertions(+), 50 deletions(-)
+
+diff --git a/.config b/.config
+index 2dd7c4c733..f34000cb7b 100644
+--- a/.config
++++ b/.config
+@@ -4,7 +4,7 @@
+ #
+ 
+ #
+-# Compiler: riscv32-buildroot-linux-gnu-gcc.br_real (Buildroot -ge725bb3-dirty) 12.3.0
++# Compiler: gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+ #
+ CONFIG_CREATE_ARCH_SYMLINK=y
+ CONFIG_SYS_CACHE_SHIFT_6=y
+@@ -70,7 +70,6 @@ CONFIG_FWU_NUM_BANKS=2
+ CONFIG_FWU_NUM_IMAGES_PER_BANK=2
+ CONFIG_DEBUG_UART=y
+ # CONFIG_AHCI is not set
+-# CONFIG_SMP is not set
+ 
+ #
+ # RISC-V architecture
+@@ -93,8 +92,8 @@ CONFIG_ARCH_RV32I=y
+ # CONFIG_ARCH_RV64I is not set
+ # CONFIG_CMODEL_MEDLOW is not set
+ CONFIG_CMODEL_MEDANY=y
+-CONFIG_RISCV_MMODE=y
+-# CONFIG_RISCV_SMODE is not set
++# CONFIG_RISCV_MMODE is not set
++CONFIG_RISCV_SMODE=y
+ # CONFIG_RISCV_ISA_C is not set
+ # CONFIG_RISCV_ISA_F is not set
+ # CONFIG_RISCV_ISA_ZBB is not set
+@@ -103,7 +102,9 @@ CONFIG_RISCV_MMODE=y
+ # Use assembly optimized implementation of string routines
+ #
+ CONFIG_RISCV_ISA_A=y
+-CONFIG_RISCV_ACLINT=y
++CONFIG_SBI=y
++# CONFIG_SBI_V01 is not set
++CONFIG_SBI_V02=y
+ # CONFIG_XIP is not set
+ # CONFIG_SPL_XIP is not set
+ # CONFIG_AVAILABLE_HARTS is not set
+@@ -122,7 +123,7 @@ CONFIG_STACK_SIZE_SHIFT=14
+ CONFIG_LOCALVERSION=""
+ CONFIG_LOCALVERSION_AUTO=y
+ CONFIG_CC_IS_GCC=y
+-CONFIG_GCC_VERSION=120300
++CONFIG_GCC_VERSION=110400
+ CONFIG_CLANG_VERSION=0
+ CONFIG_CC_OPTIMIZE_FOR_SIZE=y
+ # CONFIG_CC_OPTIMIZE_FOR_SPEED is not set
+@@ -180,7 +181,6 @@ CONFIG_BOOTSTD=y
+ CONFIG_BOOTSTD_BOOTCOMMAND=y
+ CONFIG_BOOTMETH_GLOBAL=y
+ CONFIG_BOOTMETH_EXTLINUX=y
+-CONFIG_BOOTMETH_EFILOADER=y
+ CONFIG_BOOTMETH_VBE=y
+ CONFIG_BOOTMETH_VBE_REQUEST=y
+ CONFIG_BOOTMETH_VBE_SIMPLE=y
+@@ -280,8 +280,8 @@ CONFIG_CONSOLE_FLUSH_SUPPORT=y
+ # Logging
+ #
+ CONFIG_LOG=y
+-CONFIG_LOG_MAX_LEVEL=9
+-CONFIG_LOG_DEFAULT_LEVEL=9
++CONFIG_LOG_MAX_LEVEL=6
++CONFIG_LOG_DEFAULT_LEVEL=6
+ CONFIG_LOG_CONSOLE=y
+ # CONFIG_LOGF_FILE is not set
+ # CONFIG_LOGF_LINE is not set
+@@ -303,8 +303,7 @@ CONFIG_LOGF_FUNC_PAD=20
+ #
+ # CONFIG_CYCLIC is not set
+ CONFIG_EVENT=y
+-CONFIG_EVENT_DYNAMIC=y
+-# CONFIG_EVENT_DEBUG is not set
++CONFIG_EVENT_DEBUG=y
+ CONFIG_ARCH_EARLY_INIT_R=y
+ # CONFIG_ARCH_MISC_INIT is not set
+ # CONFIG_BOARD_EARLY_INIT_F is not set
+@@ -312,7 +311,7 @@ CONFIG_ARCH_EARLY_INIT_R=y
+ # CONFIG_BOARD_POSTCLK_INIT is not set
+ # CONFIG_BOARD_LATE_INIT is not set
+ # CONFIG_HWCONFIG is not set
+-CONFIG_LAST_STAGE_INIT=y
++# CONFIG_LAST_STAGE_INIT is not set
+ # CONFIG_MISC_INIT_R is not set
+ # CONFIG_SYS_MALLOC_BOOTPARAMS is not set
+ # CONFIG_ID_EEPROM is not set
+@@ -360,7 +359,7 @@ CONFIG_CMD_CPU=y
+ # CONFIG_CMD_HISTORY is not set
+ # CONFIG_CMD_LICENSE is not set
+ # CONFIG_CMD_PMC is not set
+-# CONFIG_CMD_SMBIOS is not set
++# CONFIG_CMD_SBI is not set
+ 
+ #
+ # Boot commands
+@@ -371,7 +370,6 @@ CONFIG_CMD_BOOTM=y
+ # CONFIG_CMD_BOOTDEV is not set
+ CONFIG_CMD_BOOTFLOW=y
+ # CONFIG_CMD_BOOTMETH is not set
+-CONFIG_BOOTM_EFI=y
+ # CONFIG_CMD_BOOTZ is not set
+ CONFIG_CMD_BOOTI=y
+ CONFIG_BOOTM_LINUX=y
+@@ -381,12 +379,6 @@ CONFIG_BOOTM_PLAN9=y
+ CONFIG_BOOTM_RTEMS=y
+ # CONFIG_CMD_VBE is not set
+ CONFIG_BOOTM_VXWORKS=y
+-CONFIG_CMD_BOOTEFI=y
+-CONFIG_CMD_BOOTEFI_BINARY=y
+-CONFIG_CMD_BOOTEFI_BOOTMGR=y
+-CONFIG_CMD_BOOTEFI_HELLO_COMPILE=y
+-# CONFIG_CMD_BOOTEFI_HELLO is not set
+-# CONFIG_CMD_BOOTEFI_SELFTEST is not set
+ # CONFIG_CMD_BOOTMENU is not set
+ # CONFIG_CMD_ADTIMG is not set
+ CONFIG_CMD_ELF=y
+@@ -412,7 +404,6 @@ CONFIG_CMD_SAVEENV=y
+ CONFIG_CMD_ENV_EXISTS=y
+ # CONFIG_CMD_ENV_CALLBACK is not set
+ # CONFIG_CMD_ENV_FLAGS is not set
+-# CONFIG_CMD_NVEDIT_EFI is not set
+ # CONFIG_CMD_NVEDIT_INDIRECT is not set
+ # CONFIG_CMD_NVEDIT_INFO is not set
+ # CONFIG_CMD_NVEDIT_LOAD is not set
+@@ -543,8 +534,6 @@ CONFIG_CMD_BLOCK_CACHE=y
+ # CONFIG_CMD_CACHE is not set
+ # CONFIG_CMD_CONITRACE is not set
+ # CONFIG_CMD_CLS is not set
+-# CONFIG_CMD_EFIDEBUG is not set
+-CONFIG_CMD_EFICONFIG=y
+ # CONFIG_CMD_EXCEPTION is not set
+ # CONFIG_CMD_INI is not set
+ # CONFIG_CMD_DATE is not set
+@@ -1101,6 +1090,7 @@ CONFIG_SERIAL_PUTS=y
+ # CONFIG_SERIAL_PROBE_ALL is not set
+ # CONFIG_VPL_DM_SERIAL is not set
+ CONFIG_DEBUG_UART_NS16550=y
++# CONFIG_DEBUG_SBI_CONSOLE is not set
+ CONFIG_DEBUG_UART_SHIFT=0
+ # CONFIG_DEBUG_UART_ANNOUNCE is not set
+ # CONFIG_DEBUG_UART_SKIP_INIT is not set
+@@ -1181,7 +1171,7 @@ CONFIG_TIMER=y
+ # CONFIG_NPCM_TIMER is not set
+ # CONFIG_OMAP_TIMER is not set
+ # CONFIG_ORION_TIMER is not set
+-# CONFIG_RISCV_TIMER is not set
++CONFIG_RISCV_TIMER=y
+ # CONFIG_ROCKCHIP_TIMER is not set
+ # CONFIG_SP804_TIMER is not set
+ # CONFIG_STM32_TIMER is not set
+@@ -1255,9 +1245,7 @@ CONFIG_WATCHDOG_TIMEOUT_MSECS=60000
+ # CONFIG_PHYSMEM is not set
+ # CONFIG_BCH is not set
+ # CONFIG_CC_OPTIMIZE_LIBS_FOR_SPEED is not set
+-CONFIG_CHARSET=y
+ # CONFIG_DYNAMIC_CRC_TABLE is not set
+-CONFIG_LIB_UUID=y
+ # CONFIG_RANDOM_UUID is not set
+ # CONFIG_SEMIHOSTING is not set
+ CONFIG_PRINTF=y
+@@ -1329,35 +1317,12 @@ CONFIG_SYS_FDT_PAD=0x3000
+ #
+ # System tables
+ #
+-CONFIG_GENERATE_SMBIOS_TABLE=y
+ # CONFIG_LIB_RATIONAL is not set
+ CONFIG_ASN1_COMPILER=y
+ CONFIG_ASN1_DECODER=y
+ CONFIG_OID_REGISTRY=y
+-CONFIG_SMBIOS=y
+ # CONFIG_SMBIOS_PARSER is not set
+-CONFIG_EFI_LOADER=y
+-CONFIG_EFI_BINARY_EXEC=y
+-CONFIG_EFI_BOOTMGR=y
+-CONFIG_EFI_VARIABLE_NO_STORE=y
+-# CONFIG_EFI_VARIABLES_PRESEED is not set
+-CONFIG_EFI_VAR_BUF_SIZE=131072
+-# CONFIG_EFI_SCROLL_ON_CLEAR_SCREEN is not set
+-# CONFIG_EFI_RUNTIME_UPDATE_CAPSULE is not set
+-CONFIG_EFI_CAPSULE_MAX=15
+-CONFIG_EFI_DEVICE_PATH_TO_TEXT=y
+-CONFIG_EFI_DEVICE_PATH_UTIL=y
+-CONFIG_EFI_DT_FIXUP=y
+-CONFIG_EFI_LOADER_HII=y
+-CONFIG_EFI_UNICODE_COLLATION_PROTOCOL2=y
+-CONFIG_EFI_UNICODE_CAPITALIZATION=y
+-CONFIG_EFI_PLATFORM_LANG_CODES="en-US"
+-CONFIG_EFI_LOAD_FILE2_INITRD=y
+-# CONFIG_EFI_SECURE_BOOT is not set
+-CONFIG_EFI_ECPT=y
+-CONFIG_EFI_EBBR_2_1_CONFORMANCE=y
+-CONFIG_EFI_RISCV_BOOT_PROTOCOL=y
+-# CONFIG_EFI_HTTP_BOOT is not set
++# CONFIG_EFI_LOADER is not set
+ # CONFIG_OPTEE_LIB is not set
+ # CONFIG_OPTEE_IMAGE is not set
+ # CONFIG_BOOTM_OPTEE is not set
+diff --git a/arch/riscv/dts/llep.dts b/arch/riscv/dts/llep.dts
+index e2c59ed026..e47cf25ba3 100644
+--- a/arch/riscv/dts/llep.dts
++++ b/arch/riscv/dts/llep.dts
+@@ -14,6 +14,10 @@
+     #address-cells = <1>;
+     #size-cells = <1>;
+ 
++    cpus: cpus {
++    		timebase-frequency = <100000000>;
++    };
++
+     uart@12500000 {
+ 		compatible = "ns16550a", "ns16550", "ns8250";
+ 		reg = <0x12500000 0x100>;
+@@ -22,4 +26,16 @@
+ 		reg-shift = <0>;
+ 		bootph-all;
+ 	};
++
++	memory {
++	    device_type = "memory";
++    	#address-cells = <1>;
++    	#size-cells = <1>;
++    	reg = <0x02000000 0x0a000000>;
++    	auto-size;
++    };
++
++    timer {
++    		compatible = "riscv,timer";
++    };
+ };
+-- 
+2.34.1
+

@@ -1,0 +1,44 @@
+From d2dbfcbf5723d69e0dd76243c07207052cc01cee Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Fri, 16 Feb 2024 22:31:11 +0800
+Subject: [PATCH 04/15] dts: add device tree support for llep with uart enabled
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ arch/riscv/dts/llep.dts | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+ create mode 100644 arch/riscv/dts/llep.dts
+
+diff --git a/arch/riscv/dts/llep.dts b/arch/riscv/dts/llep.dts
+new file mode 100644
+index 0000000000..2ce3dba208
+--- /dev/null
++++ b/arch/riscv/dts/llep.dts
+@@ -0,0 +1,24 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2021, Bin Meng <bmeng.cn@gmail.com>
++ */
++
++/dts-v1/;
++
++#include "binman.dtsi"
++
++/ {
++
++    model = "snps,emsdp";
++
++    #address-cells = <1>;
++    #size-cells = <1>;
++
++    uart@12500000 {
++		compatible = "ns16550a", "ns16550", "ns8250";
++		reg = <0x12500000 0x100>;
++		clock-frequency = <1152000>;
++		interrupts = <10>;
++		reg-shift = <0>;
++	};
++};
+-- 
+2.34.1
+

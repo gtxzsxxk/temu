@@ -1,0 +1,40 @@
+From c7fa4f0df9f05f7a24ce19db88137fd2be7c972d Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Mon, 19 Feb 2024 13:42:59 +0800
+Subject: [PATCH 12/15] llep: use seperate fdt which locates @ 0x02048800
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ .config | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/.config b/.config
+index d3cae83657..5916b342cf 100644
+--- a/.config
++++ b/.config
+@@ -186,9 +186,9 @@ CONFIG_BOOTMETH_VBE_REQUEST=y
+ CONFIG_BOOTMETH_VBE_SIMPLE=y
+ CONFIG_BOOTMETH_VBE_SIMPLE_OS=y
+ # CONFIG_BOOTMETH_SCRIPT is not set
+-# CONFIG_LEGACY_IMAGE_FORMAT is not set
++CONFIG_LEGACY_IMAGE_FORMAT=y
+ CONFIG_SYS_BOOTM_LEN=0x800000
+-# CONFIG_SUPPORT_RAW_INITRD is not set
++CONFIG_SUPPORT_RAW_INITRD=y
+ # CONFIG_CHROMEOS is not set
+ # CONFIG_CHROMEOS_VBOOT is not set
+ # CONFIG_RAMBOOT_PBL is not set
+@@ -610,8 +610,8 @@ CONFIG_SUPPORT_OF_CONTROL=y
+ CONFIG_OF_CONTROL=y
+ CONFIG_OF_REAL=y
+ # CONFIG_OF_LIVE is not set
+-# CONFIG_OF_SEPARATE is not set
+-CONFIG_OF_EMBED=y
++CONFIG_OF_SEPARATE=y
++# CONFIG_OF_EMBED is not set
+ # CONFIG_OF_BOARD is not set
+ # CONFIG_OF_OMIT_DTB is not set
+ CONFIG_DEVICE_TREE_INCLUDES=""
+-- 
+2.34.1
+

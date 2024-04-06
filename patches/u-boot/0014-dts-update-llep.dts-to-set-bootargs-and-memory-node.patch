@@ -1,0 +1,43 @@
+From ebb1db8f60c2ceae3569a47ef4da54a959937fcd Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Fri, 1 Mar 2024 12:35:01 +0800
+Subject: [PATCH 14/15] dts: update llep.dts to set bootargs and memory node
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ arch/riscv/dts/llep.dts | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/arch/riscv/dts/llep.dts b/arch/riscv/dts/llep.dts
+index b7808d75f6..7c58d0940e 100644
+--- a/arch/riscv/dts/llep.dts
++++ b/arch/riscv/dts/llep.dts
+@@ -15,6 +15,11 @@
+     #address-cells = <1>;
+     #size-cells = <1>;
+ 
++	chosen {
++		bootargs = "earlycon=sbi console=ttyS0";
++		stdout-path = "serial0:115200n8";
++	};
++
+     cpus: cpus {
+     		timebase-frequency = <100000000>;
+     };
+@@ -28,12 +33,9 @@
+ 		bootph-all;
+ 	};
+ 
+-	memory {
++	memory@80000000 {
+ 	    device_type = "memory";
+-    	#address-cells = <1>;
+-    	#size-cells = <1>;
+     	reg = <CFG_SYS_SDRAM_BASE CFG_SYS_SDRAM_SIZE>;
+-    	auto-size;
+     };
+ 
+     timer {
+-- 
+2.34.1
+

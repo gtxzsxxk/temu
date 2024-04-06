@@ -1,0 +1,26 @@
+From f6e6fd3f0351214cf1efc9f94ff3207a8ba1bd06 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Sat, 17 Feb 2024 13:58:46 +0800
+Subject: [PATCH 07/15] configs: set RISCV_SMODE_TIMER_FREQ 10kHz to support
+ timer functions
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ include/configs/llep.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/configs/llep.h b/include/configs/llep.h
+index 363bd3a065..53cb893a12 100644
+--- a/include/configs/llep.h
++++ b/include/configs/llep.h
+@@ -9,6 +9,7 @@
+ #include <linux/sizes.h>
+ 
+ #define CFG_SYS_SDRAM_BASE		0x02000000
++#define RISCV_SMODE_TIMER_FREQ		10000
+ 
+ /* Environment options */
+ 
+-- 
+2.34.1
+

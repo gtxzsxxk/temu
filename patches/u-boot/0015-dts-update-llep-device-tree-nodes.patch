@@ -1,0 +1,99 @@
+From 4e147dba9efdca8c0da481c7a818dcc081e87790 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Tue, 5 Mar 2024 08:02:37 +0800
+Subject: [PATCH 15/15] dts: update llep device tree nodes
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ arch/riscv/dts/llep.dts | 55 +++++++++++++++++++++++++++++++----------
+ 1 file changed, 42 insertions(+), 13 deletions(-)
+
+diff --git a/arch/riscv/dts/llep.dts b/arch/riscv/dts/llep.dts
+index 7c58d0940e..94e46f1d9f 100644
+--- a/arch/riscv/dts/llep.dts
++++ b/arch/riscv/dts/llep.dts
+@@ -5,32 +5,60 @@
+ 
+ /dts-v1/;
+ 
+-#include "binman.dtsi"
+ #include "configs/llep.h"
+ 
+ / {
+ 
+-    model = "snps,emsdp";
++    Model = "Low-speed Linux Experimental Platform";
+ 
+     #address-cells = <1>;
+     #size-cells = <1>;
+ 
++	aliases {
++		serial0 = &uart0;
++	};
++
+ 	chosen {
+-		bootargs = "earlycon=sbi console=ttyS0";
+ 		stdout-path = "serial0:115200n8";
+ 	};
+ 
+-    cpus: cpus {
+-    		timebase-frequency = <100000000>;
++    cpus {
++		#address-cells = <1>;
++		#size-cells = <0>;
++		timebase-frequency = <100000000>;
++
++		cpu0: cpu@0 {
++			compatible = "riscv";
++			reg = <0>;
++			device_type = "cpu";
++			riscv,isa-base = "rv32i";
++			riscv,isa-extensions = "i", "m", "a";
++
++			cpu0_intc: interrupt-controller {
++				compatible = "riscv,cpu-intc";
++				interrupt-controller;
++				#interrupt-cells = <1>;
++			};
++		};
+     };
+ 
+-    uart@12500000 {
+-		compatible = "ns16550a", "ns16550", "ns8250";
+-		reg = <0x12500000 0x100>;
+-		clock-frequency = <1152000>;
+-		interrupts = <10>;
+-		reg-shift = <0>;
+-		bootph-all;
++	soc {
++		#address-cells = <1>;
++		#size-cells = <1>;
++		compatible = "simple-bus";
++		ranges;
++
++		uart0: uart@12500000 {
++			compatible = "snps,dw-apb-uart", "ns16550a", "ns16550", "ns8250";
++			reg = <0x12500000 0x100>;
++			clock-frequency = <1152000>;
++			interrupts = <10>;
++			reg-shift = <0>;
++			reg-io-width = <1>;
++			interrupt-parent = <&cpu0_intc>;
++			status = "okay";
++			bootph-all;
++		};
+ 	};
+ 
+ 	memory@80000000 {
+@@ -39,6 +67,7 @@
+     };
+ 
+     timer {
+-    		compatible = "riscv,timer";
++		compatible = "riscv,timer";
++		interrupts-extended = <&cpu0_intc 5>;
+     };
+ };
+-- 
+2.34.1
+

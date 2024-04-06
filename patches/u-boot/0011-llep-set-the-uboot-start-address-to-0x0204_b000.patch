@@ -1,0 +1,86 @@
+From 39cd421ba3637fe401df944b8dd81fe154e8f267 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Mon, 19 Feb 2024 00:41:01 +0800
+Subject: [PATCH 11/15] llep: set the uboot start address to 0x0204_b000
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ .config                 | 8 ++++----
+ arch/riscv/dts/llep.dts | 3 ++-
+ include/configs/llep.h  | 1 +
+ 3 files changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/.config b/.config
+index d3462f079d..d3cae83657 100644
+--- a/.config
++++ b/.config
+@@ -37,13 +37,13 @@ CONFIG_SYS_DCACHE_OFF=y
+ CONFIG_USE_ARCH_MEMCPY=y
+ CONFIG_USE_ARCH_MEMMOVE=y
+ CONFIG_USE_ARCH_MEMSET=y
+-CONFIG_TEXT_BASE=0x03000000
++CONFIG_TEXT_BASE=0x0204b000
+ CONFIG_SYS_MALLOC_LEN=0x8000
+ CONFIG_SYS_MALLOC_F_LEN=0x4000
+ CONFIG_NR_DRAM_BANKS=1
+ CONFIG_ENV_SOURCE_FILE=""
+ CONFIG_HAS_CUSTOM_SYS_INIT_SP_ADDR=y
+-CONFIG_CUSTOM_SYS_INIT_SP_ADDR=0x03800000
++CONFIG_CUSTOM_SYS_INIT_SP_ADDR=0x0204b000
+ CONFIG_ENV_SIZE=0x2000
+ # CONFIG_DM_GPIO is not set
+ CONFIG_DEFAULT_DEVICE_TREE="llep"
+@@ -62,7 +62,7 @@ CONFIG_DEBUG_UART_CLOCK=1152000
+ CONFIG_IDENT_STRING="Low-speed Linux Experimental Platform"
+ CONFIG_SYS_CLK_FREQ=0
+ CONFIG_SYS_MEM_TOP_HIDE=0x0
+-CONFIG_SYS_LOAD_ADDR=0x0
++CONFIG_SYS_LOAD_ADDR=0x0204b000
+ CONFIG_BUILD_TARGET=""
+ CONFIG_32BIT=y
+ # CONFIG_PCI is not set
+@@ -150,7 +150,7 @@ CONFIG_SYS_SRAM_SIZE=0x0
+ # CONFIG_MP is not set
+ CONFIG_HAVE_TEXT_BASE=y
+ # CONFIG_HAVE_SYS_UBOOT_START is not set
+-CONFIG_SYS_UBOOT_START=0x03000000
++CONFIG_SYS_UBOOT_START=0x0204b000
+ # CONFIG_DYNAMIC_SYS_CLK_FREQ is not set
+ # CONFIG_API is not set
+ 
+diff --git a/arch/riscv/dts/llep.dts b/arch/riscv/dts/llep.dts
+index e47cf25ba3..b7808d75f6 100644
+--- a/arch/riscv/dts/llep.dts
++++ b/arch/riscv/dts/llep.dts
+@@ -6,6 +6,7 @@
+ /dts-v1/;
+ 
+ #include "binman.dtsi"
++#include "configs/llep.h"
+ 
+ / {
+ 
+@@ -31,7 +32,7 @@
+ 	    device_type = "memory";
+     	#address-cells = <1>;
+     	#size-cells = <1>;
+-    	reg = <0x02000000 0x0a000000>;
++    	reg = <CFG_SYS_SDRAM_BASE CFG_SYS_SDRAM_SIZE>;
+     	auto-size;
+     };
+ 
+diff --git a/include/configs/llep.h b/include/configs/llep.h
+index 53cb893a12..95811172ae 100644
+--- a/include/configs/llep.h
++++ b/include/configs/llep.h
+@@ -9,6 +9,7 @@
+ #include <linux/sizes.h>
+ 
+ #define CFG_SYS_SDRAM_BASE		0x02000000
++#define CFG_SYS_SDRAM_SIZE		0x01000000
+ #define RISCV_SMODE_TIMER_FREQ		10000
+ 
+ /* Environment options */
+-- 
+2.34.1
+

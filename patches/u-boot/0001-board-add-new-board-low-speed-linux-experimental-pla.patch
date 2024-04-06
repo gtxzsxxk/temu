@@ -1,0 +1,188 @@
+From 4d0438d2015d40c413e9dd212074af68bd300f68 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Fri, 16 Feb 2024 17:38:50 +0800
+Subject: [PATCH 01/15] board: add new board low-speed linux experimental
+ platform
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ arch/riscv/Kconfig            |  4 +++
+ board/emulation/llep/Kconfig  | 33 +++++++++++++++++++++++
+ board/emulation/llep/Makefile |  5 ++++
+ board/emulation/llep/llep.c   | 50 +++++++++++++++++++++++++++++++++++
+ include/configs/llep.h        | 32 ++++++++++++++++++++++
+ 5 files changed, 124 insertions(+)
+ create mode 100644 board/emulation/llep/Kconfig
+ create mode 100644 board/emulation/llep/Makefile
+ create mode 100644 board/emulation/llep/llep.c
+ create mode 100644 include/configs/llep.h
+
+diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
+index ac52c5e6da..55e34ff450 100644
+--- a/arch/riscv/Kconfig
++++ b/arch/riscv/Kconfig
+@@ -20,6 +20,9 @@ config TARGET_MILKV_DUO
+ config TARGET_OPENPITON_RISCV64
+ 	bool "Support RISC-V cores on OpenPiton SoC"
+ 
++config TARGET_LLEP
++	bool "Support Low-speed Linux Experimental Platform"
++
+ config TARGET_QEMU_VIRT
+ 	bool "Support QEMU Virt Board"
+ 
+@@ -80,6 +83,7 @@ config SPL_ZERO_MEM_BEFORE_USE
+ 
+ # board-specific options below
+ source "board/AndesTech/ae350/Kconfig"
++source "board/emulation/llep/Kconfig"
+ source "board/emulation/qemu-riscv/Kconfig"
+ source "board/microchip/mpfs_icicle/Kconfig"
+ source "board/openpiton/riscv64/Kconfig"
+diff --git a/board/emulation/llep/Kconfig b/board/emulation/llep/Kconfig
+new file mode 100644
+index 0000000000..95fd8bf724
+--- /dev/null
++++ b/board/emulation/llep/Kconfig
+@@ -0,0 +1,33 @@
++if TARGET_LLEP
++
++config SYS_BOARD
++	default "llep"
++
++config SYS_VENDOR
++	default "emulation"
++
++config SYS_CPU
++	default "generic"
++
++config SYS_CONFIG_NAME
++	default "llep"
++
++config TEXT_BASE
++	default 0x03000000
++
++config SPL_TEXT_BASE
++	default 0x04000000
++
++config SPL_OPENSBI_LOAD_ADDR
++	hex
++	default 0x02000000
++
++config PRE_CON_BUF_ADDR
++	hex
++	default 0x02a00000
++
++config BOARD_SPECIFIC_OPTIONS # dummy
++	def_bool y
++	select GENERIC_RISCV
++
++endif
+diff --git a/board/emulation/llep/Makefile b/board/emulation/llep/Makefile
+new file mode 100644
+index 0000000000..94b40e4cde
+--- /dev/null
++++ b/board/emulation/llep/Makefile
+@@ -0,0 +1,5 @@
++# SPDX-License-Identifier: GPL-2.0+
++#
++# Copyright (C) 2018, Bin Meng <bmeng.cn@gmail.com>
++
++obj-y	+= llep.o
+diff --git a/board/emulation/llep/llep.c b/board/emulation/llep/llep.c
+new file mode 100644
+index 0000000000..bf0693c062
+--- /dev/null
++++ b/board/emulation/llep/llep.c
+@@ -0,0 +1,50 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2018, Hanyuan Zhao <zhaohy22@mails.tsinghua.edu.cn>
++ */
++
++#include <common.h>
++#include <dm.h>
++#include <dm/ofnode.h>
++#include <env.h>
++#include <fdtdec.h>
++#include <image.h>
++#include <log.h>
++#include <spl.h>
++#include <init.h>
++
++DECLARE_GLOBAL_DATA_PTR;
++
++int board_init(void)
++{
++    return 0;
++}
++
++int board_late_init(void)
++{
++
++    return 0;
++}
++
++#ifdef CONFIG_SPL
++u32 spl_boot_device(void)
++{
++	/* RISC-V QEMU only supports RAM as SPL boot device */
++	return BOOT_DEVICE_RAM;
++}
++#endif
++
++#ifdef CONFIG_SPL_LOAD_FIT
++int board_fit_config_name_match(const char *name)
++{
++	/* boot using first FIT config */
++	return 0;
++}
++#endif
++
++void *board_fdt_blob_setup(int *err)
++{
++    *err = 0;
++    /* Stored the DTB address there during our init */
++    return (void *)(ulong)gd->arch.firmware_fdt_addr;
++}
+diff --git a/include/configs/llep.h b/include/configs/llep.h
+new file mode 100644
+index 0000000000..363bd3a065
+--- /dev/null
++++ b/include/configs/llep.h
+@@ -0,0 +1,32 @@
++/* SPDX-License-Identifier: GPL-2.0+ */
++/*
++ * Copyright (C) 2024, Hanyuan Zhao <zhaohy22@mails.tsinghua.edu.cn>
++ */
++
++#ifndef __CONFIG_H
++#define __CONFIG_H
++
++#include <linux/sizes.h>
++
++#define CFG_SYS_SDRAM_BASE		0x02000000
++
++/* Environment options */
++
++#define CFG_STD_DEVICES_SETTINGS	"stdin=serial,usbkbd\0" \
++					"stdout=serial,vidconsole\0" \
++					"stderr=serial,vidconsole\0"
++
++#define BOOT_TARGET_DEVICES(func)
++
++#include <config_distro_bootcmd.h>
++
++#define CFG_EXTRA_ENV_SETTINGS \
++	CFG_STD_DEVICES_SETTINGS \
++	"fdt_high=0xffffffffffffffff\0" \
++	"initrd_high=0xffffffffffffffff\0" \
++	"kernel_addr_r=0x05a00000\0" \
++	"kernel_comp_addr_r=0x09000000\0" \
++	"kernel_comp_size=0x4000000\0" \
++	BOOTENV
++
++#endif /* __CONFIG_H */
+-- 
+2.34.1
+

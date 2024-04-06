@@ -1,0 +1,49 @@
+From ac215ff7f412ac0e9b8c19256618a3a941238525 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Sat, 17 Feb 2024 19:25:25 +0800
+Subject: [PATCH 08/15] configs: lower the size of console buffers to avoid
+ calloc fail
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ .config | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/.config b/.config
+index f34000cb7b..d3462f079d 100644
+--- a/.config
++++ b/.config
+@@ -4,7 +4,7 @@
+ #
+ 
+ #
+-# Compiler: gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
++# Compiler: riscv32-buildroot-linux-gnu-gcc.br_real (Buildroot -ge725bb3-dirty) 12.3.0
+ #
+ CONFIG_CREATE_ARCH_SYMLINK=y
+ CONFIG_SYS_CACHE_SHIFT_6=y
+@@ -123,7 +123,7 @@ CONFIG_STACK_SIZE_SHIFT=14
+ CONFIG_LOCALVERSION=""
+ CONFIG_LOCALVERSION_AUTO=y
+ CONFIG_CC_IS_GCC=y
+-CONFIG_GCC_VERSION=110400
++CONFIG_GCC_VERSION=120300
+ CONFIG_CLANG_VERSION=0
+ CONFIG_CC_OPTIMIZE_FOR_SIZE=y
+ # CONFIG_CC_OPTIMIZE_FOR_SPEED is not set
+@@ -251,10 +251,10 @@ CONFIG_DEFAULT_FDT_FILE=""
+ CONFIG_MENU=y
+ CONFIG_CONSOLE_RECORD=y
+ CONFIG_CONSOLE_RECORD_INIT_F=y
+-CONFIG_CONSOLE_RECORD_OUT_SIZE=0x6000
++CONFIG_CONSOLE_RECORD_OUT_SIZE=0x800
+ CONFIG_CONSOLE_RECORD_OUT_SIZE_F=0x400
+ CONFIG_CONSOLE_RECORD_IN_SIZE=0x100
+-CONFIG_SYS_CBSIZE=1024
++CONFIG_SYS_CBSIZE=256
+ CONFIG_SYS_PBSIZE=1044
+ # CONFIG_DISABLE_CONSOLE is not set
+ CONFIG_LOGLEVEL=4
+-- 
+2.34.1
+

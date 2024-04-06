@@ -1,0 +1,88 @@
+From c8d82649d27495106b1e618b87ade96ab50cd690 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Sat, 17 Feb 2024 21:24:22 +0800
+Subject: [PATCH 10/15] cli: allow users to determine history buffer allocation
+ method
+
+This commit allows users to choose the appropriate memory
+allocation method between static allocated and dynamically
+calloc. The previous static-array way will not obviously
+contribute to the final binary size since it is uninitialized,
+and might have better performance than the dynamical one.
+Now we provide the users with both the two options.
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ cmd/Kconfig           |  8 ++++++++
+ common/cli_readline.c | 23 ++++++++++++++++-------
+ 2 files changed, 24 insertions(+), 7 deletions(-)
+
+diff --git a/cmd/Kconfig b/cmd/Kconfig
+index af4dbc95fc..d0140b6cbe 100644
+--- a/cmd/Kconfig
++++ b/cmd/Kconfig
+@@ -190,6 +190,14 @@ config CMD_HISTORY
+ 	  Show the command-line history, i.e. a list of commands that are in
+ 	  the history buffer.
+ 
++config CMD_HISTORY_USE_CALLOC
++	bool "dynamically allocate memory"
++	default y
++	depends on CMD_HISTORY
++	help
++	  Saying Y to this will use calloc to get the space for history
++	  storing. Or it will be compiled as a static array.
++
+ config CMD_LICENSE
+ 	bool "license"
+ 	select BUILD_BIN2C
+diff --git a/common/cli_readline.c b/common/cli_readline.c
+index eec6d8b0a2..a945cbf7cf 100644
+--- a/common/cli_readline.c
++++ b/common/cli_readline.c
+@@ -87,26 +87,35 @@ static int hist_add_idx;
+ static int hist_cur = -1;
+ static unsigned hist_num;
+ 
++#ifndef CONFIG_CMD_HISTORY_USE_CALLOC
++static char hist_data[HIST_MAX][HIST_SIZE + 1];
++#endif
+ static char *hist_list[HIST_MAX];
+ 
+ #define add_idx_minus_one() ((hist_add_idx == 0) ? hist_max : hist_add_idx-1)
+ 
+ static int hist_init(void)
+ {
+-	unsigned char *hist;
+ 	int i;
+ 
+-	hist_max = 0;
+-	hist_add_idx = 0;
+-	hist_cur = -1;
+-	hist_num = 0;
+-
+-	hist = calloc(HIST_MAX, HIST_SIZE + 1);
++#ifndef CONFIG_CMD_HISTORY_USE_CALLOC
++	for (i = 0; i < HIST_MAX; i++) {
++		hist_list[i] = hist_data[i];
++		hist_list[i][0] = '\0';
++	}
++#else
++	unsigned char *hist = calloc(HIST_MAX, HIST_SIZE + 1);
+ 	if (!hist)
+ 		panic("%s: calloc: out of memory!\n", __func__);
+ 
+ 	for (i = 0; i < HIST_MAX; i++)
+ 		hist_list[i] = hist + (i * (HIST_SIZE + 1));
++#endif
++
++	hist_max = 0;
++	hist_add_idx = 0;
++	hist_cur = -1;
++	hist_num = 0;
+ 
+ 	return 0;
+ }
+-- 
+2.34.1
+

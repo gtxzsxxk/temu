@@ -1,0 +1,78 @@
+From 16588b18d06247cc0c4f101b8fbc1c1135c6beae Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Fri, 16 Feb 2024 22:30:10 +0800
+Subject: [PATCH 03/15] configs: enlarge the malloc f len, set up dtc with
+ embedding, logging and uart
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ .config | 23 ++++++++++++++++-------
+ 1 file changed, 16 insertions(+), 7 deletions(-)
+
+diff --git a/.config b/.config
+index b67b8bc4a3..2dd7c4c733 100644
+--- a/.config
++++ b/.config
+@@ -39,14 +39,14 @@ CONFIG_USE_ARCH_MEMMOVE=y
+ CONFIG_USE_ARCH_MEMSET=y
+ CONFIG_TEXT_BASE=0x03000000
+ CONFIG_SYS_MALLOC_LEN=0x8000
+-CONFIG_SYS_MALLOC_F_LEN=0x400
++CONFIG_SYS_MALLOC_F_LEN=0x4000
+ CONFIG_NR_DRAM_BANKS=1
+ CONFIG_ENV_SOURCE_FILE=""
+ CONFIG_HAS_CUSTOM_SYS_INIT_SP_ADDR=y
+ CONFIG_CUSTOM_SYS_INIT_SP_ADDR=0x03800000
+ CONFIG_ENV_SIZE=0x2000
+ # CONFIG_DM_GPIO is not set
+-CONFIG_DEFAULT_DEVICE_TREE="qemu-virt32"
++CONFIG_DEFAULT_DEVICE_TREE="llep"
+ CONFIG_SPL_TEXT_BASE=0x04000000
+ CONFIG_BOARD_SPECIFIC_OPTIONS=y
+ # CONFIG_OF_LIBFDT_OVERLAY is not set
+@@ -279,7 +279,16 @@ CONFIG_CONSOLE_FLUSH_SUPPORT=y
+ #
+ # Logging
+ #
+-# CONFIG_LOG is not set
++CONFIG_LOG=y
++CONFIG_LOG_MAX_LEVEL=9
++CONFIG_LOG_DEFAULT_LEVEL=9
++CONFIG_LOG_CONSOLE=y
++# CONFIG_LOGF_FILE is not set
++# CONFIG_LOGF_LINE is not set
++# CONFIG_LOGF_FUNC is not set
++CONFIG_LOGF_FUNC_PAD=20
++# CONFIG_LOG_SYSLOG is not set
++# CONFIG_LOG_ERROR_RETURN is not set
+ 
+ #
+ # Init options
+@@ -612,12 +621,12 @@ CONFIG_SUPPORT_OF_CONTROL=y
+ CONFIG_OF_CONTROL=y
+ CONFIG_OF_REAL=y
+ # CONFIG_OF_LIVE is not set
+-CONFIG_OF_SEPARATE=y
+-# CONFIG_OF_EMBED is not set
++# CONFIG_OF_SEPARATE is not set
++CONFIG_OF_EMBED=y
+ # CONFIG_OF_BOARD is not set
+ # CONFIG_OF_OMIT_DTB is not set
+ CONFIG_DEVICE_TREE_INCLUDES=""
+-CONFIG_OF_LIST="qemu-virt32"
++CONFIG_OF_LIST="llep"
+ # CONFIG_MULTI_DTB_FIT is not set
+ CONFIG_OF_TAG_MIGRATE=y
+ # CONFIG_OF_DTB_PROPS_REMOVE is not set
+@@ -1094,7 +1103,7 @@ CONFIG_SERIAL_PUTS=y
+ CONFIG_DEBUG_UART_NS16550=y
+ CONFIG_DEBUG_UART_SHIFT=0
+ # CONFIG_DEBUG_UART_ANNOUNCE is not set
+-CONFIG_DEBUG_UART_SKIP_INIT=y
++# CONFIG_DEBUG_UART_SKIP_INIT is not set
+ # CONFIG_DEBUG_UART_NS16550_CHECK_ENABLED is not set
+ # CONFIG_ALTERA_JTAG_UART is not set
+ # CONFIG_ALTERA_UART is not set
+-- 
+2.34.1
+
