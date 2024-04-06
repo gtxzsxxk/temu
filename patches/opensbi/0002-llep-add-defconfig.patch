@@ -1,0 +1,48 @@
+From 130266ae09f397ccb7f5a5dc58273821f897ca85 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Wed, 14 Feb 2024 17:18:12 +0800
+Subject: [PATCH 02/12] llep: add defconfig
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ platform/llep/configs/defconfig | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+
+diff --git a/platform/llep/configs/defconfig b/platform/llep/configs/defconfig
+index e69de29..b3e442d 100644
+--- a/platform/llep/configs/defconfig
++++ b/platform/llep/configs/defconfig
+@@ -0,0 +1,30 @@
++FW_TEXT_START=0x00000000
++PLATFORM_RISCV_XLEN=32
++
++# SBI Extension Support
++CONFIG_SBI_ECALL_TIME=y
++CONFIG_SBI_ECALL_DBCN=y
++CONFIG_SBI_ECALL_LEGACY=y
++CONFIG_SBI_ECALL_VENDOR=y
++
++# Utils and Drivers Support
++CONFIG_FDT=y
++CONFIG_FDT_DOMAIN=y
++CONFIG_FDT_PMU=y
++
++# Serial Device Support
++CONFIG_FDT_SERIAL=y
++CONFIG_FDT_SERIAL_UART8250=y
++CONFIG_SERIAL_UART8250=y
++
++# Regmap Support
++CONFIG_FDT_REGMAP=y
++CONFIG_FDT_REGMAP_SYSCON=y
++CONFIG_REGMAP=y
++
++CONFIG_LIBFDT=y
++
++# Interrupt Controller Support
++CONFIG_IRQCHIP_PLIC=y
++
++
+-- 
+2.34.1
+

@@ -1,0 +1,305 @@
+From 70323125192440d6042236d2fe2abbd31254be19 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Wed, 14 Feb 2024 17:09:54 +0800
+Subject: [PATCH 01/12] platform: add platform Low-speed Linux Experimental
+ Platform
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ platform/llep/Kconfig           |  16 ++++
+ platform/llep/configs/defconfig |   0
+ platform/llep/objects.mk        |  87 +++++++++++++++++
+ platform/llep/platform.c        | 160 ++++++++++++++++++++++++++++++++
+ 4 files changed, 263 insertions(+)
+ create mode 100644 platform/llep/Kconfig
+ create mode 100644 platform/llep/configs/defconfig
+ create mode 100644 platform/llep/objects.mk
+ create mode 100644 platform/llep/platform.c
+
+diff --git a/platform/llep/Kconfig b/platform/llep/Kconfig
+new file mode 100644
+index 0000000..d73825d
+--- /dev/null
++++ b/platform/llep/Kconfig
+@@ -0,0 +1,16 @@
++# SPDX-License-Identifier: BSD-2-Clause
++
++#
++# All mandatory drivers or libraries for this platform should
++# be directly selected by the PLATFORM_xyz kconfig symbol.
++#
++# All optional drivers or libraries for this platform should
++# be enabled via configs/defconfig of this platform.
++#
++config PLATFORM_TEMPLATE
++	bool
++	select IPI_MSWI
++	select IRQCHIP_PLIC
++	select SERIAL_UART8250
++	select TIMER_MTIMER
++	default y
+diff --git a/platform/llep/configs/defconfig b/platform/llep/configs/defconfig
+new file mode 100644
+index 0000000..e69de29
+diff --git a/platform/llep/objects.mk b/platform/llep/objects.mk
+new file mode 100644
+index 0000000..0025928
+--- /dev/null
++++ b/platform/llep/objects.mk
+@@ -0,0 +1,87 @@
++#
++# SPDX-License-Identifier: BSD-2-Clause
++#
++# Copyright (c) 2019 Western Digital Corporation or its affiliates.
++#
++
++# Compiler pre-processor flags
++platform-cppflags-y =
++
++# C Compiler and assembler flags.
++platform-cflags-y =
++platform-asflags-y =
++
++# Linker flags: additional libraries and object files that the platform
++# code needs can be added here
++platform-ldflags-y =
++
++#
++# Command for platform specific "make run"
++# Useful for development and debugging on plaftform simulator (such as QEMU)
++#
++# platform-runcmd = your_platform_run.sh
++
++#
++# Platform RISC-V XLEN, ABI, ISA and Code Model configuration.
++# These are optional parameters but platforms can optionaly provide it.
++# Some of these are guessed based on GCC compiler capabilities
++#
++# PLATFORM_RISCV_XLEN = 64
++# PLATFORM_RISCV_ABI = lp64
++# PLATFORM_RISCV_ISA = rv64imafdc
++# PLATFORM_RISCV_CODE_MODEL = medany
++
++# Space separated list of object file names to be compiled for the platform
++platform-objs-y += platform.o
++
++#
++# If the platform support requires a builtin device tree file, the name of
++# the device tree compiled file should be specified here. The device tree
++# source file be in the form <dt file name>.dts
++#
++# platform-objs-y += <dt file name>.o
++
++# Firmware load address configuration. This is mandatory.
++FW_TEXT_START=0x80000000
++
++# Optional parameter for path to external FDT
++# FW_FDT_PATH="path to platform flattened device tree file"
++
++#
++# Dynamic firmware configuration.
++# Optional parameters are commented out. Uncomment and define these parameters
++# as needed.
++#
++FW_DYNAMIC=<y|n>
++
++#
++# Jump firmware configuration.
++# Optional parameters are commented out. Uncomment and define these parameters
++# as needed.
++#
++FW_JUMP=<y|n>
++# This needs to be 4MB aligned for 32-bit support
++# This needs to be 2MB aligned for 64-bit support
++# ifeq ($(PLATFORM_RISCV_XLEN), 32)
++# FW_JUMP_ADDR=0x80400000
++# else
++# FW_JUMP_ADDR=0x80200000
++# endif
++# FW_JUMP_FDT_ADDR=0x82200000
++
++#
++# Firmware with payload configuration.
++# Optional parameters are commented out. Uncomment and define these parameters
++# as needed.
++#
++FW_PAYLOAD=<y|n>
++# This needs to be 4MB aligned for 32-bit support
++# This needs to be 2MB aligned for 64-bit support
++ifeq ($(PLATFORM_RISCV_XLEN), 32)
++FW_PAYLOAD_OFFSET=0x400000
++else
++FW_PAYLOAD_OFFSET=0x200000
++endif
++# FW_PAYLOAD_ALIGN=0x1000
++# FW_PAYLOAD_PATH="path to next boot stage binary image file"
++# FW_PAYLOAD_FDT_ADDR=0x82200000
+diff --git a/platform/llep/platform.c b/platform/llep/platform.c
+new file mode 100644
+index 0000000..4b3f2ac
+--- /dev/null
++++ b/platform/llep/platform.c
+@@ -0,0 +1,160 @@
++/*
++ * SPDX-License-Identifier: BSD-2-Clause
++ *
++ * Copyright (c) 2019 Western Digital Corporation or its affiliates.
++ */
++
++#include <sbi/riscv_asm.h>
++#include <sbi/riscv_encoding.h>
++#include <sbi/sbi_const.h>
++#include <sbi/sbi_platform.h>
++
++/*
++ * Include these files as needed.
++ * See objects.mk PLATFORM_xxx configuration parameters.
++ */
++#include <sbi_utils/ipi/aclint_mswi.h>
++#include <sbi_utils/irqchip/plic.h>
++#include <sbi_utils/serial/uart8250.h>
++#include <sbi_utils/timer/aclint_mtimer.h>
++
++#define PLATFORM_PLIC_ADDR		0xc000000
++#define PLATFORM_PLIC_SIZE		(0x200000 + \
++					 (PLATFORM_HART_COUNT * 0x1000))
++#define PLATFORM_PLIC_NUM_SOURCES	128
++#define PLATFORM_HART_COUNT		4
++#define PLATFORM_CLINT_ADDR		0x2000000
++#define PLATFORM_ACLINT_MTIMER_FREQ	10000000
++#define PLATFORM_ACLINT_MSWI_ADDR	(PLATFORM_CLINT_ADDR + \
++					 CLINT_MSWI_OFFSET)
++#define PLATFORM_ACLINT_MTIMER_ADDR	(PLATFORM_CLINT_ADDR + \
++					 CLINT_MTIMER_OFFSET)
++#define PLATFORM_UART_ADDR		0x09000000
++#define PLATFORM_UART_INPUT_FREQ	10000000
++#define PLATFORM_UART_BAUDRATE		115200
++
++static struct plic_data plic = {
++	.addr = PLATFORM_PLIC_ADDR,
++	.size = PLATFORM_PLIC_SIZE,
++	.num_src = PLATFORM_PLIC_NUM_SOURCES,
++};
++
++static struct aclint_mswi_data mswi = {
++	.addr = PLATFORM_ACLINT_MSWI_ADDR,
++	.size = ACLINT_MSWI_SIZE,
++	.first_hartid = 0,
++	.hart_count = PLATFORM_HART_COUNT,
++};
++
++static struct aclint_mtimer_data mtimer = {
++	.mtime_freq = PLATFORM_ACLINT_MTIMER_FREQ,
++	.mtime_addr = PLATFORM_ACLINT_MTIMER_ADDR +
++		      ACLINT_DEFAULT_MTIME_OFFSET,
++	.mtime_size = ACLINT_DEFAULT_MTIME_SIZE,
++	.mtimecmp_addr = PLATFORM_ACLINT_MTIMER_ADDR +
++			 ACLINT_DEFAULT_MTIMECMP_OFFSET,
++	.mtimecmp_size = ACLINT_DEFAULT_MTIMECMP_SIZE,
++	.first_hartid = 0,
++	.hart_count = PLATFORM_HART_COUNT,
++	.has_64bit_mmio = true,
++};
++
++/*
++ * Platform early initialization.
++ */
++static int platform_early_init(bool cold_boot)
++{
++	return 0;
++}
++
++/*
++ * Platform final initialization.
++ */
++static int platform_final_init(bool cold_boot)
++{
++	return 0;
++}
++
++/*
++ * Initialize the platform console.
++ */
++static int platform_console_init(void)
++{
++	/* Example if the generic UART8250 driver is used */
++	return uart8250_init(PLATFORM_UART_ADDR, PLATFORM_UART_INPUT_FREQ,
++			     PLATFORM_UART_BAUDRATE, 0, 1, 0);
++}
++
++/*
++ * Initialize the platform interrupt controller for current HART.
++ */
++static int platform_irqchip_init(bool cold_boot)
++{
++	u32 hartid = current_hartid();
++	int ret;
++
++	/* Example if the generic PLIC driver is used */
++	if (cold_boot) {
++		ret = plic_cold_irqchip_init(&plic);
++		if (ret)
++			return ret;
++	}
++
++	return plic_warm_irqchip_init(&plic, 2 * hartid, 2 * hartid + 1);
++}
++
++/*
++ * Initialize IPI for current HART.
++ */
++static int platform_ipi_init(bool cold_boot)
++{
++	int ret;
++
++	/* Example if the generic ACLINT driver is used */
++	if (cold_boot) {
++		ret = aclint_mswi_cold_init(&mswi);
++		if (ret)
++			return ret;
++	}
++
++	return aclint_mswi_warm_init();
++}
++
++/*
++ * Initialize platform timer for current HART.
++ */
++static int platform_timer_init(bool cold_boot)
++{
++	int ret;
++
++	/* Example if the generic ACLINT driver is used */
++	if (cold_boot) {
++		ret = aclint_mtimer_cold_init(&mtimer, NULL);
++		if (ret)
++			return ret;
++	}
++
++	return aclint_mtimer_warm_init();
++}
++
++/*
++ * Platform descriptor.
++ */
++const struct sbi_platform_operations platform_ops = {
++	.early_init		= platform_early_init,
++	.final_init		= platform_final_init,
++	.console_init		= platform_console_init,
++	.irqchip_init		= platform_irqchip_init,
++	.ipi_init		= platform_ipi_init,
++	.timer_init		= platform_timer_init
++};
++const struct sbi_platform platform = {
++	.opensbi_version	= OPENSBI_VERSION,
++	.platform_version	= SBI_PLATFORM_VERSION(0x0, 0x00),
++	.name			= "platform-name",
++	.features		= SBI_PLATFORM_DEFAULT_FEATURES,
++	.hart_count		= 1,
++	.hart_stack_size	= SBI_PLATFORM_DEFAULT_HART_STACK_SIZE,
++	.heap_size		= SBI_PLATFORM_DEFAULT_HEAP_SIZE(1),
++	.platform_ops_addr	= (unsigned long)&platform_ops
++};
+-- 
+2.34.1
+

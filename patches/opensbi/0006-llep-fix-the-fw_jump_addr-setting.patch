@@ -1,0 +1,28 @@
+From 86f1f39c7c6694d6f887418dc60b5f58b8b33717 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Wed, 14 Feb 2024 17:31:57 +0800
+Subject: [PATCH 06/12] llep: fix the fw_jump_addr setting
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ platform/llep/objects.mk | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
+
+diff --git a/platform/llep/objects.mk b/platform/llep/objects.mk
+index 13915d7..d7ca099 100644
+--- a/platform/llep/objects.mk
++++ b/platform/llep/objects.mk
+@@ -52,9 +52,4 @@ PLATFORM_RISCV_XLEN=32
+ #
+ FW_JUMP=y
+ # This needs to be 4MB aligned for 32-bit support
+-# This needs to be 2MB aligned for 64-bit support
+-ifeq ($(PLATFORM_RISCV_XLEN), 32)
+-	FW_JUMP_ADDR=0x80400000
+-else
+-	FW_JUMP_ADDR=0x80200000
+-endif
++FW_JUMP_ADDR=0x02400000
+-- 
+2.34.1
+

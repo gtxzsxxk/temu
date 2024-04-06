@@ -1,0 +1,81 @@
+From 21a2588c924687653118604b37b4ab76ef3b5961 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Wed, 14 Feb 2024 17:27:59 +0800
+Subject: [PATCH 04/12] llep: set up fw_jump to have firmware output
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ platform/llep/configs/defconfig |  3 ---
+ platform/llep/objects.mk        | 37 +++++----------------------------
+ 2 files changed, 5 insertions(+), 35 deletions(-)
+
+diff --git a/platform/llep/configs/defconfig b/platform/llep/configs/defconfig
+index b3e442d..f0eb7b7 100644
+--- a/platform/llep/configs/defconfig
++++ b/platform/llep/configs/defconfig
+@@ -1,6 +1,3 @@
+-FW_TEXT_START=0x00000000
+-PLATFORM_RISCV_XLEN=32
+-
+ # SBI Extension Support
+ CONFIG_SBI_ECALL_TIME=y
+ CONFIG_SBI_ECALL_DBCN=y
+diff --git a/platform/llep/objects.mk b/platform/llep/objects.mk
+index 0025928..93601b5 100644
+--- a/platform/llep/objects.mk
++++ b/platform/llep/objects.mk
+@@ -42,46 +42,19 @@ platform-objs-y += platform.o
+ # platform-objs-y += <dt file name>.o
+ 
+ # Firmware load address configuration. This is mandatory.
+-FW_TEXT_START=0x80000000
+-
+-# Optional parameter for path to external FDT
+-# FW_FDT_PATH="path to platform flattened device tree file"
+-
+-#
+-# Dynamic firmware configuration.
+-# Optional parameters are commented out. Uncomment and define these parameters
+-# as needed.
+-#
+-FW_DYNAMIC=<y|n>
++FW_TEXT_START=0x00000000
++PLATFORM_RISCV_XLEN=32
+ 
+ #
+ # Jump firmware configuration.
+ # Optional parameters are commented out. Uncomment and define these parameters
+ # as needed.
+ #
+-FW_JUMP=<y|n>
+-# This needs to be 4MB aligned for 32-bit support
+-# This needs to be 2MB aligned for 64-bit support
+-# ifeq ($(PLATFORM_RISCV_XLEN), 32)
+-# FW_JUMP_ADDR=0x80400000
+-# else
+-# FW_JUMP_ADDR=0x80200000
+-# endif
+-# FW_JUMP_FDT_ADDR=0x82200000
+-
+-#
+-# Firmware with payload configuration.
+-# Optional parameters are commented out. Uncomment and define these parameters
+-# as needed.
+-#
+-FW_PAYLOAD=<y|n>
++FW_JUMP=y
+ # This needs to be 4MB aligned for 32-bit support
+ # This needs to be 2MB aligned for 64-bit support
+ ifeq ($(PLATFORM_RISCV_XLEN), 32)
+-FW_PAYLOAD_OFFSET=0x400000
++	FW_JUMP_ADDR=0x80400000
+ else
+-FW_PAYLOAD_OFFSET=0x200000
++	FW_JUMP_ADDR=0x80200000
+ endif
+-# FW_PAYLOAD_ALIGN=0x1000
+-# FW_PAYLOAD_PATH="path to next boot stage binary image file"
+-# FW_PAYLOAD_FDT_ADDR=0x82200000
+-- 
+2.34.1
+

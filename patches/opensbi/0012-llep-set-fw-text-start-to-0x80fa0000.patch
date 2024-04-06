@@ -1,0 +1,34 @@
+From 6d29e2b00bf974bc34ec6d800e996ea43ca4c45f Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Tue, 27 Feb 2024 12:16:07 +0800
+Subject: [PATCH 12/12] llep: set fw text start to 0x80fa0000
+
+We should move it to higher position in memory
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ platform/llep/objects.mk | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/platform/llep/objects.mk b/platform/llep/objects.mk
+index 875f9ff..2a9a495 100644
+--- a/platform/llep/objects.mk
++++ b/platform/llep/objects.mk
+@@ -42,7 +42,7 @@ FW_PIC=y
+ # platform-objs-y += <dt file name>.o
+ 
+ # Firmware load address configuration. This is mandatory.
+-FW_TEXT_START=0x80dc0000
++FW_TEXT_START=0x80fa0000
+ PLATFORM_RISCV_XLEN=32
+ PLATFORM_RISCV_ISA=rv32ima_zicsr_zifencei
+ 
+@@ -54,4 +54,4 @@ PLATFORM_RISCV_ISA=rv32ima_zicsr_zifencei
+ FW_JUMP=y
+ # This needs to be 4MB aligned for 32-bit support
+ FW_JUMP_ADDR=0x80000000
+-FW_JUMP_FDT_ADDR=0x80dfd800
++FW_JUMP_FDT_ADDR=0x80ffd800
+-- 
+2.34.1
+

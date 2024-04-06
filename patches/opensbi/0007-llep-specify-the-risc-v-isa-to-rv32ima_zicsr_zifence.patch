@@ -1,0 +1,25 @@
+From 37904cd3cd0bb351269a8011bb792400699a1c7a Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Wed, 14 Feb 2024 20:46:50 +0800
+Subject: [PATCH 07/12] llep: specify the risc-v isa to rv32ima_zicsr_zifencei
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ platform/llep/objects.mk | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/platform/llep/objects.mk b/platform/llep/objects.mk
+index d7ca099..7216356 100644
+--- a/platform/llep/objects.mk
++++ b/platform/llep/objects.mk
+@@ -44,6 +44,7 @@ platform-objs-y += platform.o
+ # Firmware load address configuration. This is mandatory.
+ FW_TEXT_START=0x02000000
+ PLATFORM_RISCV_XLEN=32
++PLATFORM_RISCV_ISA=rv32ima_zicsr_zifencei
+ 
+ #
+ # Jump firmware configuration.
+-- 
+2.34.1
+

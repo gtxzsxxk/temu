@@ -1,0 +1,24 @@
+From 48f8c2734d50867b2a1fce5d267c8d81363681ab Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Mon, 19 Feb 2024 00:42:11 +0800
+Subject: [PATCH 09/12] llep: set fw_jump address to 0x02004b00 due to the rare
+ 16MiB system
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ platform/llep/objects.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/platform/llep/objects.mk b/platform/llep/objects.mk
+index 2cf9072..637b3e9 100644
+--- a/platform/llep/objects.mk
++++ b/platform/llep/objects.mk
+@@ -53,4 +53,4 @@ PLATFORM_RISCV_ISA=rv32ima_zicsr_zifencei
+ #
+ FW_JUMP=y
+ # This needs to be 4MB aligned for 32-bit support
+-FW_JUMP_ADDR=0x03000000
++FW_JUMP_ADDR=0x0204B000
+-- 
+2.34.1
+

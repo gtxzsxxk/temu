@@ -1,0 +1,22 @@
+From 1a40c05914f48a6e5851b42d73e63f4d6f400cff Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Mon, 19 Feb 2024 13:39:11 +0800
+Subject: [PATCH 10/12] llep: pass fdt address @ 0x02048800
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ platform/llep/objects.mk | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/platform/llep/objects.mk b/platform/llep/objects.mk
+index 637b3e9..96f1ca3 100644
+--- a/platform/llep/objects.mk
++++ b/platform/llep/objects.mk
+@@ -54,3 +54,4 @@ PLATFORM_RISCV_ISA=rv32ima_zicsr_zifencei
+ FW_JUMP=y
+ # This needs to be 4MB aligned for 32-bit support
+ FW_JUMP_ADDR=0x0204B000
++FW_JUMP_FDT_ADDR=0x02048800
+-- 
+2.34.1
+

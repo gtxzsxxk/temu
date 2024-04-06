@@ -1,0 +1,27 @@
+From ca2b78de0f778d59c6365f8eb9cd9e205a741854 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Wed, 14 Feb 2024 17:28:38 +0800
+Subject: [PATCH 05/12] llep: opensbi should run in ram which starts at
+ 0x0200_0000
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ platform/llep/objects.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/platform/llep/objects.mk b/platform/llep/objects.mk
+index 93601b5..13915d7 100644
+--- a/platform/llep/objects.mk
++++ b/platform/llep/objects.mk
+@@ -42,7 +42,7 @@ platform-objs-y += platform.o
+ # platform-objs-y += <dt file name>.o
+ 
+ # Firmware load address configuration. This is mandatory.
+-FW_TEXT_START=0x00000000
++FW_TEXT_START=0x02000000
+ PLATFORM_RISCV_XLEN=32
+ 
+ #
+-- 
+2.34.1
+
