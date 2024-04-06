@@ -4,10 +4,13 @@
 
 - [快餐：进入内核演示](#jumping-to-kernel)
 - [存储器与内存映射](#内存映射)
+- [B站视频演示](https://www.bilibili.com/video/BV1s2421P7rZ)
 
 ## Description
 
-该项目是一个基于`C`语言编写的`RISC-V`模拟器，支持`rv32ima_zicsr_zicnt_sstc`架构和`sv32`内存分页结构。模拟器实现了**指令级别**的模拟，即使用`C`执行其描述的内存操作与运算等。本模拟器虚拟了SoC的常见体系结构，支持运行主线`Linux`。我们模拟的SoC，在本文档中，都会基于`OpenSBI`+`U-Boot`的方式来进行内核启动前的工作。
+该项目是一个基于`C`语言编写的`RISC-V`模拟器，支持`rv32ima_zicsr_zicnt_sstc`架构和`sv32`内存分页结构。
+模拟器实现了**指令级别**的模拟，即使用`C`**解释**执行其描述的内存操作与运算等。本模拟器虚拟了SoC的常见体系结构，
+支持运行主线`Linux`。我们模拟的SoC，在本文档中，都会基于`OpenSBI`+`U-Boot`的方式来进行内核启动前的工作。
 
 ## Getting Started
 
@@ -17,7 +20,7 @@
 * `cmake`工具链
 * `mkimage` (Optional)
 * `riscv-gnu-toolchain`(Optional，如果你希望自己编译`RISC-V`平台的目标二进制文件，我这里使用`buildroot`制作的`riscv32-buildroot-linux-gnu-`作为我的交叉编译工具链)
-* 本模拟器目前只支持在Linux下完成编译
+* (WIP) 将此项目的代码移植到`WINDOWS`以及`OSX`平台
 
 ### Compiling
 
@@ -314,7 +317,29 @@ hart isa        : rv32ima
 
 ### CPU Architect
 
+我们没有对微架构的描述，因为我们是解释执行指令，所以简化了许多微架构设计的内容。本项目模拟的SoC没有缓存（后续会加上），
+也不存在任何总线，我们对SoC的仿真类似于操作系统中的宏内核的概念，指令解释与外设模拟都是同时实现的，可以直接调用。
+
+以下是CPU解释执行指令的有关代码：
+- `src/decode.c`：解释并执行指令
+- `src/machine.c`：取指，模拟外设，中断等特权态处理
+- `src/mem.c`：模拟内存控制器对内存进行读写
+- `src/vm.c`：实现对虚拟地址的转换，以及对物理内存的读写
+- `src/zicsr.c`：实现特权架构
+
 #### 支持的ISA
+
+**rv32ima_zicsr_zicnt_sstc**
+
+- `i`：整数指令
+- `m`：硬件乘法
+- `a`：原子指令
+- `zicsr`：特权架构支持
+- `zicnt`：CSR寄存器的计数器支持
+- `sstc`：特权架构`Supervisor`级别定时器中断支持。这个扩展给运行在`Supervisor`模式的软件
+（后续都称为操作系统）也添加了`time`和`timecmp`寄存器，允许操作系统读写这两个寄存器来实现直接在`Supervisor`模式进行处理的
+定时器中断。（如果你学习过`xv6`，你会发现`xv6`只会在`Machine`特权态下处理定时器的中断，并且它还在手册里明确指出了`risc-v`规定
+定时器中断只能在`Machine Mode`下处理。但是如果实现了`sstc`拓展，这个过程可以得到很大的简化。）
 
 ### 内存映射
 
@@ -340,17 +365,55 @@ hart isa        : rv32ima
 
 ### MMU模型
 
+实现`sv32`内存模型。具体的`risc-v`特权态手册里都写了。这个页表就两级，实现起来比较容易。
+
 ### CSR寄存器支持
+
+实现的CSR请参考`include/zicsr.h`，但是真正使用过的CSR是以下几个：
+
+- `sstatus`
+- `sie`
+- `stvec`
+- `sepc`
+- `scause`
+- `stval`
+- `sip`
+- `stimecmp`
+- `stimecmph`
+- `satp`
+- `mstatus`
+- `medeleg`
+- `mideleg`
+- `mie`
+- `mtvec`
+- `mepc`
+- `mcause`
+- `mcause`
+- `mtval`
+- `mip`
+- `scontext`
+- `cycle`
+- `time`
+- `cycleh`
+- `timeh`
+- `mvendorid`
+
+需要注意的是，以上列出的寄存器，只是我们代码中显式调用了的。对于某些软件，你必须实现我们在`include/zicsr.h`的这些寄存器。它必须存在，尽管
+我并没有实现它们具体的功能。
 
 ### 异常与中断
 
-### ZICNT扩展
-
-### SSTC扩展
+(WIP)
 
 ### uart 16550a
 
+(WIP)
+
 ### PLIC中断控制器
+
+(WIP)
+
+我们实现的是`t-head`的`plic`，而不是`sifive`的`plic`控制器。
 
 ## Authors
 
