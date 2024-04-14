@@ -1,7 +1,7 @@
 From 5c5e5156582116772d99ac2b6eb9880ed0fac7da Mon Sep 17 00:00:00 2001
 From: Hanyuan Zhao <hanyuan-z@qq.com>
 Date: Sat, 17 Feb 2024 13:19:50 +0800
-Subject: [PATCH 06/15] dts: add cpus, memory and timer node to support
+Subject: [PATCH 06/18] dts: add cpus, memory and timer node to support
  initcalls
 
 Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>

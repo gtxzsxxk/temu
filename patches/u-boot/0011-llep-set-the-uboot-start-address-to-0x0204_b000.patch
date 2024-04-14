@@ -1,7 +1,7 @@
 From 39cd421ba3637fe401df944b8dd81fe154e8f267 Mon Sep 17 00:00:00 2001
 From: Hanyuan Zhao <hanyuan-z@qq.com>
 Date: Mon, 19 Feb 2024 00:41:01 +0800
-Subject: [PATCH 11/15] llep: set the uboot start address to 0x0204_b000
+Subject: [PATCH 11/18] llep: set the uboot start address to 0x0204_b000
 
 Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
 ---

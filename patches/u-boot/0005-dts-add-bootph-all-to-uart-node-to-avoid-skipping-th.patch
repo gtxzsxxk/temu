@@ -1,7 +1,7 @@
 From 63e7b462972594368d670afaa81c5bf891f83258 Mon Sep 17 00:00:00 2001
 From: Hanyuan Zhao <hanyuan-z@qq.com>
 Date: Fri, 16 Feb 2024 22:44:54 +0800
-Subject: [PATCH 05/15] dts: add bootph-all to uart node to avoid skipping the
+Subject: [PATCH 05/18] dts: add bootph-all to uart node to avoid skipping the
  ns16550 initialization
 
 Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>

@@ -1,7 +1,7 @@
 From 4e147dba9efdca8c0da481c7a818dcc081e87790 Mon Sep 17 00:00:00 2001
 From: Hanyuan Zhao <hanyuan-z@qq.com>
 Date: Tue, 5 Mar 2024 08:02:37 +0800
-Subject: [PATCH 15/15] dts: update llep device tree nodes
+Subject: [PATCH 15/18] dts: update llep device tree nodes
 
 Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
 ---

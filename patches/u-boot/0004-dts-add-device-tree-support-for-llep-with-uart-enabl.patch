@@ -1,7 +1,7 @@
 From d2dbfcbf5723d69e0dd76243c07207052cc01cee Mon Sep 17 00:00:00 2001
 From: Hanyuan Zhao <hanyuan-z@qq.com>
 Date: Fri, 16 Feb 2024 22:31:11 +0800
-Subject: [PATCH 04/15] dts: add device tree support for llep with uart enabled
+Subject: [PATCH 04/18] dts: add device tree support for llep with uart enabled
 
 Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
 ---

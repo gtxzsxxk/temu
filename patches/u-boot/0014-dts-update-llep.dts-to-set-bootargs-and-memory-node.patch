@@ -1,7 +1,7 @@
 From ebb1db8f60c2ceae3569a47ef4da54a959937fcd Mon Sep 17 00:00:00 2001
 From: Hanyuan Zhao <hanyuan-z@qq.com>
 Date: Fri, 1 Mar 2024 12:35:01 +0800
-Subject: [PATCH 14/15] dts: update llep.dts to set bootargs and memory node
+Subject: [PATCH 14/18] dts: update llep.dts to set bootargs and memory node
 
 Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
 ---

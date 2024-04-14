@@ -1,7 +1,7 @@
 From 4d0438d2015d40c413e9dd212074af68bd300f68 Mon Sep 17 00:00:00 2001
 From: Hanyuan Zhao <hanyuan-z@qq.com>
 Date: Fri, 16 Feb 2024 17:38:50 +0800
-Subject: [PATCH 01/15] board: add new board low-speed linux experimental
+Subject: [PATCH 01/18] board: add new board low-speed linux experimental
  platform
 
 Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>

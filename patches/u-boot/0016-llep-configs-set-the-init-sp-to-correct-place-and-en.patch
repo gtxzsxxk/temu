@@ -1,0 +1,36 @@
+From 513824f5d833fed457dbe1f830b105664fc8886f Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Sun, 14 Apr 2024 22:52:47 +0800
+Subject: [PATCH 16/18] llep: configs: set the init sp to correct place and
+ enlarge the bootm length
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ .config | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/.config b/.config
+index e881061cd1..57942e1573 100644
+--- a/.config
++++ b/.config
+@@ -43,7 +43,7 @@ CONFIG_SYS_MALLOC_F_LEN=0x4000
+ CONFIG_NR_DRAM_BANKS=1
+ CONFIG_ENV_SOURCE_FILE=""
+ CONFIG_HAS_CUSTOM_SYS_INIT_SP_ADDR=y
+-CONFIG_CUSTOM_SYS_INIT_SP_ADDR=0x80a00000
++CONFIG_CUSTOM_SYS_INIT_SP_ADDR=0x80800000
+ CONFIG_ENV_SIZE=0x2000
+ # CONFIG_DM_GPIO is not set
+ CONFIG_DEFAULT_DEVICE_TREE="llep"
+@@ -187,7 +187,7 @@ CONFIG_BOOTMETH_VBE_SIMPLE=y
+ CONFIG_BOOTMETH_VBE_SIMPLE_OS=y
+ # CONFIG_BOOTMETH_SCRIPT is not set
+ CONFIG_LEGACY_IMAGE_FORMAT=y
+-CONFIG_SYS_BOOTM_LEN=0x800000
++CONFIG_SYS_BOOTM_LEN=0x990000
+ CONFIG_SUPPORT_RAW_INITRD=y
+ # CONFIG_CHROMEOS is not set
+ # CONFIG_CHROMEOS_VBOOT is not set
+-- 
+2.34.1
+

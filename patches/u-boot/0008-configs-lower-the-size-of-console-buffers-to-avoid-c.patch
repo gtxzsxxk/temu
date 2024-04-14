@@ -1,7 +1,7 @@
 From ac215ff7f412ac0e9b8c19256618a3a941238525 Mon Sep 17 00:00:00 2001
 From: Hanyuan Zhao <hanyuan-z@qq.com>
 Date: Sat, 17 Feb 2024 19:25:25 +0800
-Subject: [PATCH 08/15] configs: lower the size of console buffers to avoid
+Subject: [PATCH 08/18] configs: lower the size of console buffers to avoid
  calloc fail
 
 Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>

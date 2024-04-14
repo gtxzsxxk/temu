@@ -1,7 +1,7 @@
 From c0de634cdb2ae7d123bdf122688c55a720e37f99 Mon Sep 17 00:00:00 2001
 From: Hanyuan Zhao <hanyuan-z@qq.com>
 Date: Sat, 17 Feb 2024 20:39:49 +0800
-Subject: [PATCH 09/15] cli: allow users to disable history if unused at all
+Subject: [PATCH 09/18] cli: allow users to disable history if unused at all
 
 This commit allows user to determine whether to have history recording
 in command-line. Previously the history data as uninitialized static

@@ -1,7 +1,7 @@
 From ec25381efa3e1eefe30e1cf47563b2bd3166f673 Mon Sep 17 00:00:00 2001
 From: Hanyuan Zhao <hanyuan-z@qq.com>
 Date: Fri, 1 Mar 2024 12:34:35 +0800
-Subject: [PATCH 13/15] llep: configs: set RAM base address at 0x80000000 and
+Subject: [PATCH 13/18] llep: configs: set RAM base address at 0x80000000 and
  size to 16MiB and new location
 
 Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>

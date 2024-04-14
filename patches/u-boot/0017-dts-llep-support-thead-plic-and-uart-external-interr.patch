@@ -1,0 +1,60 @@
+From 49e131e34a5258f9307494ee5bcf68a76b76cbb6 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Sun, 14 Apr 2024 22:53:25 +0800
+Subject: [PATCH 17/18] dts: llep: support thead plic and uart external
+ interrupt
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ arch/riscv/dts/llep.dts | 16 +++++++++++++---
+ 1 file changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/arch/riscv/dts/llep.dts b/arch/riscv/dts/llep.dts
+index 94e46f1d9f..9702d06b0c 100644
+--- a/arch/riscv/dts/llep.dts
++++ b/arch/riscv/dts/llep.dts
+@@ -4,7 +4,7 @@
+  */
+ 
+ /dts-v1/;
+-
++#include <dt-bindings/interrupt-controller/irq.h>
+ #include "configs/llep.h"
+ 
+ / {
+@@ -45,6 +45,7 @@
+ 	soc {
+ 		#address-cells = <1>;
+ 		#size-cells = <1>;
++		interrupt-parent = <&plic>;
+ 		compatible = "simple-bus";
+ 		ranges;
+ 
+@@ -52,13 +53,22 @@
+ 			compatible = "snps,dw-apb-uart", "ns16550a", "ns16550", "ns8250";
+ 			reg = <0x12500000 0x100>;
+ 			clock-frequency = <1152000>;
+-			interrupts = <10>;
+ 			reg-shift = <0>;
++			interrupts = <10 IRQ_TYPE_LEVEL_HIGH>;
+ 			reg-io-width = <1>;
+-			interrupt-parent = <&cpu0_intc>;
+ 			status = "okay";
+ 			bootph-all;
+ 		};
++
++		plic: interrupt-controller@c000000 {
++			compatible = "thead,c900-plic";
++			reg = <0xc000000 0x4000000>;
++			interrupts-extended = <&cpu0_intc 11>, <&cpu0_intc 9>;
++			interrupt-controller;
++			#interrupt-cells = <2>;
++			#address-cells = <0>;
++			riscv,ndev = <16>;
++		};
+ 	};
+ 
+ 	memory@80000000 {
+-- 
+2.34.1
+

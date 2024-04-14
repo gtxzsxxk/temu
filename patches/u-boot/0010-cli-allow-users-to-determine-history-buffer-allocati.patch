@@ -1,7 +1,7 @@
 From c8d82649d27495106b1e618b87ade96ab50cd690 Mon Sep 17 00:00:00 2001
 From: Hanyuan Zhao <hanyuan-z@qq.com>
 Date: Sat, 17 Feb 2024 21:24:22 +0800
-Subject: [PATCH 10/15] cli: allow users to determine history buffer allocation
+Subject: [PATCH 10/18] cli: allow users to determine history buffer allocation
  method
 
 This commit allows users to choose the appropriate memory

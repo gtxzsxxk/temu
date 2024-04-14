@@ -1,0 +1,26 @@
+From ffbd44ec4750b74553625c12dd4b555683837b68 Mon Sep 17 00:00:00 2001
+From: Hanyuan Zhao <hanyuan-z@qq.com>
+Date: Sun, 14 Apr 2024 22:54:27 +0800
+Subject: [PATCH 18/18] llep: configs: set sdram size to 32MiB
+
+Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
+---
+ include/configs/llep.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/llep.h b/include/configs/llep.h
+index 88bd0a99d8..3184137296 100644
+--- a/include/configs/llep.h
++++ b/include/configs/llep.h
+@@ -9,7 +9,7 @@
+ #include <linux/sizes.h>
+ 
+ #define CFG_SYS_SDRAM_BASE		0x80000000
+-#define CFG_SYS_SDRAM_SIZE		0x00fa0000
++#define CFG_SYS_SDRAM_SIZE		0x01fa0000
+ #define RISCV_SMODE_TIMER_FREQ		10000
+ 
+ /* Environment options */
+-- 
+2.34.1
+

@@ -1,7 +1,7 @@
 From 16588b18d06247cc0c4f101b8fbc1c1135c6beae Mon Sep 17 00:00:00 2001
 From: Hanyuan Zhao <hanyuan-z@qq.com>
 Date: Fri, 16 Feb 2024 22:30:10 +0800
-Subject: [PATCH 03/15] configs: enlarge the malloc f len, set up dtc with
+Subject: [PATCH 03/18] configs: enlarge the malloc f len, set up dtc with
  embedding, logging and uart
 
 Signed-off-by: Hanyuan Zhao <hanyuan-z@qq.com>
