@@ -1,14 +1,14 @@
 //
 // Created by hanyuan on 2024/2/8.
 //
-#include <termios.h>
-#include <unistd.h>
+
 #include "machine.h"
 #include "mem.h"
 #include "decode.h"
 #include "uart8250.h"
 #include "trap.h"
 #include "zicsr.h"
+#include "port/console.h"
 
 //#define RISCV_DEBUG
 //#define RISCV_ISA_TESTS
@@ -51,7 +51,7 @@ _Noreturn void machine_start(uint32_t start, int printreg) {
 static void machine_pre_boot(uint32_t start) {
     program_counter = start;
 
-    set_terminal();
+    port_os_console_init();
     uart8250_init();
 }
 
@@ -86,12 +86,4 @@ static void machine_debug(uint32_t instruction, int printreg) {
     }
 #endif
 #endif
-}
-
-static void set_terminal(void) {
-    static struct termios tm;
-    tcgetattr(STDIN_FILENO, &tm);
-    cfmakeraw(&tm);
-    tm.c_lflag &= ~(ICANON);
-    tcsetattr(STDIN_FILENO, TCSANOW, &tm);
 }
