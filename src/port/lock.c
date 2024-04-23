@@ -36,4 +36,22 @@ void port_lock_lock(PORT_LOCK_T *lock, char is_write) {
     pthread_spin_lock(lock);
 }
 
+#elif defined(WIN64) || defined(WIN32)
+
+int port_lock_init(PORT_LOCK_T *lock) {
+    return pthread_spin_init(lock, 0);
+}
+
+void port_lock_unlock(PORT_LOCK_T *lock) {
+    pthread_spin_unlock(lock);
+}
+
+void port_lock_lock(PORT_LOCK_T *lock, char is_write) {
+    pthread_spin_lock(lock);
+}
+
+#else
+
+#error No support porting for lock in current platform.
+
 #endif
