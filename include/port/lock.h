@@ -9,7 +9,7 @@
 
 #if defined(__APPLE__)
 #define PORT_LOCK_T pthread_rwlock_t
-#elif defined(__linux__)
+#else
 #define PORT_LOCK_T pthread_spinlock_t
 #endif
 

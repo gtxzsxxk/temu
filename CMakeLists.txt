@@ -4,9 +4,6 @@ project(temu C)
 set(CMAKE_C_STANDARD 11)
 
 include_directories(include)
-include_directories(lib)
-include_directories(src)
-include_directories(src/*)
 
 add_executable(temu src/main.c
         src/mem.c
@@ -23,4 +20,8 @@ add_executable(temu src/main.c
         src/peripherals/plic-simple.c
         include/plic-simple.h
         src/port/lock.c
-        include/port/lock.h)
+        include/port/lock.h
+        src/port/load_binary.c
+        include/port/load_binary.h
+        src/port/console.c
+        include/port/console.h)
