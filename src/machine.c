@@ -1,7 +1,7 @@
 //
 // Created by hanyuan on 2024/2/8.
 //
-#include <termios.h>
+
 #include <unistd.h>
 #include "machine.h"
 #include "mem.h"
@@ -146,9 +146,5 @@ static void machine_debug(uint32_t instruction, int printreg) {
 }
 
 static void set_terminal(void) {
-    static struct termios tm;
-    tcgetattr(STDIN_FILENO, &tm);
-    cfmakeraw(&tm);
-    tm.c_lflag &= ~(ICANON);
-    tcsetattr(STDIN_FILENO, TCSANOW, &tm);
+
 }

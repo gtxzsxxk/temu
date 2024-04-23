@@ -9,8 +9,8 @@
 
 #if defined(__APPLE__)
 #define PORT_LOCK_T pthread_rwlock_t
-#elif defined(__linux__)
-#define PORTLOCK_T pthread_spinlock_t
+#else
+#define PORT_LOCK_T pthread_spinlock_t
 #endif
 
 int port_lock_init(PORT_LOCK_T *lock);
