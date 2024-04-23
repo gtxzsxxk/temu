@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <pthread.h>
+#include "port/lock.h"
 #include "uart8250.h"
 #include "plic-simple.h"
 
@@ -55,22 +55,22 @@ uint8_t tx_fifo_tail = 0;
 uint8_t rx_fifo[UART_FIFO_SIZE];
 uint8_t rx_fifo_tail = 0;
 
-pthread_spinlock_t rx_fifo_lock;
+PORT_LOCK_T rx_fifo_lock;
 
 static void throw_interrupt(uint8_t cause);
 
 static void clear_interrupt(uint8_t cause);
 
 static void write_rx_fifo(uint8_t data) {
-    pthread_spin_lock(&rx_fifo_lock);
+    port_lock_lock(&rx_fifo_lock, 1);
     if (rx_fifo_tail < UART_FIFO_SIZE) {
         rx_fifo[rx_fifo_tail++] = data;
     }
-    pthread_spin_unlock(&rx_fifo_lock);
+    port_lock_unlock(&rx_fifo_lock);
 }
 
 static uint8_t read_from_rx_fifo(void) {
-    pthread_spin_lock(&rx_fifo_lock);
+    port_lock_lock(&rx_fifo_lock, 1);
     uint8_t head = rx_fifo[0];
     if (rx_fifo_tail) {
         /* 移位 */
@@ -87,15 +87,15 @@ static uint8_t read_from_rx_fifo(void) {
     if (rx_fifo_tail < FCR_TRIGGER_LEVLEL[FCR_INT_TRIGGER_LEVEL]) {
         clear_interrupt(INT_READ_DATA_AVAILABLE);
     }
-    pthread_spin_unlock(&rx_fifo_lock);
+    port_lock_unlock(&rx_fifo_lock);
     return head;
 }
 
 static void clear_rx_fifo(void) {
     /* TODO: But it doesn’t clear the shift register, i.e. receiving of the current character continues. */
-    pthread_spin_lock(&rx_fifo_lock);
+    port_lock_lock(&rx_fifo_lock, 1);
     rx_fifo_tail = 0;
-    pthread_spin_unlock(&rx_fifo_lock);
+    port_lock_unlock(&rx_fifo_lock);
 }
 
 static void clear_tx_fifo(void) {
@@ -153,9 +153,9 @@ uint8_t uart8250_read_b(uint8_t offset) {
             return MCR;
         case 5:
             scratch = LSR;
-            pthread_spin_lock(&rx_fifo_lock);
+            port_lock_lock(&rx_fifo_lock, 0);
             LSR &= ~(1 << 1);
-            pthread_spin_unlock(&rx_fifo_lock);
+            port_lock_unlock(&rx_fifo_lock);
             clear_interrupt(INT_RECEIVER_LINE_STATUS);
             return scratch;
         case 6:
@@ -176,11 +176,11 @@ void uart8250_write_b(uint8_t offset, uint8_t data) {
                 if (tx_fifo_tail < UART_FIFO_SIZE) {
                     tx_fifo[tx_fifo_tail++] = data;
                     /* 1 << 5: Transmit FIFO empty */
-                    pthread_spin_lock(&rx_fifo_lock);
+                    port_lock_lock(&rx_fifo_lock, 0);
                     LSR &= ~(1 << 5);
                     LSR &= ~(1 << 6);
                     clear_interrupt(INT_TRANSMIT_HOLDING_EMPTY);
-                    pthread_spin_unlock(&rx_fifo_lock);
+                    port_lock_unlock(&rx_fifo_lock);
                 }
             }
             break;
@@ -259,18 +259,18 @@ void uart8250_tick(void) {
             tx_fifo_tail--;
             if (tx_fifo_tail == 0) {
                 /* 1 << 6: Transmitter empty */
-                pthread_spin_lock(&rx_fifo_lock);
+                port_lock_lock(&rx_fifo_lock, 0);
                 LSR |= (1 << 6);
                 fflush(stdout);
-                pthread_spin_unlock(&rx_fifo_lock);
+                port_lock_unlock(&rx_fifo_lock);
             }
         }
         if (!tx_fifo_tail) {
             /* 1 << 5: Transmit FIFO empty */
-            pthread_spin_lock(&rx_fifo_lock);
+            port_lock_lock(&rx_fifo_lock, 0);
             LSR |= (1 << 5);
             throw_interrupt(INT_TRANSMIT_HOLDING_EMPTY);
-            pthread_spin_unlock(&rx_fifo_lock);
+            port_lock_unlock(&rx_fifo_lock);
         }
     } else {
         div_cnt++;
@@ -280,7 +280,7 @@ void uart8250_tick(void) {
 int uart8250_init(void) {
     pthread_t listening_thd;
 
-    pthread_spin_init(&rx_fifo_lock, PTHREAD_PROCESS_PRIVATE);
+    port_lock_init(&rx_fifo_lock);
 
     if (pthread_create(&listening_thd, NULL, uart8250_listening, NULL)) {
         printf("Failed to create uart listening thread\n");
@@ -293,7 +293,7 @@ int uart8250_init(void) {
 _Noreturn void *uart8250_listening(void *ptr) {
     for (;;) {
         int ch = getchar();
-        pthread_spin_lock(&rx_fifo_lock);
+        port_lock_lock(&rx_fifo_lock, 1);
         if (rx_fifo_tail >= UART_FIFO_SIZE - 1) {
             /* FIFO is full */
             LSR |= 1 << 1;
@@ -307,6 +307,6 @@ _Noreturn void *uart8250_listening(void *ptr) {
             LSR &= ~1;
         }
         throw_interrupt(INT_READ_DATA_AVAILABLE);
-        pthread_spin_unlock(&rx_fifo_lock);
+        port_lock_unlock(&rx_fifo_lock);
     }
 }

@@ -20,6 +20,7 @@ add_executable(temu src/main.c
         src/peripherals/uart8250.c
         src/vm.c
         include/vm.h
-        peripherals/plic-simple.c
-        include/plic-simple.h)
         src/peripherals/plic-simple.c
+        include/plic-simple.h
+        src/port/lock.c
+        include/port/lock.h)
