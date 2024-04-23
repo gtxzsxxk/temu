@@ -24,3 +24,5 @@ add_executable(temu src/main.c
         include/plic-simple.h
         src/port/lock.c
         include/port/lock.h)
+        src/port/load_binary.c
+        include/port/load_binary.h

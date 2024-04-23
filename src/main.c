@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "machine.h"
-#include "mem.h"
+#include "port/load_binary.h"
 
 static const char *usage = "Usage: temu [-ram/-rom/-addr 0x02000000] [-printreg] -exec=program.bin [-with=addr#file.bin]\n\n"
                            "Example:\n"
@@ -14,8 +14,6 @@ static const char *usage = "Usage: temu [-ram/-rom/-addr 0x02000000] [-printreg]
                            "--with=0x80000000#u-boot.bin\n"
                            "--with=0x80dfd800#u-boot.dtb\n"
                            "--with=0x80ab5000#uImage.gz\n";
-
-static int load_binary(uint32_t addr, const char *path);
 
 static int with_binary(const char *data);
 
@@ -84,7 +82,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    if (load_binary(start_addr, exec_path) == -1) {
+    if (port_load_binary_from_file(exec_path, start_addr) == -1) {
         printf("%s", usage);
         return -1;
     }
@@ -92,28 +90,9 @@ int main(int argc, char **argv) {
     machine_start(start_addr, printreg);
 }
 
-static int load_binary(uint32_t addr, const char *path) {
-    int mem_ptr_flag;
-    FILE *fp = fopen(path, "r");
-    if (!fp) {
-        printf("Failed to access %s\r\n", path);
-        return -1;
-    }
-
-
-    uint8_t *mem_ptr = pm_get_ptr(addr, &mem_ptr_flag);
-    if (mem_ptr_flag == -1) {
-        printf("Failed to access memory at 0x%08x\r\n", addr);
-        return -1;
-    }
-    fread(mem_ptr, mem_ptr_flag == MEM_PTR_RAM ? RAM_SIZE : ROM_SIZE - addr, 1, fp);
-    fclose(fp);
-    return 0;
-}
-
 static int with_binary(const char *data) {
     uint32_t addr;
     char path[64];
     sscanf(data, "%x#%s", &addr, path);
-    return load_binary(addr, path);
+    return port_load_binary_from_file(path, addr);
 }

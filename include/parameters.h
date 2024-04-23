@@ -29,4 +29,6 @@
 /* 此时均摊到每一条指令，平均时钟为100MHz */
 #define ZICNT_TIMER_FREQ        (SIM_EVENLY_DIV_CLOCK*1000000/SIM_YIELD_GAP)
 
+#define TEMU_PRINT_BANNER       "[TEMU MESSAGE] "
+
 #endif //TEMU_PARAMETERS_H
