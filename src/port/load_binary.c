@@ -32,6 +32,7 @@ int port_load_binary_from_file(const char *path, uint32_t addr) {
         return -1;
     }
     CloseHandle(hFile);
+    printf(TEMU_PRINT_BANNER"Read %lu bytes of %s.\n", file_read_size, path);
 #else
     uint32_t file_read_size;
     FILE *fp = fopen(path, "rb");
@@ -41,8 +42,7 @@ int port_load_binary_from_file(const char *path, uint32_t addr) {
     }
     file_read_size = fread(mem_ptr, mem_ptr_flag == MEM_PTR_RAM ? RAM_SIZE : ROM_SIZE - addr, 1, fp);
     fclose(fp);
-#endif
-
     printf(TEMU_PRINT_BANNER"Read %u bytes of %s.\n", file_read_size, path);
+#endif
     return 0;
 }

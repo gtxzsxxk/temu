@@ -21,17 +21,13 @@ static void machine_tick(void);
 
 static void machine_debug(uint32_t instruction, int printreg);
 
-static void set_terminal(void);
-
-void digest(uint32_t addr, uint32_t len);
-
 _Noreturn void machine_start(uint32_t start, int printreg) {
     uint32_t instruction;
     machine_pre_boot(start);
 
     for (;;) {
         access_error_intr = 0;
-        instruction = mem_read_w(program_counter, &access_error_intr);
+        instruction = mem_read_inst(program_counter, &access_error_intr);
         if (access_error_intr) {
             if (access_error_intr == 2) {
                 trap_throw_exception(EXCEPTION_INST_PAGEFAULT, program_counter);

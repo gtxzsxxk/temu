@@ -85,9 +85,6 @@ const uint8_t csr_index_remap[0x10] = {
 };
 
 uint8_t csr_get_index_by_number(uint16_t csr_number) {
-    if(csr_number == CSR_num_sstatus) {
-        int a = 0;
-    }
     uint8_t start_index = csr_index_remap[csr_number >> 8];
     if (start_index == 100) {
         return -1;

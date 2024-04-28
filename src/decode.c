@@ -516,7 +516,7 @@ DEC_FUNC(ATOMIC) {
             return;
         } else {
             mem_register_write(rd, t);
-            uint32_t res = 0;
+            uint32_t res;
             if (typ == 0x01) {
                 /* AMOSWAP.W */
                 res = value;
