@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 project(temu C)
 
 set(CMAKE_C_STANDARD 11)
-
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -g")
 include_directories(include)
 
 add_executable(temu src/main.c
@@ -24,4 +24,5 @@ add_executable(temu src/main.c
         src/port/load_binary.c
         include/port/load_binary.h
         src/port/console.c
-        include/port/console.h)
+        include/port/console.h
+        include/perf.h)

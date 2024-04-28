@@ -5,20 +5,48 @@
 #include "mem.h"
 #include "zicsr.h"
 #include "trap.h"
+#include "perf.h"
 
-static uint32_t dec_pow(uint32_t x, uint32_t y) {
-    uint32_t ans = 1;
-    for (uint32_t i = 0; i < y; i++) {
-        ans *= x;
-    }
-    return ans;
+static uint32_t POWERS_OF_2[] = {
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+        131072,
+        262144,
+        524288,
+        1048576,
+        2097152,
+        4194304,
+        8388608,
+        16777216,
+        33554432,
+        67108864,
+        134217728,
+        268435456,
+        536870912,
+        1073741824,
+        2147483648
+};
+
+static inline uint32_t extract(uint32_t inst, uint8_t start, uint8_t end) {
+    return (inst >> start) & (POWERS_OF_2[(end - start + 1)] - 1);
 }
 
-static uint32_t extract(uint32_t inst, uint8_t start, uint8_t end) {
-    return (inst >> start) & (dec_pow(2, (end - start + 1)) - 1);
-}
-
-static void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2, uint8_t *funct7) {
+static inline void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2, uint8_t *funct7) {
     *rd = INST_EXT(11, 7);
     *funct3 = INST_EXT(14, 12);
     *rs1 = INST_EXT(19, 15);
@@ -26,21 +54,21 @@ static void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *
     *funct7 = INST_EXT(31, 25);
 }
 
-static void decode_type_i(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint16_t *imm) {
+static inline void decode_type_i(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint16_t *imm) {
     *rd = INST_EXT(11, 7);
     *funct3 = INST_EXT(14, 12);
     *rs1 = INST_EXT(19, 15);
     *imm = INST_EXT(31, 20);
 }
 
-static void decode_type_s(uint32_t inst, uint32_t *imm, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2) {
+static inline void decode_type_s(uint32_t inst, uint32_t *imm, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2) {
     *imm = INST_EXT(11, 7) | (INST_EXT(31, 25) << 5);
     *funct3 = INST_EXT(14, 12);
     *rs1 = INST_EXT(19, 15);
     *rs2 = INST_EXT(24, 20);
 }
 
-static void decode_type_b(uint32_t inst, uint32_t *imm, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2) {
+static inline void decode_type_b(uint32_t inst, uint32_t *imm, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2) {
     *imm = (INST_EXT(11, 8) << 1) |
            (INST_EXT(30, 25) << 5) |
            (((inst >> 7) & 0x01) << 11) |
@@ -50,12 +78,12 @@ static void decode_type_b(uint32_t inst, uint32_t *imm, uint8_t *funct3, uint8_t
     *rs2 = INST_EXT(24, 20);
 }
 
-static void decode_type_u(uint32_t inst, uint32_t *imm, uint8_t *rd) {
+static inline void decode_type_u(uint32_t inst, uint32_t *imm, uint8_t *rd) {
     *imm = (INST_EXT(31, 12) << 12);
     *rd = INST_EXT(11, 7);
 }
 
-static void decode_type_j(uint32_t inst, uint32_t *imm, uint8_t *rd) {
+static inline void decode_type_j(uint32_t inst, uint32_t *imm, uint8_t *rd) {
     *imm = (INST_EXT(19, 12) << 12) |
            (INST_EXT(30, 21) << 1) |
            (((inst >> 20) & 0x01) << 11) |
@@ -83,6 +111,8 @@ DEC_FUNC(AUIPC) {
 }
 
 DEC_FUNC(JAL) {
+    PERF_MONITOR_CAN_MUTE("JAL", PERF_BATCH_10M);
+
     uint32_t imm;
     uint8_t rd;
     INST_DEC(j, &imm, &rd);
@@ -92,6 +122,8 @@ DEC_FUNC(JAL) {
 }
 
 DEC_FUNC(JALR) {
+    PERF_MONITOR_CAN_MUTE("JALR", PERF_BATCH_10M);
+
     uint16_t imm;
     uint8_t rs1;
     uint8_t funct3;
@@ -105,6 +137,8 @@ DEC_FUNC(JALR) {
 }
 
 DEC_FUNC(BRANCH) {
+    PERF_MONITOR_CAN_MUTE("BRANCH", PERF_BATCH_10M);
+
     uint32_t imm;
     uint8_t funct3;
     uint8_t rs1;
@@ -167,6 +201,8 @@ DEC_FUNC(BRANCH) {
 }
 
 DEC_FUNC(LOAD) {
+    PERF_MONITOR_CAN_MUTE("LOAD", PERF_BATCH_10M);
+
     uint8_t rd, funct3, rs1;
     uint16_t imm;
     INST_DEC(i, &rd, &funct3, &rs1, &imm);
@@ -210,7 +246,7 @@ DEC_FUNC(LOAD) {
         program_counter -= 4;
     }
 
-    if (access_error_intr) {
+    if (unlikely(access_error_intr)) {
         if (access_error_intr == 2) {
             trap_throw_exception(EXCEPTION_LOAD_PAGEFAULT, target_addr);
         } else if (access_error_intr == 3) {
@@ -224,6 +260,8 @@ DEC_FUNC(LOAD) {
 }
 
 DEC_FUNC(STORE) {
+    PERF_MONITOR_CAN_MUTE("STORE", PERF_BATCH_10M);
+
     uint32_t imm;
     uint8_t funct3, rs1, rs2;
     INST_DEC(s, &imm, &funct3, &rs1, &rs2);
@@ -244,7 +282,7 @@ DEC_FUNC(STORE) {
         program_counter -= 4;
     }
 
-    if (access_error_intr) {
+    if (unlikely(access_error_intr)) {
         if (access_error_intr == 2) {
             trap_throw_exception(EXCEPTION_STORE_PAGEFAULT, target_addr);
         } else if (access_error_intr == 3) {
@@ -258,6 +296,8 @@ DEC_FUNC(STORE) {
 }
 
 DEC_FUNC(ARITH_IMM) {
+    PERF_MONITOR_CAN_MUTE("ARITH for Immediate", PERF_BATCH_10M);
+
     uint8_t rd, funct3, rs1;
     uint16_t imm;
     INST_DEC(i, &rd, &funct3, &rs1, &imm);
@@ -303,6 +343,8 @@ DEC_FUNC(ARITH_IMM) {
 }
 
 DEC_FUNC(ARITH) {
+    PERF_MONITOR_CAN_MUTE("ARITH", PERF_BATCH_10M);
+
     uint8_t rd, funct3, rs1, rs2, funct7;
     INST_DEC(r, &rd, &funct3, &rs1, &rs2, &funct7);
     if (funct7 != 1) {
@@ -417,6 +459,8 @@ DEC_FUNC(ARITH) {
 }
 
 DEC_FUNC(ZICSR_ECALL_EBREAK) {
+    PERF_MONITOR_CAN_MUTE("ECALL", PERF_BATCH_10M);
+
     uint8_t rd, funct3, rs1;
     uint16_t imm;
     INST_DEC(i, &rd, &funct3, &rs1, &imm);
@@ -468,7 +512,7 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         return;
     }
 
-    if (illegal_inst_intr) {
+    if (unlikely(illegal_inst_intr)) {
         trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
     } else {
         program_counter += 4;
@@ -477,6 +521,8 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
 
 DEC_FUNC(ATOMIC) {
     /* TODO: implement the reservation set */
+    PERF_MONITOR_CAN_MUTE("ATOMIC", PERF_BATCH_10M);
+
     static uint32_t reservation_set;
     static uint8_t reservation_valid = 0;
     uint8_t rd, funct3, rs1, rs2, funct7;
@@ -573,6 +619,8 @@ DEC_FUNC(ZIFENCEI_FENCE) {
 }
 
 void decode(uint32_t inst) {
+    PERF_MONITOR_CAN_MUTE("decode", PERF_BATCH_100M);
+
     uint8_t opcode = inst & 0x7f;
     switch (opcode) {
         DECODE(LUI)
