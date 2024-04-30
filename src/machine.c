@@ -57,7 +57,7 @@ static void machine_pre_boot(uint32_t start) {
 static void machine_tick(void) {
     zicnt_cycle_tick();
 
-    if (zicnt_get_cycle() % (SIM_YIELD_GAP / 10000) == 0) {
+    if (zicnt_get_cycle() % SIM_YIELD_GAP == 0) {
         zicnt_time_tick();
 #if !SIM_FULL_SPEED
         usleep(SIM_YIELD_TIME);

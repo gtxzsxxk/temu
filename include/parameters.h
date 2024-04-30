@@ -28,6 +28,9 @@
 #define SIM_YIELD_TIME          (SIM_YIELD_GAP/SIM_EVENLY_DIV_CLOCK*SIM_CLOCK_SCALE)
 /* 此时均摊到每一条指令，平均时钟为100MHz */
 #define ZICNT_TIMER_FREQ        (SIM_EVENLY_DIV_CLOCK*1000000/SIM_YIELD_GAP)
+#define ZICNT_TICK_INTERVAL     10000
+/* CSR timer的频率。此项需要与设备树一致 */
+#define ZICNT_TIMER_FREQ        100000000
 
 #define TEMU_PRINT_BANNER       "[TEMU MESSAGE] "
 

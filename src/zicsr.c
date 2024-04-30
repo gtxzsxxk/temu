@@ -1,6 +1,9 @@
 //
 // Created by hanyuan on 2024/2/10.
 //
+
+/* TODO: use port to provide timer information */
+#include <time.h>
 #include "mem.h"
 #include "trap.h"
 #include "zicsr.h"
@@ -8,7 +11,7 @@
 uint8_t current_privilege = CSR_MASK_MACHINE;
 
 static uint64_t cycle = 0;
-static uint64_t time = 0;
+static uint64_t csr_time = 0;
 static uint64_t timecmp = 0xffffffffffffffff;
 
 uint32_t control_status_registers[CSR_SIZE] = {
@@ -205,18 +208,22 @@ void zicnt_cycle_tick(void) {
 }
 
 void zicnt_time_tick(void) {
-    time++;
+    static clock_t last_clk = 0;
+    csr_time += (uint64_t) (ZICNT_TIMER_FREQ * ((double) (clock() - last_clk)) / CLOCKS_PER_SEC);
 
-    timecmp = (((uint64_t) control_status_registers[CSR_idx_stimecmph]) << 32) | control_status_registers[CSR_idx_stimecmp];
+    timecmp = (((uint64_t) control_status_registers[CSR_idx_stimecmph]) << 32) |
+              control_status_registers[CSR_idx_stimecmp];
 
-    if (time > timecmp && timecmp > 0) {
+    if (csr_time > timecmp && timecmp > 0) {
         trap_throw_interrupt(INTERRUPT_SUPERVISOR_TIMER);
     } else {
         trap_clear_interrupt_pending(INTERRUPT_SUPERVISOR_TIMER);
     }
 
-    control_status_registers[CSR_idx_time] = time & 0xffffffff;
-    control_status_registers[CSR_idx_timeh] = (time >> 32) & 0xffffffff;
+    control_status_registers[CSR_idx_time] = csr_time & 0xffffffff;
+    control_status_registers[CSR_idx_timeh] = (csr_time >> 32) & 0xffffffff;
+
+    last_clk = clock();
 }
 
 uint64_t zicnt_get_cycle(void) {
