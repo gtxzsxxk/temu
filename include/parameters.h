@@ -16,18 +16,7 @@
 #define PLIC_BASE_ADDR          0x0c000000
 #define PLIC_SIZE               0x00400000
 
-/* 全速模式（仅调试） */
-#define SIM_FULL_SPEED          1
-/* 均摊时钟 in MHz */
-#define SIM_EVENLY_DIV_CLOCK    100
-/* 缩放比例 */
-#define SIM_CLOCK_SCALE         1
-/* 执行多少条指令后，统一给出CPU */
-#define SIM_YIELD_GAP           10000
-/* 给出CPU的时间(us) */
-#define SIM_YIELD_TIME          (SIM_YIELD_GAP/SIM_EVENLY_DIV_CLOCK*SIM_CLOCK_SCALE)
-/* 此时均摊到每一条指令，平均时钟为100MHz */
-#define ZICNT_TIMER_FREQ        (SIM_EVENLY_DIV_CLOCK*1000000/SIM_YIELD_GAP)
+/* 执行多少条指令后，让CSR timer tick */
 #define ZICNT_TICK_INTERVAL     10000
 /* CSR timer的频率。此项需要与设备树一致 */
 #define ZICNT_TIMER_FREQ        100000000
