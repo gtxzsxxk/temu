@@ -9,6 +9,7 @@
 #include "trap.h"
 #include "zicsr.h"
 #include "port/console.h"
+#include "perf.h"
 
 //#define RISCV_DEBUG
 //#define RISCV_ISA_TESTS
@@ -26,6 +27,8 @@ _Noreturn void machine_start(uint32_t start, int printreg) {
     machine_pre_boot(start);
 
     for (;;) {
+        PERF_MONITOR_CONTINUOUS(mainloop, PERF_BATCH_100M);
+
         access_error_intr = 0;
         instruction = mem_read_inst(program_counter, &access_error_intr);
         if (access_error_intr) {

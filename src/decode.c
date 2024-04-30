@@ -5,6 +5,7 @@
 #include "mem.h"
 #include "zicsr.h"
 #include "trap.h"
+#include "perf.h"
 
 static uint32_t POWERS_OF_2[] = {
         1,
@@ -45,7 +46,8 @@ static inline uint32_t extract(uint32_t inst, uint8_t start, uint8_t end) {
     return (inst >> start) & (POWERS_OF_2[(end - start + 1)] - 1);
 }
 
-static inline void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2, uint8_t *funct7) {
+static inline void
+decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2, uint8_t *funct7) {
     *rd = INST_EXT(11, 7);
     *funct3 = INST_EXT(14, 12);
     *rs1 = INST_EXT(19, 15);
@@ -110,15 +112,21 @@ DEC_FUNC(AUIPC) {
 }
 
 DEC_FUNC(JAL) {
+    PERF_MONITOR_DISCRETE_WARP_START(JAL);
+
     uint32_t imm;
     uint8_t rd;
     INST_DEC(j, &imm, &rd);
     int32_t sext_imm = SEXT(imm, 31, 20);
     mem_register_write(rd, program_counter + 4);
     program_counter += sext_imm;
+
+    PERF_MONITOR_DISCRETE_WARP_END(JAL, PERF_BATCH_1M);
 }
 
 DEC_FUNC(JALR) {
+    PERF_MONITOR_DISCRETE_WARP_START(JALR);
+
     uint16_t imm;
     uint8_t rs1;
     uint8_t funct3;
@@ -129,9 +137,13 @@ DEC_FUNC(JALR) {
     uint32_t next_addr = program_counter + 4;
     program_counter = (mem_register_read(rs1) + sext_offset) & (~0x00000001);
     mem_register_write(rd, next_addr);
+
+    PERF_MONITOR_DISCRETE_WARP_END(JALR, PERF_BATCH_1M);
 }
 
 DEC_FUNC(BRANCH) {
+    PERF_MONITOR_DISCRETE_WARP_START(BRANCH);
+
     uint32_t imm;
     uint8_t funct3;
     uint8_t rs1;
@@ -191,9 +203,13 @@ DEC_FUNC(BRANCH) {
             trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
             break;
     }
+
+    PERF_MONITOR_DISCRETE_WARP_END(BRANCH, PERF_BATCH_1M);
 }
 
 DEC_FUNC(LOAD) {
+    PERF_MONITOR_DISCRETE_WARP_START(LOAD);
+
     uint8_t rd, funct3, rs1;
     uint16_t imm;
     INST_DEC(i, &rd, &funct3, &rs1, &imm);
@@ -248,9 +264,13 @@ DEC_FUNC(LOAD) {
     } else {
         program_counter += 4;
     }
+
+    PERF_MONITOR_DISCRETE_WARP_END(LOAD, PERF_BATCH_1M);
 }
 
 DEC_FUNC(STORE) {
+    PERF_MONITOR_DISCRETE_WARP_START(STORE);
+
     uint32_t imm;
     uint8_t funct3, rs1, rs2;
     INST_DEC(s, &imm, &funct3, &rs1, &rs2);
@@ -282,9 +302,13 @@ DEC_FUNC(STORE) {
     } else {
         program_counter += 4;
     }
+
+    PERF_MONITOR_DISCRETE_WARP_END(STORE, PERF_BATCH_1M);
 }
 
 DEC_FUNC(ARITH_IMM) {
+    PERF_MONITOR_DISCRETE_WARP_START(ARITHforImm);
+
     uint8_t rd, funct3, rs1;
     uint16_t imm;
     INST_DEC(i, &rd, &funct3, &rs1, &imm);
@@ -327,9 +351,13 @@ DEC_FUNC(ARITH_IMM) {
     }
 
     program_counter += 4;
+
+    PERF_MONITOR_DISCRETE_WARP_END(ARITHforImm, PERF_BATCH_1M);
 }
 
 DEC_FUNC(ARITH) {
+    PERF_MONITOR_DISCRETE_WARP_START(ARITH);
+
     uint8_t rd, funct3, rs1, rs2, funct7;
     INST_DEC(r, &rd, &funct3, &rs1, &rs2, &funct7);
     if (funct7 != 1) {
@@ -441,6 +469,8 @@ DEC_FUNC(ARITH) {
     }
 
     program_counter += 4;
+
+    PERF_MONITOR_DISCRETE_WARP_END(ARITH, PERF_BATCH_1M);
 }
 
 DEC_FUNC(ZICSR_ECALL_EBREAK) {
@@ -504,6 +534,7 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
 
 DEC_FUNC(ATOMIC) {
     /* TODO: implement the reservation set */
+
     static uint32_t reservation_set;
     static uint8_t reservation_valid = 0;
     uint8_t rd, funct3, rs1, rs2, funct7;
@@ -600,6 +631,8 @@ DEC_FUNC(ZIFENCEI_FENCE) {
 }
 
 void decode(uint32_t inst) {
+    PERF_MONITOR_CONTINUOUS_CAN_MUTE(decode, PERF_BATCH_100M);
+
     uint8_t opcode = inst & 0x7f;
     switch (opcode) {
         DECODE(LUI)

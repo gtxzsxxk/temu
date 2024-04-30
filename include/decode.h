@@ -21,7 +21,7 @@
 
 #define INST_EXT(end, begin)  extract(inst,begin,end)
 #define INST_DEC(type, ...) decode_type_##type(inst, __VA_ARGS__)
-#define DEC_FUNC(OPCODE) static void decode_func_##OPCODE(uint32_t inst)
+#define DEC_FUNC(OPCODE) static inline void decode_func_##OPCODE(uint32_t inst)
 #define DECODE(OPCODE) case RV32I_##OPCODE: decode_func_##OPCODE(inst); break;
 #define SEXT(op, target_idx, source_idx) (((int32_t)(op << (target_idx - source_idx))) >> (target_idx - source_idx))
 
