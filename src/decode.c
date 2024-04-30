@@ -253,7 +253,7 @@ DEC_FUNC(LOAD) {
         program_counter -= 4;
     }
 
-    if (access_error_intr) {
+    if (unlikely(access_error_intr)) {
         if (access_error_intr == 2) {
             trap_throw_exception(EXCEPTION_LOAD_PAGEFAULT, target_addr);
         } else if (access_error_intr == 3) {
@@ -291,7 +291,7 @@ DEC_FUNC(STORE) {
         program_counter -= 4;
     }
 
-    if (access_error_intr) {
+    if (unlikely(access_error_intr)) {
         if (access_error_intr == 2) {
             trap_throw_exception(EXCEPTION_STORE_PAGEFAULT, target_addr);
         } else if (access_error_intr == 3) {
@@ -525,7 +525,7 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         return;
     }
 
-    if (illegal_inst_intr) {
+    if (unlikely(illegal_inst_intr)) {
         trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
     } else {
         program_counter += 4;

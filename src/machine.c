@@ -31,7 +31,7 @@ _Noreturn void machine_start(uint32_t start, int printreg) {
 
         access_error_intr = 0;
         instruction = mem_read_inst(program_counter, &access_error_intr);
-        if (access_error_intr) {
+        if (unlikely(access_error_intr)) {
             if (access_error_intr == 2) {
                 trap_throw_exception(EXCEPTION_INST_PAGEFAULT, program_counter);
             } else if (access_error_intr == 3) {
