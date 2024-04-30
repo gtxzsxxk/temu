@@ -41,12 +41,11 @@ static uint32_t POWERS_OF_2[] = {
         2147483648
 };
 
-static uint32_t extract(uint32_t inst, uint8_t start, uint8_t end) {
-    return (inst >> start) & (dec_pow(2, (end - start + 1)) - 1);
+static inline uint32_t extract(uint32_t inst, uint8_t start, uint8_t end) {
     return (inst >> start) & (POWERS_OF_2[(end - start + 1)] - 1);
 }
 
-static void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2, uint8_t *funct7) {
+static inline void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2, uint8_t *funct7) {
     *rd = INST_EXT(11, 7);
     *funct3 = INST_EXT(14, 12);
     *rs1 = INST_EXT(19, 15);
@@ -54,21 +53,21 @@ static void decode_type_r(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *
     *funct7 = INST_EXT(31, 25);
 }
 
-static void decode_type_i(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint16_t *imm) {
+static inline void decode_type_i(uint32_t inst, uint8_t *rd, uint8_t *funct3, uint8_t *rs1, uint16_t *imm) {
     *rd = INST_EXT(11, 7);
     *funct3 = INST_EXT(14, 12);
     *rs1 = INST_EXT(19, 15);
     *imm = INST_EXT(31, 20);
 }
 
-static void decode_type_s(uint32_t inst, uint32_t *imm, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2) {
+static inline void decode_type_s(uint32_t inst, uint32_t *imm, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2) {
     *imm = INST_EXT(11, 7) | (INST_EXT(31, 25) << 5);
     *funct3 = INST_EXT(14, 12);
     *rs1 = INST_EXT(19, 15);
     *rs2 = INST_EXT(24, 20);
 }
 
-static void decode_type_b(uint32_t inst, uint32_t *imm, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2) {
+static inline void decode_type_b(uint32_t inst, uint32_t *imm, uint8_t *funct3, uint8_t *rs1, uint8_t *rs2) {
     *imm = (INST_EXT(11, 8) << 1) |
            (INST_EXT(30, 25) << 5) |
            (((inst >> 7) & 0x01) << 11) |
@@ -78,12 +77,12 @@ static void decode_type_b(uint32_t inst, uint32_t *imm, uint8_t *funct3, uint8_t
     *rs2 = INST_EXT(24, 20);
 }
 
-static void decode_type_u(uint32_t inst, uint32_t *imm, uint8_t *rd) {
+static inline void decode_type_u(uint32_t inst, uint32_t *imm, uint8_t *rd) {
     *imm = (INST_EXT(31, 12) << 12);
     *rd = INST_EXT(11, 7);
 }
 
-static void decode_type_j(uint32_t inst, uint32_t *imm, uint8_t *rd) {
+static inline void decode_type_j(uint32_t inst, uint32_t *imm, uint8_t *rd) {
     *imm = (INST_EXT(19, 12) << 12) |
            (INST_EXT(30, 21) << 1) |
            (((inst >> 20) & 0x01) << 11) |
