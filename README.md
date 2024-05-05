@@ -29,7 +29,7 @@
 * (TODO) 添加`htop`等
 * (TODO) 添加显示屏等外设
 
-### Compiling
+### Compiling （建议略过，直接跳到下一步，体验已经准备好的二进制）
 
 #### 编译TEMU模拟器
 
@@ -93,9 +93,7 @@ gzip -c uImage > uImage.gz
 ### Executing program (Using Provided Binaries)
 
 * 确保你拥有`RISC-V`指令集的二进制文件，本项目目前仅支持装载`bin`，即`objcopy`的输出，暂时不支持直接加载ELF，且加载ELF对于系统级别的模拟意义不大
-*
-这些二进制文件可以在这里下载： [TEMU Booting Binaries v0.1.0](https://cloud.tsinghua.edu.cn/f/43a3a88575564557b4b1/?dl=1)
-，可以直接使用`wget`下载到`linux`中。
+* 这些二进制文件可以在这里下载： [TEMU Booting Binaries v0.1.0](https://cloud.tsinghua.edu.cn/f/43a3a88575564557b4b1/?dl=1)，可以直接使用`wget`下载到`linux`中。
     * Changes since `TEMU Booting Binaries v0.0.2`
         * 由于根文件系统的增大（`rootfs`预留量由`6MiB`扩大到了`12MiB`），因此`U-Boot`的启动参数发生了改变
         * 这个版本的`U-Boot`不需要手动输启动参数，等3秒就会`autoboot`。
@@ -132,7 +130,7 @@ Example:
 
 如果成功启动，`TEMU`首先会打印`OpenSBI`的启动信息，接着打印`U-Boot`的信息，然后就进入内核。
 
-```
+```console
 OpenSBI v1.4
    ____                    _____ ____ _____
   / __ \                  / ____|  _ \_   _|
@@ -294,12 +292,11 @@ FAIL
 
 Welcome to Buildroot
 buildroot login:
-
 ```
 
 进入内核后，可以尝试以下玩法：
 
-```
+```console
 Welcome to Buildroot
 buildroot login: root
 login[60]: root login on 'console'
