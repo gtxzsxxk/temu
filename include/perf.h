@@ -15,9 +15,9 @@
 #define PERF_BATCH_1000M    1000000000ul
 
 #define PERF_MUTE 1
-#define PERF_MUTE_ALL 1
 
-#if PERF_MUTE_ALL
+/* defined in CMakeLists.txt */
+#if defined(PERF_MUTE_ALL)
 #define PERF_MONITOR_CONTINUOUS(name, batch_size) do {} while(0);
 #else
 #define PERF_MONITOR_CONTINUOUS(name, batch_size) do { \

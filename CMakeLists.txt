@@ -3,9 +3,19 @@ project(temu C)
 
 set(CMAKE_C_STANDARD 11)
 
-include_directories(include)
+set(PerformanceMode OFF)
+set(PerformanceMonitor OFF)
+if (PerformanceMode)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -g")
+    message(STATUS "Compiling with performance mode -- -O2")
+else ()
+    message(STATUS "Compiling without performance")
+endif ()
+if (NOT PerformanceMonitor)
+    add_definitions(-DPERF_MUTE_ALL)
+endif ()
 
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -g")
+include_directories(include)
 
 add_executable(temu src/main.c
         src/mem.c
