@@ -38,3 +38,7 @@ add_executable(temu src/main.c
         src/port/console.c
         include/port/console.h
         include/perf.h)
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(temu PRIVATE Threads::Threads)
