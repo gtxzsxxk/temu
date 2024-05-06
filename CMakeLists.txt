@@ -39,7 +39,9 @@ add_executable(temu src/main.c
         include/port/console.h
         include/perf.h
         include/port/main_memory.h
-        src/port/main_memory.c)
+        src/port/main_memory.c
+        src/tlb.c
+        src/tlb.h)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
