@@ -26,8 +26,10 @@
 * 支持的`host`平台：`macOS with LLVM`, `Linux`, `Windows with MinGW`
 * (TODO) 将此项目的代码对`MSVC`友好
 * (TODO) 适配`Windows`的终端环境
-* (TODO) 添加`htop`等
+* (TODO) 使用`Ctrl + A + X`退出
+* (TODO) 在根文件系统中添加其它软件等
 * (TODO) 添加显示屏等外设
+* (TODO) 使用`cmake`自动下载`TEMU`二进制
 
 ### Compiling （建议略过，直接跳到下一步，体验已经准备好的二进制）
 
@@ -90,10 +92,13 @@ mkimage -A riscv -O linux -T kernel -C none -a 0x80000000 -e 0x80000000 -d arch/
 gzip -c uImage > uImage.gz
 ```
 
-### Executing program (Using Provided Binaries)
+### 使用TEMU运行主线Linux系统
 
 * 确保你拥有`RISC-V`指令集的二进制文件，本项目目前仅支持装载`bin`，即`objcopy`的输出，暂时不支持直接加载ELF，且加载ELF对于系统级别的模拟意义不大
-* 这些二进制文件可以在这里下载： [TEMU Booting Binaries v0.1.0](https://cloud.tsinghua.edu.cn/f/43a3a88575564557b4b1/?dl=1)，可以直接使用`wget`下载到`linux`中。
+* 这些二进制文件可以在这里下载： [TEMU Booting Binaries v0.1.1](https://cloud.tsinghua.edu.cn/f/9e6c7a13b2914654bcd3/?dl=1)，可以直接使用`wget`下载到`linux`中。
+    * Changes since `TEMU Booting Binaries v0.1.0`
+        * 添加`htop`工具
+        * 修复了`U-Boot`中一个引起`Store/AMO Access Fault`异常的bug
     * Changes since `TEMU Booting Binaries v0.0.2`
         * 由于根文件系统的增大（`rootfs`预留量由`6MiB`扩大到了`12MiB`），因此`U-Boot`的启动参数发生了改变
         * 这个版本的`U-Boot`不需要手动输启动参数，等3秒就会`autoboot`。
