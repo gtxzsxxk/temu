@@ -1,48 +1,32 @@
 //
 // Created by hanyuan on 2024/4/23.
 //
-#include <stdio.h>
 #include "parameters.h"
-#include "mem.h"
+#include "port/main_memory.h"
 #include "port/load_binary.h"
 
-#if defined(WIN64) || defined(WIN32)
-#include <windows.h>
-#endif
-
+/// 从文件中加载二进制，并且装入主存中
+/// \param path 二进制文件在文件系统中的路径
+/// \param addr 主存中的目标地址
+/// \return 0 for success
 int port_load_binary_from_file(const char *path, uint32_t addr) {
-    int mem_ptr_flag;
-    uint8_t *mem_ptr = pm_get_ptr(addr, &mem_ptr_flag);
-    if (mem_ptr_flag == -1) {
-        printf(TEMU_PRINT_BANNER"Failed to access memory at 0x%08x\r\n", addr);
-        return -1;
-    }
-
-#if defined(WIN64) || defined(WIN32)
-    DWORD file_read_size;
-    HANDLE hFile = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (hFile == INVALID_HANDLE_VALUE) {
-        printf(TEMU_PRINT_BANNER"Failed to access %s\r\n", path);
-        return -1;
-    }
-    DWORD dwFileSize = GetFileSize(hFile, NULL);
-    if (!ReadFile(hFile, mem_ptr, dwFileSize, &file_read_size, NULL)) {
-        printf(TEMU_PRINT_BANNER"Failed to read %s\r\n", path);
-        CloseHandle(hFile);
-        return -1;
-    }
-    CloseHandle(hFile);
-    printf(TEMU_PRINT_BANNER"Read %lu bytes of %s.\n", file_read_size, path);
-#else
-    uint32_t file_read_size;
-    FILE *fp = fopen(path, "rb");
+    uint8_t load_buffer[256];
+    uint32_t main_memory_offset = addr - (uint32_t) RAM_BASE_ADDR;
+    uint32_t file_read_size = 0;
+    FILE *fp = PORT_FILE_OPEN(path, "rb");
     if (!fp) {
-        printf(TEMU_PRINT_BANNER"Failed to access %s\r\n", path);
+        printf(TEMU_PRINT_BANNER"Failed to access %s\n", path);
         return -1;
     }
-    file_read_size = fread(mem_ptr, mem_ptr_flag == MEM_PTR_RAM ? RAM_SIZE : ROM_SIZE - addr, 1, fp);
-    fclose(fp);
-    printf(TEMU_PRINT_BANNER"Read %u bytes of %s.\n", file_read_size, path);
-#endif
+    while (!PORT_FILE_EOF(fp)) {
+        uint32_t read_n = PORT_FILE_READ(load_buffer, 1, 256, fp);
+        for (uint32_t i = 0; i < read_n; i++) {
+            port_main_memory_write(main_memory_offset, load_buffer[i]);
+            main_memory_offset++;
+        }
+        file_read_size += read_n;
+    }
+    PORT_FILE_CLOSE(fp);
+    printf(TEMU_PRINT_BANNER"Write %u bytes of %s to 0x%8x -- 0x%x.\n", file_read_size, path, addr, main_memory_offset);
     return 0;
 }
