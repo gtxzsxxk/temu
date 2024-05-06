@@ -3,7 +3,7 @@
 //
 #include <stdio.h>
 #include "parameters.h"
-#include "mem.h"
+#include "port/main_memory.h"
 #include "port/load_binary.h"
 
 #if defined(WIN64) || defined(WIN32)
@@ -11,14 +11,11 @@
 #endif
 
 int port_load_binary_from_file(const char *path, uint32_t addr) {
-    int mem_ptr_flag;
-    uint8_t *mem_ptr = pm_get_ptr(addr, &mem_ptr_flag);
-    if (mem_ptr_flag == -1) {
-        printf(TEMU_PRINT_BANNER"Failed to access memory at 0x%08x\r\n", addr);
-        return -1;
-    }
+    uint8_t load_buffer[256];
+    uint32_t main_memory_offset = addr - (uint32_t)RAM_BASE_ADDR;
 
 #if defined(WIN64) || defined(WIN32)
+#error Not port the load binary function to this platform!
     DWORD file_read_size;
     HANDLE hFile = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hFile == INVALID_HANDLE_VALUE) {
@@ -34,15 +31,22 @@ int port_load_binary_from_file(const char *path, uint32_t addr) {
     CloseHandle(hFile);
     printf(TEMU_PRINT_BANNER"Read %lu bytes of %s.\n", file_read_size, path);
 #else
-    uint32_t file_read_size;
+    uint32_t file_read_size = 0;
     FILE *fp = fopen(path, "rb");
     if (!fp) {
-        printf(TEMU_PRINT_BANNER"Failed to access %s\r\n", path);
+        printf(TEMU_PRINT_BANNER"Failed to access %s\n", path);
         return -1;
     }
-    file_read_size = fread(mem_ptr, mem_ptr_flag == MEM_PTR_RAM ? RAM_SIZE : ROM_SIZE - addr, 1, fp);
+    while (!feof(fp)) {
+        uint32_t read_n = fread(load_buffer, 1, 256, fp);
+        for (uint32_t i = 0; i < read_n; i++) {
+            port_main_memory_write(main_memory_offset, load_buffer[i]);
+            main_memory_offset++;
+        }
+        file_read_size += read_n;
+    }
     fclose(fp);
-    printf(TEMU_PRINT_BANNER"Read %u bytes of %s.\n", file_read_size, path);
+    printf(TEMU_PRINT_BANNER"Write %u bytes of %s to 0x%8x -- 0x%x.\n", file_read_size, path, addr, main_memory_offset);
 #endif
     return 0;
 }

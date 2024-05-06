@@ -6,7 +6,7 @@ set(CMAKE_C_STANDARD 11)
 set(PerformanceMode OFF)
 set(PerformanceMonitor OFF)
 if (PerformanceMode)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -g")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -g")
     message(STATUS "Compiling with performance mode -- -O2")
 else ()
     message(STATUS "Compiling without performance")
@@ -37,7 +37,9 @@ add_executable(temu src/main.c
         include/port/load_binary.h
         src/port/console.c
         include/port/console.h
-        include/perf.h)
+        include/perf.h
+        include/port/main_memory.h
+        src/port/main_memory.c)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
