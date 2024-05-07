@@ -21,7 +21,7 @@ int port_load_binary_from_file(const char *path, uint32_t addr) {
     while (!PORT_FILE_EOF(fp)) {
         uint32_t read_n = PORT_FILE_READ(load_buffer, 1, 256, fp);
         for (uint32_t i = 0; i < read_n; i++) {
-            port_main_memory_write(main_memory_offset, load_buffer[i]);
+            port_main_memory_load_b(main_memory_offset, load_buffer[i]);
             main_memory_offset++;
         }
         file_read_size += read_n;

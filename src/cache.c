@@ -9,8 +9,12 @@
 static struct cache_line ICACHE[CACHE_LINES][CACHE_WAYS];
 static struct cache_line DCACHE[CACHE_LINES][CACHE_WAYS];
 
+#ifndef NULL
+#define NULL (void*)0
+#endif
+
 /* the physical address needs to be aligned with 4 bytes */
-static uint32_t cache_read(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uint8_t *miss) {
+static inline uint32_t cache_read(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uint8_t *miss) {
     struct cache_line *cacheline_set = cache[CACHE_ADDR_GET_INDEX(paddr)];
     uint32_t tag = CACHE_ADDR_GET_TAG(paddr);
     uint16_t offset = (paddr & (0xffffffff >> (32 - CACHE_OFFSET_FIELD_LENGTH))) >> 2;
@@ -26,7 +30,7 @@ static uint32_t cache_read(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uin
     return 0x30303030;
 }
 
-static void cache_write(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uint8_t data_b,
+static inline void cache_write(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uint8_t data_b,
                         uint16_t data_h, uint32_t data_w, enum CACHE_DATA_SIZE datasize, uint8_t *miss) {
     struct cache_line *cacheline_set = cache[CACHE_ADDR_GET_INDEX(paddr)];
     uint32_t tag = CACHE_ADDR_GET_TAG(paddr);
@@ -53,7 +57,7 @@ static void cache_write(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32
     *miss = 1;
 }
 
-static void cache_load(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uint8_t *load_fault) {
+static inline void cache_load(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uint8_t *load_fault) {
     struct cache_line *cacheline_set = cache[CACHE_ADDR_GET_INDEX(paddr)];
     uint32_t tag = CACHE_ADDR_GET_TAG(paddr);
     uint16_t min_used = 0xffff;
