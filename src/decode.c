@@ -517,6 +517,9 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         trap_return_machine();
         /* avoid incorrect pc */
         program_counter -= 4;
+    } else if (!funct3 && (imm >> 5) == 0x09) {
+        /* SFENCE.VMA */
+        tlb_flushall();
     } else if (!funct3 && !rd && !rs1 && imm == 0x105) {
         /* WFI */
         in_wfi = 1;
