@@ -5,6 +5,7 @@
 /* TODO: use port to provide timer information */
 #include <time.h>
 #include "mem.h"
+#include "tlb.h"
 #include "trap.h"
 #include "zicsr.h"
 
@@ -109,6 +110,10 @@ void csr_write(uint16_t csr_index, uint32_t value) {
     /* TODO: implement write actions */
     if (csr_match[csr_index] & CSR_MASK_WRITE) {
         control_status_registers[csr_index] = value;
+        if (csr_index == CSR_idx_satp) {
+            /* 目前还没有支持ASID，所以在每次写SATP后需要手动flush TLB */
+            tlb_flushall();
+        }
     }
 }
 
