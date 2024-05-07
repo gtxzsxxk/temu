@@ -15,7 +15,7 @@ uint8_t mem_read_b(uint32_t addr, uint8_t *intr) {
     }
 
     uint8_t page_fault = 0;
-    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_R) : addr;
+    uint32_t addr_translated = vm_on() ? vm_lookup_paddr(addr, &page_fault, PTE_R) : addr;
     if (page_fault) {
         if (intr) {
             *intr = 2;
@@ -35,7 +35,7 @@ uint16_t mem_read_h(uint32_t addr, uint8_t *intr) {
     }
 
     uint8_t page_fault = 0;
-    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_R) : addr;
+    uint32_t addr_translated = vm_on() ? vm_lookup_paddr(addr, &page_fault, PTE_R) : addr;
     if (page_fault) {
         if (intr) {
             *intr = 2;
@@ -52,7 +52,7 @@ uint32_t mem_read_w(uint32_t addr, uint8_t *intr) {
     }
 
     uint8_t page_fault = 0;
-    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_R) : addr;
+    uint32_t addr_translated = vm_on() ? vm_lookup_paddr(addr, &page_fault, PTE_R) : addr;
     if (page_fault) {
         if (intr) {
             *intr = 2;
@@ -72,7 +72,7 @@ uint32_t mem_read_inst(uint32_t addr, uint8_t *intr) {
     }
 
     uint8_t page_fault = 0;
-    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_X) : addr;
+    uint32_t addr_translated = vm_on() ? vm_lookup_paddr(addr, &page_fault, PTE_X) : addr;
     if (page_fault) {
         if (intr) {
             *intr = 2;
@@ -89,7 +89,7 @@ void mem_write_b(uint32_t addr, uint8_t data, uint8_t *intr) {
     }
 
     uint8_t page_fault = 0;
-    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_W) : addr;
+    uint32_t addr_translated = vm_on() ? vm_lookup_paddr(addr, &page_fault, PTE_W) : addr;
     if (page_fault) {
         if (intr) {
             *intr = 2;
@@ -111,7 +111,7 @@ void mem_write_h(uint32_t addr, uint16_t data, uint8_t *intr) {
     }
 
     uint8_t page_fault = 0;
-    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_W) : addr;
+    uint32_t addr_translated = vm_on() ? vm_lookup_paddr(addr, &page_fault, PTE_W) : addr;
     if (page_fault) {
         if (intr) {
             *intr = 2;
@@ -128,7 +128,7 @@ void mem_write_w(uint32_t addr, uint32_t data, uint8_t *intr) {
     }
 
     uint8_t page_fault = 0;
-    uint32_t addr_translated = vm_on() ? vm_translation(addr, &page_fault, PTE_W) : addr;
+    uint32_t addr_translated = vm_on() ? vm_lookup_paddr(addr, &page_fault, PTE_W) : addr;
     if (page_fault) {
         if (intr) {
             *intr = 2;

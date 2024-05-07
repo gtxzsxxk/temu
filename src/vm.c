@@ -26,7 +26,7 @@ uint8_t vm_status_read_sum() {
     return (control_status_registers[CSR_idx_sstatus] >> mstatus_SUM);
 }
 
-uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flags) {
+static uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t *access_flags, uint8_t *user_only) {
     uint32_t pgtable = SV32_ROOT(control_status_registers[CSR_idx_satp]);
     uint32_t pte;
     uint8_t intr;
@@ -40,8 +40,8 @@ uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flag
         }
         if (PTE_MATCH(pte, PTE_R) || PTE_MATCH(pte, PTE_X)) {
             /* leaf */
-            if ((pte & (1 << access_flags)) != (1 << access_flags) ||
-                (PTE_MATCH(pte, PTE_X) && !PTE_MATCH(pte, PTE_R) && (access_flags == PTE_R) &&
+            if (!(pte & (1 << *access_flags)) ||
+                (PTE_MATCH(pte, PTE_X) && !PTE_MATCH(pte, PTE_R) && (*access_flags == PTE_R) &&
                  !vm_status_read_mxr()) ||
                 (vm_status_read_sum() == 0 && PTE_MATCH(pte, PTE_U) &&
                  current_privilege == CSR_MASK_SUPERVISOR) ||
@@ -53,9 +53,12 @@ uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flag
             }
 
             pte |= (1 << PTE_A);
-            if (access_flags | PTE_W) {
+            if (*access_flags | PTE_W) {
                 pte |= (1 << PTE_D);
             }
+
+            *user_only = PTE_MATCH(pte, PTE_U);
+            *access_flags = (pte >> 1) & 0x07;
             /* the INTR shouldn't be 1 */
             pm_write_w(pgtable + SV32_VPN(vaddr, i) * 4, pte, NULL);
             uint32_t pa = SV32_PTE2PA(pte) + SV32_VOFFSET(vaddr);
@@ -73,6 +76,31 @@ uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flag
         *page_fault = 1;
     }
     return 0xefefefef;
+}
+
+uint32_t vm_lookup_paddr(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flags) {
+    uint8_t fault_flag;
+    uint8_t user_only = 0;
+    uint32_t ppn = tlb_lookup(vaddr, access_flags, &fault_flag);
+    if (!fault_flag) {
+        return (ppn << 12) | SV32_VOFFSET(vaddr);
+    }
+    if (fault_flag == TLB_PAGE_FAULT_IDENTIFIER) {
+        *page_fault = 1;
+    } else if (fault_flag == TLB_MISS_IDENTIFIER) {
+        ppn = vm_translation(vaddr, page_fault, &access_flags, &user_only);
+        if (!(*page_fault)) {
+            struct tlb_cache_line line = {
+                    .prot = access_flags,
+                    .ppn = (ppn >> 12),
+                    .user_only = user_only
+            };
+            tlb_insert(vaddr, line);
+            return ppn;
+        }
+    }
+
+    return 0x9a9a9a9a;
 }
 
 uint8_t pm_read_b(uint32_t addr, uint8_t *intr) {

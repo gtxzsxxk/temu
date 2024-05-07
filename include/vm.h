@@ -4,9 +4,8 @@
 
 #ifndef TEMU_VM_H
 #define TEMU_VM_H
-
-#define MEM_PTR_ROM         1
-#define MEM_PTR_RAM         2
+/* vm代表MMU，TLB应该被包含在MMU内，因此在本header中include tlb.h */
+#include "tlb.h"
 
 #define PTE_V               0
 #define PTE_R               1
@@ -28,7 +27,7 @@ uint8_t vm_on(void);
 
 uint8_t vm_status_read_sum();
 
-uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flags);
+uint32_t vm_lookup_paddr(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flags);
 
 uint8_t pm_read_b(uint32_t addr, uint8_t *intr);
 
