@@ -10,7 +10,7 @@ uint8_t in_wfi = 0;
 uint32_t wfi_next_pc = 0;
 
 static uint32_t trap_get_program_counter(void) {
-    if(in_wfi) {
+    if (in_wfi) {
         in_wfi = 0;
         return wfi_next_pc;
     }
@@ -35,7 +35,7 @@ void trap_take_interrupt(void) {
     uint32_t cause = 0;
     /* TODO: priority */
     uint32_t pending = control_status_registers[CSR_idx_sip];
-    if(!pending) {
+    if (!pending) {
         return;
     }
     while (!(pending & 0x01)) {
@@ -47,7 +47,8 @@ void trap_take_interrupt(void) {
     }
     if ((1 << cause) & control_status_registers[CSR_idx_mideleg]) {
         /* delegate to supervisor mode */
-        if (!(control_status_registers[CSR_idx_sstatus] & (1 << mstatus_SIE)) && current_privilege > CSR_MASK_USER && !in_wfi) {
+        if (!(control_status_registers[CSR_idx_sstatus] & (1 << mstatus_SIE)) && current_privilege > CSR_MASK_USER &&
+            !in_wfi) {
             return;
         }
         if (!(control_status_registers[CSR_idx_sie] & (1 << cause))) {
@@ -79,7 +80,7 @@ void trap_take_interrupt(void) {
         current_privilege = CSR_MASK_SUPERVISOR;
     } else {
         if (!(control_status_registers[CSR_idx_mstatus] & (1 << mstatus_MIE)) &&
-            current_privilege == CSR_MASK_MACHINE  && !in_wfi) {
+            current_privilege == CSR_MASK_MACHINE && !in_wfi) {
             return;
         }
         if (!(control_status_registers[CSR_idx_mie] & (1 << cause))) {
@@ -161,6 +162,7 @@ void trap_throw_exception(uint32_t cause, uint32_t tval) {
 
 void trap_return_machine(void) {
     current_privilege = (control_status_registers[CSR_idx_mstatus] >> mstatus_MPP) & 0x03;
+    control_status_registers[CSR_idx_mstatus] &= ~(0x03 << mstatus_MPP);
     if (control_status_registers[CSR_idx_mstatus] & (1 << mstatus_MPIE)) {
         control_status_registers[CSR_idx_mstatus] |= (1 << mstatus_MIE);
     } else {
@@ -172,6 +174,7 @@ void trap_return_machine(void) {
 
 void trap_return_supervisor(void) {
     current_privilege = (control_status_registers[CSR_idx_sstatus] >> mstatus_SPP);
+    control_status_registers[CSR_idx_sstatus] &= ~(1 << mstatus_SPP);
     if (control_status_registers[CSR_idx_sstatus] & (1 << sstatus_SPIE)) {
         control_status_registers[CSR_idx_sstatus] |= (1 << sstatus_SIE);
     } else {
