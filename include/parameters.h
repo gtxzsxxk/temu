@@ -5,25 +5,29 @@
 #ifndef TEMU_PARAMETERS_H
 #define TEMU_PARAMETERS_H
 
-#define ROM_BASE_ADDR           0x00000000
-#define ROM_SIZE                0x00010000
-#define RAM_BASE_ADDR           0x80000000
-#define RAM_SIZE                0x02000000
+#define RAM_BASE_ADDR               0x80000000
+#define RAM_SIZE                    0x02000000
 
-#define UART_BASE_ADDR          0x12500000
-#define UART_SIZE               0x00000100
+#define UART_BASE_ADDR              0x12500000
+#define UART_SIZE                   0x00000100
 
-#define PLIC_BASE_ADDR          0x0c000000
-#define PLIC_SIZE               0x00400000
+#define PLIC_BASE_ADDR              0x0c000000
+#define PLIC_SIZE                   0x00400000
+
+#define ICACHE_LINES                96
+#define ICACHE_WAYS                 4
+
+#define DCACHE_LINES                96
+#define DCACHE_WAYS                 4
 
 /* 执行多少条指令后，让CSR timer tick */
-#define ZICNT_TICK_INTERVAL     10000
+#define ZICNT_TICK_INTERVAL         10000
 /* CSR timer的频率。此项需要与设备树一致 */
-#define ZICNT_TIMER_FREQ        100000000
+#define ZICNT_TIMER_FREQ            100000000
 
-#define TEMU_PRINT_BANNER       "[TEMU MESSAGE] "
+#define TEMU_PRINT_BANNER           "[TEMU MESSAGE] "
 
-#define likely(x)       __builtin_expect(!!(x), 1)
-#define unlikely(x)     __builtin_expect(!!(x), 0)
+#define likely(x)                   __builtin_expect(!!(x), 1)
+#define unlikely(x)                 __builtin_expect(!!(x), 0)
 
 #endif //TEMU_PARAMETERS_H

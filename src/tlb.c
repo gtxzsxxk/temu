@@ -10,19 +10,19 @@ static struct tlb_cache_line TLB[TLB_CACHE_LINE_SIZE][TLB_CACHE_WAY];
 
 /* return the ppn of the virtual address */
 uint32_t tlb_lookup(uint32_t vaddr, uint8_t access_flags, uint8_t *fault) {
-    struct tlb_cache_line *indexed_line = TLB[TLB_VADDR_GET_INDEX(vaddr)];
+    struct tlb_cache_line *cacheline_set = TLB[TLB_VADDR_GET_INDEX(vaddr)];
     uint16_t tag = TLB_VADDR_GET_TAG(vaddr);
     uint8_t pgfault_flag = 0;
     for (uint8_t i = 0; i < TLB_CACHE_WAY; i++) {
-        if (indexed_line[i].valid && indexed_line[i].tag == tag) {
-            if (!((1 << (access_flags - 1)) & indexed_line[i].prot) ||
-                (indexed_line[i].user_only && current_privilege == CSR_MASK_SUPERVISOR && !vm_status_read_sum())) {
+        if (cacheline_set[i].valid && cacheline_set[i].tag == tag) {
+            if (!((1 << (access_flags - 1)) & cacheline_set[i].prot) ||
+                (cacheline_set[i].user_only && current_privilege == CSR_MASK_SUPERVISOR && !vm_status_read_sum())) {
                 pgfault_flag = 1;
                 continue;
             }
-            indexed_line[i].access_counter++;
+            cacheline_set[i].access_counter++;
             *fault = 0;
-            return indexed_line[i].ppn;
+            return cacheline_set[i].ppn;
         }
     }
 
@@ -35,20 +35,20 @@ uint32_t tlb_lookup(uint32_t vaddr, uint8_t access_flags, uint8_t *fault) {
 }
 
 void tlb_insert(uint32_t vaddr, struct tlb_cache_line data) {
-    struct tlb_cache_line *indexed_line = TLB[TLB_VADDR_GET_INDEX(vaddr)];
+    struct tlb_cache_line *cacheline_set = TLB[TLB_VADDR_GET_INDEX(vaddr)];
     uint16_t min_used = 0xffff;
     struct tlb_cache_line *new_cache_line;
     for (uint8_t i = 0; i < TLB_CACHE_WAY; i++) {
         /* Cache未满 */
-        if (!indexed_line[i].valid) {
-            new_cache_line = &indexed_line[i];
+        if (!cacheline_set[i].valid) {
+            new_cache_line = &cacheline_set[i];
             break;
         }
 
         /* Cache已满 */
-        if (indexed_line[i].access_counter < min_used) {
-            min_used = indexed_line[i].access_counter;
-            new_cache_line = &indexed_line[i];
+        if (cacheline_set[i].access_counter < min_used) {
+            min_used = cacheline_set[i].access_counter;
+            new_cache_line = &cacheline_set[i];
         }
     }
 
