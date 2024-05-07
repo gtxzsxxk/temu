@@ -4,7 +4,7 @@ project(temu C)
 set(CMAKE_C_STANDARD 11)
 
 set(PerformanceMode OFF)
-set(PerformanceMonitor OFF)
+set(PerformanceMonitor ON)
 if (PerformanceMode)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -g")
     message(STATUS "Compiling with performance mode -- -O2")

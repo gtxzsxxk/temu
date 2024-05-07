@@ -7,9 +7,9 @@
 
 #include <stdint.h>
 
-#define CACHE_INDEX_FIELD_LENGTH    6
+#define CACHE_INDEX_FIELD_LENGTH    8
 #define CACHE_LINES                 (1 << CACHE_INDEX_FIELD_LENGTH)
-#define CACHE_WAYS                  4
+#define CACHE_WAYS                  1   /* 经过实验，此时效率最高 */
 #define CACHE_OFFSET_FIELD_LENGTH   6
 #define CACHE_LINE_DATA_SIZE        ((1 << CACHE_OFFSET_FIELD_LENGTH) >> 2)
 
