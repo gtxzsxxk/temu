@@ -161,6 +161,10 @@ void trap_throw_exception(uint32_t cause, uint32_t tval) {
 
 void trap_return_machine(void) {
     current_privilege = (control_status_registers[CSR_idx_mstatus] >> mstatus_MPP) & 0x03;
+    if(current_privilege == 0) {
+        int a = 0;
+    }
+    control_status_registers[CSR_idx_mstatus] &= ~(0x03 << mstatus_MPP);
     if (control_status_registers[CSR_idx_mstatus] & (1 << mstatus_MPIE)) {
         control_status_registers[CSR_idx_mstatus] |= (1 << mstatus_MIE);
     } else {
@@ -172,6 +176,10 @@ void trap_return_machine(void) {
 
 void trap_return_supervisor(void) {
     current_privilege = (control_status_registers[CSR_idx_sstatus] >> mstatus_SPP);
+    if(current_privilege == 0) {
+        int a = 0;
+    }
+    control_status_registers[CSR_idx_sstatus] &= ~(1 << mstatus_SPP);
     if (control_status_registers[CSR_idx_sstatus] & (1 << sstatus_SPIE)) {
         control_status_registers[CSR_idx_sstatus] |= (1 << sstatus_SIE);
     } else {

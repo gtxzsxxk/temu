@@ -101,7 +101,7 @@ uint32_t vm_lookup_paddr(uint32_t vaddr, uint8_t *page_fault, uint8_t access_fla
         }
     }
 
-    return 0x09090909;
+    return 0x9a9a9a9a;
 }
 
 uint8_t pm_read_b(uint32_t addr, uint8_t *intr) {

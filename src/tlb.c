@@ -16,6 +16,7 @@ uint32_t tlb_lookup(uint32_t vaddr, uint8_t access_flags, uint8_t *fault) {
         if (indexed_line[i].valid && indexed_line[i].tag == tag) {
             if (!((1 << (access_flags - 1)) & indexed_line[i].prot) ||
                 (indexed_line[i].user_only && current_privilege != CSR_MASK_USER)) {
+                /* TODO: check for user_only exceptions */
                 pgfault_flag = 1;
                 continue;
             }
@@ -27,10 +28,10 @@ uint32_t tlb_lookup(uint32_t vaddr, uint8_t access_flags, uint8_t *fault) {
 
     if (pgfault_flag) {
         *fault = TLB_PAGE_FAULT_IDENTIFIER;
-        return TLB_PAGE_FAULT_IDENTIFIER;
+        return 0xd1d1d1d1;
     }
     *fault = TLB_MISS_IDENTIFIER;
-    return TLB_MISS_IDENTIFIER;
+    return 0x3c3c3c3c;
 }
 
 void tlb_insert(uint32_t vaddr, struct tlb_cache_line data) {
