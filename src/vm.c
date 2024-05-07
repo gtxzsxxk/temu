@@ -19,7 +19,7 @@ static inline uint8_t vm_status_read_mxr() {
     return (control_status_registers[CSR_idx_sstatus] >> mstatus_MXR);
 }
 
-static inline uint8_t vm_status_read_sum() {
+uint8_t vm_status_read_sum() {
     if (current_privilege == CSR_MASK_MACHINE) {
         return (control_status_registers[CSR_idx_mstatus] >> mstatus_SUM);
     }

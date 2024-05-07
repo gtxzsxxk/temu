@@ -26,6 +26,8 @@
 
 uint8_t vm_on(void);
 
+uint8_t vm_status_read_sum();
+
 uint32_t vm_translation(uint32_t vaddr, uint8_t *page_fault, uint8_t access_flags);
 
 uint8_t pm_read_b(uint32_t addr, uint8_t *intr);
