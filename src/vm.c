@@ -1,7 +1,6 @@
 //
 // Created by hanyuan on 2024/2/20.
 //
-#include <stdio.h>
 #include <stdint.h>
 #include <parameters.h>
 #include "vm.h"

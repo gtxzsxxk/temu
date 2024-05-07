@@ -14,12 +14,6 @@
 #define PLIC_BASE_ADDR              0x0c000000
 #define PLIC_SIZE                   0x00400000
 
-#define ICACHE_LINES                96
-#define ICACHE_WAYS                 4
-
-#define DCACHE_LINES                96
-#define DCACHE_WAYS                 4
-
 /* 执行多少条指令后，让CSR timer tick */
 #define ZICNT_TICK_INTERVAL         10000
 /* CSR timer的频率。此项需要与设备树一致 */
