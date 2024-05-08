@@ -3,6 +3,7 @@
 //
 #include <stdio.h>
 #include "mem.h"
+#include "cache.h"
 #include "uart8250.h"
 #include "plic-simple.h"
 
@@ -26,7 +27,7 @@ uint8_t mem_read_b(uint32_t addr, uint8_t *intr) {
     if (addr_translated >= UART_BASE_ADDR && addr_translated < UART_BASE_ADDR + UART_SIZE) {
         return uart8250_read_b(addr_translated - UART_BASE_ADDR);
     }
-    return pm_read_b(addr_translated, intr);
+    return cache_data_read_b(addr_translated, intr);
 }
 
 uint16_t mem_read_h(uint32_t addr, uint8_t *intr) {
@@ -43,7 +44,7 @@ uint16_t mem_read_h(uint32_t addr, uint8_t *intr) {
         return 0xffff;
     }
 
-    return pm_read_h(addr_translated, intr);
+    return cache_data_read_h(addr_translated, intr);
 }
 
 uint32_t mem_read_w(uint32_t addr, uint8_t *intr) {
@@ -63,7 +64,7 @@ uint32_t mem_read_w(uint32_t addr, uint8_t *intr) {
     if (addr_translated >= PLIC_BASE_ADDR && addr_translated < PLIC_BASE_ADDR + PLIC_SIZE) {
         return plic_read_w(addr_translated - PLIC_BASE_ADDR);
     }
-    return pm_read_w(addr_translated, intr);
+    return cache_data_read_w(addr_translated, intr);
 }
 
 uint32_t mem_read_inst(uint32_t addr, uint8_t *intr) {
@@ -80,7 +81,7 @@ uint32_t mem_read_inst(uint32_t addr, uint8_t *intr) {
         return 0x5555ffff;
     }
 
-    return pm_read_w(addr_translated, intr);
+    return cache_inst_read(addr_translated, intr);
 }
 
 void mem_write_b(uint32_t addr, uint8_t data, uint8_t *intr) {
@@ -102,7 +103,7 @@ void mem_write_b(uint32_t addr, uint8_t data, uint8_t *intr) {
         return;
     }
 
-    pm_write_b(addr_translated, data, intr);
+    cache_data_write_b(addr_translated, data, intr);
 }
 
 void mem_write_h(uint32_t addr, uint16_t data, uint8_t *intr) {
@@ -119,7 +120,7 @@ void mem_write_h(uint32_t addr, uint16_t data, uint8_t *intr) {
         return;
     }
 
-    pm_write_h(addr_translated, data, intr);
+    cache_data_write_h(addr_translated, data, intr);
 }
 
 void mem_write_w(uint32_t addr, uint32_t data, uint8_t *intr) {
@@ -139,7 +140,7 @@ void mem_write_w(uint32_t addr, uint32_t data, uint8_t *intr) {
         plic_write_w(addr_translated - PLIC_BASE_ADDR, data);
         return;
     }
-    pm_write_w(addr_translated, data, intr);
+    cache_data_write_w(addr_translated, data, intr);
 }
 
 uint32_t mem_register_read(uint8_t rd) {
