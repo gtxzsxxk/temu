@@ -81,7 +81,7 @@ uint32_t mem_read_inst(uint32_t addr, uint8_t *intr) {
         return 0x5555ffff;
     }
 
-    return cache_data_read_inst(addr_translated, intr);
+    return cache_inst_read(addr_translated, intr);
 }
 
 void mem_write_b(uint32_t addr, uint8_t data, uint8_t *intr) {

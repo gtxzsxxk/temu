@@ -31,8 +31,4 @@ uint32_t vm_lookup_paddr(uint32_t vaddr, uint8_t *page_fault, uint8_t access_fla
 
 uint8_t pm_read_b(uint32_t addr, uint8_t *intr);
 
-uint32_t pm_read_w(uint32_t addr, uint8_t *intr);
-
-void pm_write_w(uint32_t addr, uint32_t data, uint8_t *intr);
-
 #endif //TEMU_VM_H

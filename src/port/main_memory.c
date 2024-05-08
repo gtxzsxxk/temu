@@ -7,17 +7,19 @@
 static uint32_t ram_ptr[RAM_SIZE >> 2];
 static uint8_t *ram_ptr_b = (uint8_t *)&ram_ptr;
 
-inline uint8_t port_main_memory_read_b(uint32_t offset) {
-    /* offset must be less than RAM_SIZE */
-    return *(ram_ptr_b + offset);
+__attribute__((optimize("O0")));
+static void mem_delay() {
+    volatile uint32_t cnt = 1;
+    while(cnt) cnt--;
 }
 
 inline uint32_t port_main_memory_read_w(uint32_t offset) {
-    /* offset must be less than RAM_SIZE */
+    mem_delay();
     return ram_ptr[offset >> 2];
 }
 
 inline void port_main_memory_write_w(uint32_t offset, uint32_t data) {
+    mem_delay();
     ram_ptr[offset >> 2] = data;
 }
 

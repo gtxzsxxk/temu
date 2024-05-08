@@ -29,6 +29,10 @@ _Noreturn void machine_start(uint32_t start, int printreg) {
     for (;;) {
         PERF_MONITOR_CONTINUOUS(mainloop, PERF_BATCH_100M);
 
+        if(program_counter == 0xc0009eb8) {
+            int a = 0;
+        }
+
         access_error_intr = 0;
         instruction = mem_read_inst(program_counter, &access_error_intr);
         if (unlikely(access_error_intr)) {

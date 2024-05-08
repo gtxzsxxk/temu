@@ -6,6 +6,7 @@
 #include "zicsr.h"
 #include "trap.h"
 #include "perf.h"
+#include "cache.h"
 
 static const uint32_t POWERS_OF_2_SUB_ONE[] = {
         1,
@@ -237,6 +238,9 @@ DEC_FUNC(LOAD) {
         }
     } else if (funct3 == 4) {
         /* LBU */
+        if(program_counter == 0xC01D612C) {
+            int a = 0;
+        }
         uint8_t data = mem_read_b(target_addr, &access_error_intr);
         if (!access_error_intr) {
             mem_register_write(rd, data);
@@ -629,6 +633,7 @@ DEC_FUNC(ATOMIC) {
 }
 
 DEC_FUNC(ZIFENCEI_FENCE) {
+    cache_flush_icache();
     program_counter += 4;
 }
 
