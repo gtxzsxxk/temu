@@ -6,6 +6,7 @@
 #include "zicsr.h"
 #include "trap.h"
 #include "perf.h"
+#include "cache.h"
 
 static const uint32_t POWERS_OF_2_SUB_ONE[] = {
         1,
@@ -629,6 +630,7 @@ DEC_FUNC(ATOMIC) {
 }
 
 DEC_FUNC(ZIFENCEI_FENCE) {
+    cache_flush_icache();
     program_counter += 4;
 }
 
