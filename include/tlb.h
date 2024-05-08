@@ -10,7 +10,7 @@
 #define TLB_CACHE_LINE_SIZE_LOG     10
 #define TLB_CACHE_LINE_SIZE         (1 << TLB_CACHE_LINE_SIZE_LOG)
 #define SV32_VPN_FIELD_LENGTH       20
-#define TLB_CACHE_WAY               2
+#define TLB_CACHE_WAY               1   /* 由于大小限制，退化为直接映射 */
 
 #define TLB_MISS_IDENTIFIER         1
 #define TLB_PAGE_FAULT_IDENTIFIER   2
