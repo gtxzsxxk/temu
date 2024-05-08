@@ -11,7 +11,7 @@
 #include "port/console.h"
 #include "perf.h"
 
-//#define RISCV_DEBUG
+#define RISCV_DEBUG
 //#define RISCV_ISA_TESTS
 
 static uint8_t access_error_intr;
