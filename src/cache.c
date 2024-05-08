@@ -6,8 +6,8 @@
 #include "parameters.h"
 #include "port/main_memory.h"
 
-static struct cache_line ICACHE[CACHE_LINES][CACHE_WAYS];
-static struct cache_line DCACHE[CACHE_LINES][CACHE_WAYS];
+static struct cache_line ICACHE[CACHE_LINES][CACHE_WAYS] = {0};
+static struct cache_line DCACHE[CACHE_LINES][CACHE_WAYS] = {0};
 
 #ifndef NULL
 #define NULL (void*)0
