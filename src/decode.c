@@ -510,12 +510,20 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         program_counter -= 4;
     } else if (!funct3 && !rd && !rs1 && imm == 0x102) {
         /* SRET */
-        trap_return_supervisor();
+        if (current_privilege >= CSR_MASK_SUPERVISOR) {
+            trap_return_supervisor();
+        } else {
+            trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
+        }
         /* avoid incorrect pc */
         program_counter -= 4;
     } else if (!funct3 && !rd && !rs1 && imm == 0x302) {
         /* MRET */
-        trap_return_machine();
+        if (current_privilege >= CSR_MASK_MACHINE) {
+            trap_return_machine();
+        } else {
+            trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
+        }
         /* avoid incorrect pc */
         program_counter -= 4;
     } else if (!funct3 && (imm >> 5) == 0x09) {
@@ -633,7 +641,7 @@ DEC_FUNC(ZIFENCEI_FENCE) {
     uint32_t imm;
     uint8_t funct3, rs1, rs2;
     INST_DEC(s, &imm, &funct3, &rs1, &rs2);
-    if(funct3 == 0x01) {
+    if (funct3 == 0x01) {
         cache_flush_icache();
     }
     program_counter += 4;
