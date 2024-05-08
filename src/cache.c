@@ -62,7 +62,7 @@ static inline void cache_write(struct cache_line cache[CACHE_LINES][CACHE_WAYS],
 }
 
 static inline void
-cache_load(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uint8_t *load_fault, uint8_t is_icache) {
+cache_load(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uint8_t *load_fault) {
     struct cache_line *cacheline_set = cache[CACHE_ADDR_GET_INDEX(paddr)];
     uint32_t tag = CACHE_ADDR_GET_TAG(paddr);
     uint16_t min_used = 0xffff;
@@ -79,7 +79,7 @@ cache_load(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uin
         }
     }
 
-    if (new_cache_line->dirty) {
+    if (new_cache_line->valid && new_cache_line->dirty) {
         /* Write Back */
         uint32_t wb_addr = (CACHE_ADDR_GET_INDEX(paddr) << CACHE_OFFSET_FIELD_LENGTH) |
                            (new_cache_line->tag << (CACHE_OFFSET_FIELD_LENGTH + CACHE_INDEX_FIELD_LENGTH));
@@ -94,11 +94,7 @@ cache_load(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uin
     new_cache_line->dirty = 0;
     uint32_t base_addr = (paddr >> CACHE_OFFSET_FIELD_LENGTH) << CACHE_OFFSET_FIELD_LENGTH;
     for (uint32_t i = 0; i < CACHE_LINE_DATA_SIZE; i++) {
-        if (is_icache) {
-            new_cache_line->data[i] = cache_data_read_w(base_addr + (i << 2), load_fault);
-        } else {
-            new_cache_line->data[i] = physical_memory_read_w(base_addr + (i << 2), load_fault);
-        }
+        new_cache_line->data[i] = physical_memory_read_w(base_addr + (i << 2), load_fault);
         if (load_fault && *load_fault) {
             return;
         }
@@ -120,7 +116,7 @@ uint8_t cache_data_read_b(uint32_t paddr, uint8_t *intr) {
                 return data >> 24;
         }
     } else {
-        cache_load(DCACHE, paddr, intr, 0);
+        cache_load(DCACHE, paddr, intr);
         if (intr && *intr) {
             return 0x12;
         }
@@ -141,7 +137,7 @@ uint16_t cache_data_read_h(uint32_t paddr, uint8_t *intr) {
                 return data >> 16;
         }
     } else {
-        cache_load(DCACHE, paddr, intr, 0);
+        cache_load(DCACHE, paddr, intr);
         if (*intr) {
             return 0x3412;
         }
@@ -156,7 +152,7 @@ uint32_t cache_data_read_w(uint32_t paddr, uint8_t *intr) {
     if (!miss) {
         return data;
     } else {
-        cache_load(DCACHE, paddr, intr, 0);
+        cache_load(DCACHE, paddr, intr);
         if (*intr) {
             return 0x51515151;
         }
@@ -170,7 +166,7 @@ uint32_t cache_inst_read(uint32_t paddr, uint8_t *intr) {
     if (!miss) {
         return data;
     } else {
-        cache_load(ICACHE, paddr, intr, 1);
+        cache_load(ICACHE, paddr, intr);
         if (*intr) {
             return 0x51515151;
         }
@@ -182,7 +178,7 @@ void cache_data_write_b(uint32_t paddr, uint8_t data, uint8_t *intr) {
     uint8_t miss = 0;
     cache_write(DCACHE, paddr, data, 0, 0, BYTE, &miss);
     if (miss) {
-        cache_load(DCACHE, paddr, intr, 0);
+        cache_load(DCACHE, paddr, intr);
         if (*intr) {
             return;
         }
@@ -194,7 +190,7 @@ void cache_data_write_h(uint32_t paddr, uint16_t data, uint8_t *intr) {
     uint8_t miss = 0;
     cache_write(DCACHE, paddr, 0, data, 0, HalfWORD, &miss);
     if (miss) {
-        cache_load(DCACHE, paddr, intr, 0);
+        cache_load(DCACHE, paddr, intr);
         if (*intr) {
             return;
         }
@@ -206,7 +202,7 @@ void cache_data_write_w(uint32_t paddr, uint32_t data, uint8_t *intr) {
     uint8_t miss = 0;
     cache_write(DCACHE, paddr, 0, 0, data, WORD, &miss);
     if (miss) {
-        cache_load(DCACHE, paddr, intr, 0);
+        cache_load(DCACHE, paddr, intr);
         if (*intr) {
             return;
         }
@@ -218,6 +214,15 @@ void cache_flush_icache() {
     for (uint32_t i = 0; i < CACHE_LINES; i++) {
         for (uint8_t j = 0; j < CACHE_WAYS; j++) {
             ICACHE[i][j].valid = 0;
+            if (DCACHE[i][j].valid && DCACHE[i][j].dirty) {
+                /* Write Back */
+                uint32_t wb_addr = (i << CACHE_OFFSET_FIELD_LENGTH) |
+                                   (DCACHE[i][j].tag << (CACHE_OFFSET_FIELD_LENGTH + CACHE_INDEX_FIELD_LENGTH));
+                for (uint32_t k = 0; k < CACHE_LINE_DATA_SIZE; k++) {
+                    physical_memory_write_w(wb_addr + (k << 2), DCACHE[i][j].data[k], NULL);
+                }
+                DCACHE[i][j].dirty = 0;
+            }
         }
     }
 }
