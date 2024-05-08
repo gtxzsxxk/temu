@@ -280,6 +280,11 @@ DEC_FUNC(STORE) {
     int32_t sext_offset = SEXT(imm, 31, 11);
     uint32_t target_addr = mem_register_read(rs1) + sext_offset;
     uint8_t access_error_intr = 0;
+
+    if(target_addr == 0x80048CD8 || target_addr == 0xC0048CD8) {
+        int a = 0;
+    }
+
     if (funct3 == 0) {
         /* SB */
         mem_write_b(target_addr, mem_register_read(rs2) & 0xff, &access_error_intr);

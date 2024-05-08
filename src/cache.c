@@ -61,7 +61,7 @@ static inline void cache_write(struct cache_line cache[CACHE_LINES][CACHE_WAYS],
     *miss = 1;
 }
 
-static inline void cache_load(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uint8_t *load_fault) {
+static inline void cache_load(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uint8_t *load_fault, uint8_t is_icache) {
     struct cache_line *cacheline_set = cache[CACHE_ADDR_GET_INDEX(paddr)];
     uint32_t tag = CACHE_ADDR_GET_TAG(paddr);
     uint16_t min_used = 0xffff;
@@ -93,7 +93,11 @@ static inline void cache_load(struct cache_line cache[CACHE_LINES][CACHE_WAYS], 
     new_cache_line->dirty = 0;
     uint32_t base_addr = (paddr >> CACHE_OFFSET_FIELD_LENGTH) << CACHE_OFFSET_FIELD_LENGTH;
     for (uint32_t i = 0; i < CACHE_LINE_DATA_SIZE; i++) {
-        new_cache_line->data[i] = physical_memory_read_w(base_addr + (i << 2), load_fault);
+        if(is_icache) {
+            new_cache_line->data[i] = cache_data_read_w(base_addr + (i << 2), load_fault);
+        } else {
+            new_cache_line->data[i] = physical_memory_read_w(base_addr + (i << 2), load_fault);
+        }
         if (load_fault && *load_fault) {
             return;
         }
@@ -115,7 +119,7 @@ uint8_t cache_data_read_b(uint32_t paddr, uint8_t *intr) {
                 return data >> 24;
         }
     } else {
-        cache_load(DCACHE, paddr, intr);
+        cache_load(DCACHE, paddr, intr, 0);
         if (intr && *intr) {
             return 0x12;
         }
@@ -136,7 +140,7 @@ uint16_t cache_data_read_h(uint32_t paddr, uint8_t *intr) {
                 return data >> 16;
         }
     } else {
-        cache_load(DCACHE, paddr, intr);
+        cache_load(DCACHE, paddr, intr, 0);
         if (*intr) {
             return 0x3412;
         }
@@ -151,7 +155,7 @@ uint32_t cache_data_read_w(uint32_t paddr, uint8_t *intr) {
     if (!miss) {
         return data;
     } else {
-        cache_load(DCACHE, paddr, intr);
+        cache_load(DCACHE, paddr, intr, 0);
         if (*intr) {
             return 0x51515151;
         }
@@ -165,7 +169,7 @@ uint32_t cache_inst_read(uint32_t paddr, uint8_t *intr) {
     if (!miss) {
         return data;
     } else {
-        cache_load(ICACHE, paddr, intr);
+        cache_load(ICACHE, paddr, intr, 1);
         if (*intr) {
             return 0x51515151;
         }
@@ -177,7 +181,7 @@ void cache_data_write_b(uint32_t paddr, uint8_t data, uint8_t *intr) {
     uint8_t miss = 0;
     cache_write(DCACHE, paddr, data, 0, 0, BYTE, &miss);
     if (miss) {
-        cache_load(DCACHE, paddr, intr);
+        cache_load(DCACHE, paddr, intr, 0);
         if (*intr) {
             return;
         }
@@ -189,7 +193,7 @@ void cache_data_write_h(uint32_t paddr, uint16_t data, uint8_t *intr) {
     uint8_t miss = 0;
     cache_write(DCACHE, paddr, 0, data, 0, HalfWORD, &miss);
     if (miss) {
-        cache_load(DCACHE, paddr, intr);
+        cache_load(DCACHE, paddr, intr, 0);
         if (*intr) {
             return;
         }
@@ -201,7 +205,7 @@ void cache_data_write_w(uint32_t paddr, uint32_t data, uint8_t *intr) {
     uint8_t miss = 0;
     cache_write(DCACHE, paddr, 0, 0, data, WORD, &miss);
     if (miss) {
-        cache_load(DCACHE, paddr, intr);
+        cache_load(DCACHE, paddr, intr, 0);
         if (*intr) {
             return;
         }
@@ -241,6 +245,11 @@ static void physical_memory_write_w(uint32_t addr, uint32_t data, uint8_t *intr)
             *intr = 3;
         }
     }
+
+    if(addr == 0x80048CD8) {
+        int a = 0;
+    }
+
     if (addr >= RAM_BASE_ADDR && addr + 3 < RAM_BASE_ADDR + RAM_SIZE) {
         port_main_memory_write_w(addr - RAM_BASE_ADDR, data);
     } else {

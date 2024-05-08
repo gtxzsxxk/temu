@@ -109,6 +109,9 @@ void trap_take_interrupt(void) {
 }
 
 void trap_throw_exception(uint32_t cause, uint32_t tval) {
+    if(cause != 9) {
+        int a  = 0;
+    }
     if ((1 << cause) & control_status_registers[CSR_idx_medeleg]) {
         /* delegate to supervisor mode */
         /* set cause */

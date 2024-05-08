@@ -29,7 +29,7 @@ _Noreturn void machine_start(uint32_t start, int printreg) {
     for (;;) {
         PERF_MONITOR_CONTINUOUS(mainloop, PERF_BATCH_100M);
 
-        if(program_counter == 0xc0009eb8) {
+        if(program_counter == 0xc0048cd8) {
             int a = 0;
         }
 
