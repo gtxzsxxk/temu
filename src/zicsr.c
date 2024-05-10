@@ -2,11 +2,10 @@
 // Created by hanyuan on 2024/2/10.
 //
 
-/* TODO: use port to provide timer information */
-#include <time.h>
 #include "mmu.h"
 #include "tlb.h"
 #include "trap.h"
+#include "port/system_timer.h"
 #include "zicsr.h"
 
 uint8_t current_privilege = CSR_MASK_MACHINE;
@@ -263,8 +262,8 @@ void zicnt_cycle_tick(void) {
 }
 
 void zicnt_time_tick(void) {
-    static clock_t last_clk = 0;
-    csr_time += (uint64_t) (ZICNT_TIMER_FREQ * ((double) (clock() - last_clk)) / CLOCKS_PER_SEC);
+    static port_clock_t last_clk = 0;
+    csr_time += (uint64_t) ((ZICNT_TIMER_FREQ / PORT_CLOCKS_PER_SEC) * (port_system_timer_get_ticks() - last_clk));
 
     timecmp = (((uint64_t) control_status_registers[CSR_idx_stimecmph]) << 32) |
               control_status_registers[CSR_idx_stimecmp];
@@ -278,7 +277,7 @@ void zicnt_time_tick(void) {
     control_status_registers[CSR_idx_time] = csr_time & 0xffffffff;
     control_status_registers[CSR_idx_timeh] = (csr_time >> 32) & 0xffffffff;
 
-    last_clk = clock();
+    last_clk = port_system_timer_get_ticks();
 }
 
 uint64_t zicnt_get_cycle(void) {

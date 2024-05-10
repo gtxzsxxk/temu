@@ -50,7 +50,9 @@ add_executable(temu src/main.c
         src/tlb.c
         include/tlb.h
         src/cache.c
-        include/cache.h)
+        include/cache.h
+        src/port/system_timer.c
+        include/port/system_timer.h)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
