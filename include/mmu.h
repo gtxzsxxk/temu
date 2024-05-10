@@ -47,9 +47,11 @@ void mmu_register_write(uint8_t rd, uint32_t value);
 
 void mmu_debug_printreg(uint32_t pc_prev_exec);
 
+#if TEMU_DEBUG_CODE
 void mmu_debug_printaddr(uint32_t addr, uint8_t no_vaddr);
 
 void mmu_debug_printstring(uint32_t addr, uint8_t no_vaddr);
+#endif
 
 #endif //TEMU_MMU_H
 

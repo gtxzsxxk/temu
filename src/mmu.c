@@ -1,13 +1,16 @@
 //
 // Created by hanyuan on 2024/2/8.
 //
-#include <stdio.h>
 #include "mmu.h"
 #include "tlb.h"
 #include "cache.h"
 #include "uart8250.h"
 #include "plic-simple.h"
 #include "port/main_memory.h"
+
+#ifndef NULL
+#define NULL (void*)0
+#endif
 
 static uint32_t registers[32];
 uint32_t program_counter = 0;
@@ -259,6 +262,9 @@ void mmu_register_write(uint8_t rd, uint32_t value) {
     }
 }
 
+#if TEMU_DEBUG_CODE
+#include <stdio.h>
+
 void mmu_debug_printreg(uint32_t pc_prev_exec) {
     printf("Emulator registers debug print\n");
     for (int i = 0; i < 32; i++) {
@@ -333,3 +339,4 @@ void mmu_debug_printstring(uint32_t addr, uint8_t no_vaddr) {
     printf("\n===end of debug string print\n");
     fflush(stdout);
 }
+#endif

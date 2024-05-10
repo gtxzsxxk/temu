@@ -21,6 +21,8 @@
 
 #define TEMU_PRINT_BANNER           "[TEMU MESSAGE] "
 
+#define TEMU_DEBUG_CODE             0
+
 #define likely(x)                   __builtin_expect(!!(x), 1)
 #define unlikely(x)                 __builtin_expect(!!(x), 0)
 

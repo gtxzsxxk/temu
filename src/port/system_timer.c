@@ -4,7 +4,7 @@
 
 #include "port/system_timer.h"
 
-#ifndef STM32
+#ifndef BARE_METAL_PLATFORM
 
 #include <time.h>
 

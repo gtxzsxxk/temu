@@ -3,7 +3,7 @@
 //
 #include "port/console.h"
 
-#if !defined(WIN32) && !defined(WIN64) && !defined(STM32)
+#if !defined(WIN32) && !defined(WIN64) && !defined(BARE_METAL_PLATFORM)
 
 #include <termios.h>
 #include <unistd.h>
@@ -34,27 +34,27 @@ void port_os_console_init() {
 }
 
 void port_console_write(uint8_t c) {
-#ifndef STM32
+#ifndef BARE_METAL_PLATFORM
     printf("%c", c);
 #else
-#error port console write to stm32 platform!
+#error port console write to bare metal platform!
 #endif
 }
 
 void port_console_flush(void) {
-#ifndef STM32
+#ifndef BARE_METAL_PLATFORM
     fflush(stdout);
 #endif
 }
 
 int port_console_read(void) {
-#ifndef STM32
+#ifndef BARE_METAL_PLATFORM
 #if !defined(WIN32) && !defined(WIN64)
     return getchar();
 #else
 #error port console read to windows platform!
 #endif
 #else
-#error port console write to stm32 platform!
+#error port console write to bare metal platform!
 #endif
 }
