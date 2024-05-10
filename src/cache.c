@@ -38,7 +38,7 @@ static inline void cache_write(struct cache_line cache[CACHE_LINES][CACHE_WAYS],
                                uint16_t data_h, uint32_t data_w, enum CACHE_DATA_SIZE datasize, uint8_t *miss) {
     struct cache_line *cacheline_set = cache[CACHE_ADDR_GET_INDEX(paddr)];
     uint32_t tag = CACHE_ADDR_GET_TAG(paddr);
-    uint16_t offset = (paddr & (0xffffffff >> (32 - CACHE_OFFSET_FIELD_LENGTH))) >> 2;
+    uint16_t offset = (paddr & (0xffffffff >> (32 - CACHE_OFFSET_FIELD_LENGTH)));
     for (uint8_t i = 0; i < CACHE_WAYS; i++) {
         if (cacheline_set[i].valid && cacheline_set[i].tag == tag) {
             cacheline_set[i].access_counter++;
@@ -46,13 +46,13 @@ static inline void cache_write(struct cache_line cache[CACHE_LINES][CACHE_WAYS],
             cacheline_set[i].dirty = 1;
             switch (datasize) {
                 case BYTE:
-                    *((uint8_t *) &cacheline_set[i].data[offset] + (paddr & 0x03)) = data_b;
+                    *(((uint8_t *) cacheline_set[i].data) + offset) = data_b;
                     return;
                 case HalfWORD:
-                    *((uint16_t *) &cacheline_set[i].data[offset] + ((paddr >> 1) & 0x01)) = data_h;
+                    *((uint16_t *) (((uint8_t *) cacheline_set[i].data) + offset)) = data_h;
                     return;
                 case WORD:
-                    cacheline_set[i].data[offset] = data_w;
+                    *((uint32_t *) (((uint8_t *) cacheline_set[i].data) + offset)) = data_w;
                     return;
             }
         }
@@ -105,16 +105,7 @@ uint8_t cache_data_read_b(uint32_t paddr, uint8_t *intr) {
     uint8_t miss = 0;
     uint32_t data = cache_read(DCACHE, paddr, &miss);
     if (!miss) {
-        switch (paddr & 0x03) {
-            case 0:
-                return data;
-            case 1:
-                return data >> 8;
-            case 2:
-                return data >> 16;
-            case 3:
-                return data >> 24;
-        }
+        return *((uint8_t *) &data + (paddr & 0x03));
     } else {
         cache_load(DCACHE, paddr, intr);
         if (intr && *intr) {
@@ -122,20 +113,13 @@ uint8_t cache_data_read_b(uint32_t paddr, uint8_t *intr) {
         }
         return cache_data_read_b(paddr, intr);
     }
-
-    return 0x12;
 }
 
 uint16_t cache_data_read_h(uint32_t paddr, uint8_t *intr) {
     uint8_t miss = 0;
     uint32_t data = cache_read(DCACHE, paddr, &miss);
     if (!miss) {
-        switch ((paddr >> 1) & 0x01) {
-            case 0:
-                return data;
-            case 1:
-                return data >> 16;
-        }
+        return *((uint16_t *) ((uint8_t *) &data + (paddr & 0x03)));
     } else {
         cache_load(DCACHE, paddr, intr);
         if (*intr) {
@@ -143,7 +127,6 @@ uint16_t cache_data_read_h(uint32_t paddr, uint8_t *intr) {
         }
         return cache_data_read_h(paddr, intr);
     }
-    return 0x3412;
 }
 
 uint32_t cache_data_read_w(uint32_t paddr, uint8_t *intr) {
