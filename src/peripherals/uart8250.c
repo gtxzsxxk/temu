@@ -1,10 +1,9 @@
 //
 // Created by hanyuan on 2024/2/14.
 //
-#include <unistd.h>
-#include <stdint.h>
-#include <stdio.h>
+
 #include "port/lock.h"
+#include "port/console.h"
 #include "uart8250.h"
 #include "plic-simple.h"
 
@@ -249,7 +248,7 @@ void uart8250_tick(void) {
             if (LOOPBACK_MODE_ON) {
                 write_rx_fifo(tx_fifo[0]);
             } else {
-                printf("%c", tx_fifo[0]);
+                port_console_write(tx_fifo[0]);
             }
             /* 移位 */
             for (int i = 0; i < UART_FIFO_SIZE - 1; i++) {
@@ -261,7 +260,7 @@ void uart8250_tick(void) {
                 /* 1 << 6: Transmitter empty */
                 port_lock_lock(&rx_fifo_lock, 0);
                 LSR |= (1 << 6);
-                fflush(stdout);
+                port_console_flush();
                 port_lock_unlock(&rx_fifo_lock);
             }
         }
@@ -283,7 +282,6 @@ int uart8250_init(void) {
     port_lock_init(&rx_fifo_lock);
 
     if (pthread_create(&listening_thd, NULL, uart8250_listening, NULL)) {
-        printf("Failed to create uart listening thread\n");
         return -1;
     }
 
@@ -297,31 +295,8 @@ int uart8250_init(void) {
 #endif
 
 _Noreturn void *uart8250_listening(void *ptr) {
-#if defined(WIN32) || defined(WIN64)
-    HANDLE hStdin;
-    INPUT_RECORD inChar;
-    DWORD cNumRead;
-    hStdin = GetStdHandle(STD_INPUT_HANDLE);
-#endif
     for (;;) {
-#if !defined(WIN32) && !defined(WIN64)
-        int ch = getchar();
-#else
-        BOOL suc = ReadConsoleInput(
-                hStdin,      // input buffer handle
-                &inChar,     // buffer to read into
-                1,         // size of read buffer
-                &cNumRead);
-        if (!suc || !cNumRead || inChar.EventType != KEY_EVENT) {
-            continue;
-        }
-        int ch = (unsigned char) inChar.Event.KeyEvent.uChar.AsciiChar;
-        suc = ReadConsoleInput(
-                hStdin,      // input buffer handle
-                &inChar,     // buffer to read into
-                1,         // size of read buffer
-                &cNumRead);
-#endif
+        int ch = port_console_read();
         port_lock_lock(&rx_fifo_lock, 1);
         if (rx_fifo_tail >= UART_FIFO_SIZE - 1) {
             /* FIFO is full */
