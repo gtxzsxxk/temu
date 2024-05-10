@@ -3,7 +3,7 @@
 //
 
 #include "tlb.h"
-#include "vm.h"
+#include "mmu.h"
 #include "zicsr.h"
 
 static struct tlb_cache_line TLB[TLB_CACHE_LINE_SIZE][TLB_CACHE_WAY];

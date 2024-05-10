@@ -24,7 +24,7 @@ endif ()
 include_directories(include)
 
 add_executable(temu src/main.c
-        src/mem.c
+        src/mmu.c
         src/machine.c
         src/decode.c
         src/zicsr.c
@@ -33,8 +33,6 @@ add_executable(temu src/main.c
         include/trap.h
         include/uart8250.h
         src/peripherals/uart8250.c
-        src/vm.c
-        include/vm.h
         src/peripherals/plic-simple.c
         include/plic-simple.h
         src/port/lock.c

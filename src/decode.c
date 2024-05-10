@@ -2,7 +2,8 @@
 // Created by hanyuan on 2024/2/8.
 //
 #include "decode.h"
-#include "mem.h"
+#include "mmu.h"
+#include "tlb.h"
 #include "zicsr.h"
 #include "trap.h"
 #include "perf.h"
@@ -97,7 +98,7 @@ DEC_FUNC(LUI) {
     uint8_t rd;
     INST_DEC(u, &imm, &rd);
     imm &= ~0x00000fff;
-    mem_register_write(rd, imm);
+    mmu_register_write(rd, imm);
     program_counter += 4;
 }
 
@@ -107,7 +108,7 @@ DEC_FUNC(AUIPC) {
     INST_DEC(u, &imm, &rd);
     imm &= ~0x00000fff;
     imm += program_counter;
-    mem_register_write(rd, imm);
+    mmu_register_write(rd, imm);
     program_counter += 4;
 }
 
@@ -118,7 +119,7 @@ DEC_FUNC(JAL) {
     uint8_t rd;
     INST_DEC(j, &imm, &rd);
     int32_t sext_imm = SEXT(imm, 31, 20);
-    mem_register_write(rd, program_counter + 4);
+    mmu_register_write(rd, program_counter + 4);
     program_counter += sext_imm;
 
     PERF_MONITOR_DISCRETE_WARP_END(JAL, PERF_BATCH_1M);
@@ -135,8 +136,8 @@ DEC_FUNC(JALR) {
     int32_t sext_offset = SEXT(imm, 31, 11);
     /* potential bug: jalr x5, 0(x5) */
     uint32_t next_addr = program_counter + 4;
-    program_counter = (mem_register_read(rs1) + sext_offset) & (~0x00000001);
-    mem_register_write(rd, next_addr);
+    program_counter = (mmu_register_read(rs1) + sext_offset) & (~0x00000001);
+    mmu_register_write(rd, next_addr);
 
     PERF_MONITOR_DISCRETE_WARP_END(JALR, PERF_BATCH_1M);
 }
@@ -153,7 +154,7 @@ DEC_FUNC(BRANCH) {
     switch (funct3) {
         case 0:
             /* BEQ */
-            if (mem_register_read(rs1) == mem_register_read(rs2)) {
+            if (mmu_register_read(rs1) == mmu_register_read(rs2)) {
                 program_counter += sext_offset;
             } else {
                 program_counter += 4;
@@ -161,7 +162,7 @@ DEC_FUNC(BRANCH) {
             break;
         case 1:
             /* BNE */
-            if (mem_register_read(rs1) != mem_register_read(rs2)) {
+            if (mmu_register_read(rs1) != mmu_register_read(rs2)) {
                 program_counter += sext_offset;
             } else {
                 program_counter += 4;
@@ -169,7 +170,7 @@ DEC_FUNC(BRANCH) {
             break;
         case 4:
             /* BLT */
-            if (((int32_t) mem_register_read(rs1)) < ((int32_t) mem_register_read(rs2))) {
+            if (((int32_t) mmu_register_read(rs1)) < ((int32_t) mmu_register_read(rs2))) {
                 program_counter += sext_offset;
             } else {
                 program_counter += 4;
@@ -177,7 +178,7 @@ DEC_FUNC(BRANCH) {
             break;
         case 5:
             /* BGE */
-            if (((int32_t) mem_register_read(rs1)) >= ((int32_t) mem_register_read(rs2))) {
+            if (((int32_t) mmu_register_read(rs1)) >= ((int32_t) mmu_register_read(rs2))) {
                 program_counter += sext_offset;
             } else {
                 program_counter += 4;
@@ -185,7 +186,7 @@ DEC_FUNC(BRANCH) {
             break;
         case 6:
             /* BLTU */
-            if ((mem_register_read(rs1)) < (mem_register_read(rs2))) {
+            if ((mmu_register_read(rs1)) < (mmu_register_read(rs2))) {
                 program_counter += sext_offset;
             } else {
                 program_counter += 4;
@@ -193,7 +194,7 @@ DEC_FUNC(BRANCH) {
             break;
         case 7:
             /* BGEU */
-            if ((mem_register_read(rs1)) >= (mem_register_read(rs2))) {
+            if ((mmu_register_read(rs1)) >= (mmu_register_read(rs2))) {
                 program_counter += sext_offset;
             } else {
                 program_counter += 4;
@@ -214,39 +215,39 @@ DEC_FUNC(LOAD) {
     uint16_t imm;
     INST_DEC(i, &rd, &funct3, &rs1, &imm);
     int32_t sext_offset = SEXT(imm, 31, 11);
-    uint32_t target_addr = mem_register_read(rs1) + sext_offset;
+    uint32_t target_addr = mmu_register_read(rs1) + sext_offset;
     uint8_t access_error_intr = 0;
     if (funct3 == 0) {
         /* LB */
-        uint8_t data = mem_read_b(target_addr, &access_error_intr);
+        uint8_t data = mmu_read_b(target_addr, &access_error_intr);
         uint32_t sext_data = SEXT(data, 31, 7);
         if (!access_error_intr) {
-            mem_register_write(rd, sext_data);
+            mmu_register_write(rd, sext_data);
         }
     } else if (funct3 == 1) {
         /* LH */
-        uint16_t data = mem_read_h(target_addr, &access_error_intr);
+        uint16_t data = mmu_read_h(target_addr, &access_error_intr);
         uint32_t sext_data = SEXT(data, 31, 15);
         if (!access_error_intr) {
-            mem_register_write(rd, sext_data);
+            mmu_register_write(rd, sext_data);
         }
     } else if (funct3 == 2) {
         /* LW */
-        uint32_t data = mem_read_w(target_addr, &access_error_intr);
+        uint32_t data = mmu_read_w(target_addr, &access_error_intr);
         if (!access_error_intr) {
-            mem_register_write(rd, data);
+            mmu_register_write(rd, data);
         }
     } else if (funct3 == 4) {
         /* LBU */
-        uint8_t data = mem_read_b(target_addr, &access_error_intr);
+        uint8_t data = mmu_read_b(target_addr, &access_error_intr);
         if (!access_error_intr) {
-            mem_register_write(rd, data);
+            mmu_register_write(rd, data);
         }
     } else if (funct3 == 5) {
         /* LHU */
-        uint16_t data = mem_read_h(target_addr, &access_error_intr);
+        uint16_t data = mmu_read_h(target_addr, &access_error_intr);
         if (!access_error_intr) {
-            mem_register_write(rd, data);
+            mmu_register_write(rd, data);
         }
     } else {
         trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
@@ -275,17 +276,17 @@ DEC_FUNC(STORE) {
     uint8_t funct3, rs1, rs2;
     INST_DEC(s, &imm, &funct3, &rs1, &rs2);
     int32_t sext_offset = SEXT(imm, 31, 11);
-    uint32_t target_addr = mem_register_read(rs1) + sext_offset;
+    uint32_t target_addr = mmu_register_read(rs1) + sext_offset;
     uint8_t access_error_intr = 0;
     if (funct3 == 0) {
         /* SB */
-        mem_write_b(target_addr, mem_register_read(rs2) & 0xff, &access_error_intr);
+        mmu_write_b(target_addr, mmu_register_read(rs2) & 0xff, &access_error_intr);
     } else if (funct3 == 1) {
         /* SH */
-        mem_write_h(target_addr, mem_register_read(rs2) & 0xffff, &access_error_intr);
+        mmu_write_h(target_addr, mmu_register_read(rs2) & 0xffff, &access_error_intr);
     } else if (funct3 == 2) {
         /* SW */
-        mem_write_w(target_addr, mem_register_read(rs2), &access_error_intr);
+        mmu_write_w(target_addr, mmu_register_read(rs2), &access_error_intr);
     } else {
         trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
         program_counter -= 4;
@@ -315,35 +316,35 @@ DEC_FUNC(ARITH_IMM) {
     int32_t sext_imm = SEXT(imm, 31, 11);
     if (funct3 == 0) {
         /* ADDI */
-        mem_register_write(rd, mem_register_read(rs1) + sext_imm);
+        mmu_register_write(rd, mmu_register_read(rs1) + sext_imm);
     } else if (funct3 == 2) {
         /* SLTI */
-        mem_register_write(rd, (int32_t) mem_register_read(rs1) < sext_imm);
+        mmu_register_write(rd, (int32_t) mmu_register_read(rs1) < sext_imm);
     } else if (funct3 == 3) {
         /* SLTIU */
-        mem_register_write(rd, (uint32_t) mem_register_read(rs1) < (uint32_t) sext_imm);
+        mmu_register_write(rd, (uint32_t) mmu_register_read(rs1) < (uint32_t) sext_imm);
     } else if (funct3 == 4) {
         /* XORI */
-        mem_register_write(rd, (uint32_t) mem_register_read(rs1) ^ (uint32_t) sext_imm);
+        mmu_register_write(rd, (uint32_t) mmu_register_read(rs1) ^ (uint32_t) sext_imm);
     } else if (funct3 == 6) {
         /* ORI */
-        mem_register_write(rd, (uint32_t) mem_register_read(rs1) | (uint32_t) sext_imm);
+        mmu_register_write(rd, (uint32_t) mmu_register_read(rs1) | (uint32_t) sext_imm);
     } else if (funct3 == 7) {
         /* ANDI */
-        mem_register_write(rd, (uint32_t) mem_register_read(rs1) & (uint32_t) sext_imm);
+        mmu_register_write(rd, (uint32_t) mmu_register_read(rs1) & (uint32_t) sext_imm);
     } else if (funct3 == 1) {
         /* SLLI */
         uint8_t shamt = imm & 0x1f;
-        mem_register_write(rd, (uint32_t) mem_register_read(rs1) << shamt);
+        mmu_register_write(rd, (uint32_t) mmu_register_read(rs1) << shamt);
     } else if (funct3 == 5) {
         /* SRLI and SRAI */
         uint8_t shamt = imm & 0x1f;
         if (!(inst >> 30)) {
             /* SRLI */
-            mem_register_write(rd, (uint32_t) mem_register_read(rs1) >> shamt);
+            mmu_register_write(rd, (uint32_t) mmu_register_read(rs1) >> shamt);
         } else {
             /* SRAI */
-            mem_register_write(rd, (int32_t) mem_register_read(rs1) >> shamt);
+            mmu_register_write(rd, (int32_t) mmu_register_read(rs1) >> shamt);
         }
     } else {
         trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
@@ -364,40 +365,40 @@ DEC_FUNC(ARITH) {
         if (funct3 == 0) {
             if (!(inst >> 30)) {
                 /* ADD */
-                mem_register_write(rd, mem_register_read(rs1) + mem_register_read(rs2));
+                mmu_register_write(rd, mmu_register_read(rs1) + mmu_register_read(rs2));
             } else {
                 /* SUB */
-                mem_register_write(rd, mem_register_read(rs1) - mem_register_read(rs2));
+                mmu_register_write(rd, mmu_register_read(rs1) - mmu_register_read(rs2));
             }
         } else if (funct3 == 1) {
             /* SLL */
-            uint8_t shamt = mem_register_read(rs2) & 0x1f;
-            mem_register_write(rd, mem_register_read(rs1) << shamt);
+            uint8_t shamt = mmu_register_read(rs2) & 0x1f;
+            mmu_register_write(rd, mmu_register_read(rs1) << shamt);
         } else if (funct3 == 2) {
             /* SLT */
-            mem_register_write(rd, (int32_t) mem_register_read(rs1) < (int32_t) mem_register_read(rs2));
+            mmu_register_write(rd, (int32_t) mmu_register_read(rs1) < (int32_t) mmu_register_read(rs2));
         } else if (funct3 == 3) {
             /* SLTU */
-            mem_register_write(rd, mem_register_read(rs1) < mem_register_read(rs2));
+            mmu_register_write(rd, mmu_register_read(rs1) < mmu_register_read(rs2));
         } else if (funct3 == 4) {
             /* XOR */
-            mem_register_write(rd, mem_register_read(rs1) ^ mem_register_read(rs2));
+            mmu_register_write(rd, mmu_register_read(rs1) ^ mmu_register_read(rs2));
         } else if (funct3 == 5) {
             /* SRL and SRA */
-            uint8_t shamt = mem_register_read(rs2) & 0x1f;
+            uint8_t shamt = mmu_register_read(rs2) & 0x1f;
             if (!(inst >> 30)) {
                 /* SRL */
-                mem_register_write(rd, (uint32_t) mem_register_read(rs1) >> shamt);
+                mmu_register_write(rd, (uint32_t) mmu_register_read(rs1) >> shamt);
             } else {
                 /* SRA */
-                mem_register_write(rd, (int32_t) mem_register_read(rs1) >> shamt);
+                mmu_register_write(rd, (int32_t) mmu_register_read(rs1) >> shamt);
             }
         } else if (funct3 == 6) {
             /* OR */
-            mem_register_write(rd, (uint32_t) mem_register_read(rs1) | (uint32_t) mem_register_read(rs2));
+            mmu_register_write(rd, (uint32_t) mmu_register_read(rs1) | (uint32_t) mmu_register_read(rs2));
         } else if (funct3 == 7) {
             /* AND */
-            mem_register_write(rd, (uint32_t) mem_register_read(rs1) & (uint32_t) mem_register_read(rs2));
+            mmu_register_write(rd, (uint32_t) mmu_register_read(rs1) & (uint32_t) mmu_register_read(rs2));
         } else {
             trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
             program_counter -= 4;
@@ -405,65 +406,65 @@ DEC_FUNC(ARITH) {
     } else {
         if (funct3 == 0) {
             /* MUL */
-            mem_register_write(rd, mem_register_read(rs1) * mem_register_read(rs2));
+            mmu_register_write(rd, mmu_register_read(rs1) * mmu_register_read(rs2));
         } else if (funct3 == 1) {
             /* MULH */
-            int64_t res = (int64_t) ((int32_t) mem_register_read(rs1)) * (int64_t) ((int32_t) mem_register_read(rs2));
-            mem_register_write(rd, ((uint64_t) res) >> 32);
+            int64_t res = (int64_t) ((int32_t) mmu_register_read(rs1)) * (int64_t) ((int32_t) mmu_register_read(rs2));
+            mmu_register_write(rd, ((uint64_t) res) >> 32);
         } else if (funct3 == 2) {
             /* MULHSU */
-            int64_t res = (int64_t) ((int32_t) mem_register_read(rs1)) * ((uint32_t) mem_register_read(rs2));
-            mem_register_write(rd, ((uint64_t) res) >> 32);
+            int64_t res = (int64_t) ((int32_t) mmu_register_read(rs1)) * ((uint32_t) mmu_register_read(rs2));
+            mmu_register_write(rd, ((uint64_t) res) >> 32);
         } else if (funct3 == 3) {
             /* MULHU */
-            uint64_t res = (uint64_t) mem_register_read(rs1) * (uint64_t) mem_register_read(rs2);
-            mem_register_write(rd, res >> 32);
+            uint64_t res = (uint64_t) mmu_register_read(rs1) * (uint64_t) mmu_register_read(rs2);
+            mmu_register_write(rd, res >> 32);
         } else if (funct3 == 4) {
             /* DIV */
-            int32_t dividend = (int32_t) mem_register_read(rs1);
-            int32_t divisor = (int32_t) mem_register_read(rs2);
+            int32_t dividend = (int32_t) mmu_register_read(rs1);
+            int32_t divisor = (int32_t) mmu_register_read(rs2);
             if (!divisor) {
-                mem_register_write(rd, 0xffffffff);
+                mmu_register_write(rd, 0xffffffff);
             } else {
                 if ((uint32_t) dividend == 0x80000000) {
-                    mem_register_write(rd, dividend);
+                    mmu_register_write(rd, dividend);
                 } else {
                     int32_t res = dividend / divisor;
-                    mem_register_write(rd, (uint32_t) res);
+                    mmu_register_write(rd, (uint32_t) res);
                 }
             }
         } else if (funct3 == 5) {
             /* DIVU */
-            uint32_t divisor = mem_register_read(rs2);
+            uint32_t divisor = mmu_register_read(rs2);
             if (!divisor) {
-                mem_register_write(rd, 0xffffffff);
+                mmu_register_write(rd, 0xffffffff);
             } else {
-                uint32_t res = mem_register_read(rs1) / divisor;
-                mem_register_write(rd, (uint32_t) res);
+                uint32_t res = mmu_register_read(rs1) / divisor;
+                mmu_register_write(rd, (uint32_t) res);
             }
         } else if (funct3 == 6) {
             /* REM */
-            int32_t dividend = (int32_t) mem_register_read(rs1);
-            int32_t divisor = (int32_t) mem_register_read(rs2);
+            int32_t dividend = (int32_t) mmu_register_read(rs1);
+            int32_t divisor = (int32_t) mmu_register_read(rs2);
             if (!divisor) {
-                mem_register_write(rd, dividend);
+                mmu_register_write(rd, dividend);
             } else {
                 if ((uint32_t) dividend == 0x80000000) {
-                    mem_register_write(rd, 0);
+                    mmu_register_write(rd, 0);
                 } else {
                     int32_t res = dividend % divisor;
-                    mem_register_write(rd, (uint32_t) res);
+                    mmu_register_write(rd, (uint32_t) res);
                 }
             }
         } else if (funct3 == 7) {
             /* REMU */
-            uint32_t dividend = mem_register_read(rs1);
-            uint32_t divisor = mem_register_read(rs2);
+            uint32_t dividend = mmu_register_read(rs1);
+            uint32_t divisor = mmu_register_read(rs2);
             if (!divisor) {
-                mem_register_write(rd, dividend);
+                mmu_register_write(rd, dividend);
             } else {
                 uint32_t res = dividend % divisor;
-                mem_register_write(rd, res);
+                mmu_register_write(rd, res);
             }
         }
     }
@@ -545,15 +546,15 @@ DEC_FUNC(ATOMIC) {
     uint8_t typ = funct7 >> 2;
     uint8_t access_error_intr = 0;
     if (funct3 == 0x2) {
-        uint32_t addr = mem_register_read(rs1);
-        uint32_t value = mem_register_read(rs2);
+        uint32_t addr = mmu_register_read(rs1);
+        uint32_t value = mmu_register_read(rs2);
         if (typ == 0x03) {
             /* SC.W */
             if (reservation_valid && reservation_set == addr) {
                 reservation_valid = 0;
-                mem_write_w(addr, value, &access_error_intr);
+                mmu_write_w(addr, value, &access_error_intr);
                 if (access_error_intr) {
-                    mem_register_write(rd, 1);
+                    mmu_register_write(rd, 1);
                     if (access_error_intr == 2) {
                         trap_throw_exception(EXCEPTION_STORE_PAGEFAULT, addr);
                     } else if (access_error_intr == 3) {
@@ -563,20 +564,20 @@ DEC_FUNC(ATOMIC) {
                     }
                     return;
                 }
-                mem_register_write(rd, 0);
+                mmu_register_write(rd, 0);
             } else {
-                mem_register_write(rd, 1);
+                mmu_register_write(rd, 1);
                 reservation_valid = 0;
             }
             program_counter += 4;
             return;
         }
-        uint32_t t = mem_read_w(addr, &access_error_intr);
+        uint32_t t = mmu_read_w(addr, &access_error_intr);
         if (access_error_intr) {
             trap_throw_exception(EXCEPTION_LOAD_ACCESS_FAULT, addr);
             return;
         } else {
-            mem_register_write(rd, t);
+            mmu_register_write(rd, t);
             uint32_t res;
             if (typ == 0x01) {
                 /* AMOSWAP.W */
@@ -615,7 +616,7 @@ DEC_FUNC(ATOMIC) {
                 trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
                 return;
             }
-            mem_write_w(addr, res, &access_error_intr);
+            mmu_write_w(addr, res, &access_error_intr);
             if (access_error_intr) {
                 trap_throw_exception(EXCEPTION_STORE_ACCESS_FAULT, addr);
                 return;

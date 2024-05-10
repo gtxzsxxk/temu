@@ -4,7 +4,7 @@
 
 /* TODO: use port to provide timer information */
 #include <time.h>
-#include "mem.h"
+#include "mmu.h"
 #include "tlb.h"
 #include "trap.h"
 #include "zicsr.h"
@@ -128,8 +128,10 @@ void csr_csrrw(uint8_t rs1, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
         uint32_t prev_value = csr_read(index);
         csr_write(index, mem_register_read(rs1));
         mem_register_write(rd, prev_value);
+        csr_write(index, mmu_register_read(rs1), intr);
     } else {
         csr_write(index, mem_register_read(rs1));
+        csr_write(index, mmu_register_read(rs1), intr);
     }
 }
 
@@ -145,6 +147,8 @@ void csr_csrrs(uint8_t rs1, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
         csr_write(index, prev_value | mem_register_read(rs1));
     }
     mem_register_write(rd, prev_value);
+        csr_write(index, prev_value | mmu_register_read(rs1), intr);
+    mmu_register_write(rd, prev_value);
 }
 
 void csr_csrrc(uint8_t rs1, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
@@ -159,6 +163,8 @@ void csr_csrrc(uint8_t rs1, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
         csr_write(index, prev_value & (~mem_register_read(rs1)));
     }
     mem_register_write(rd, prev_value);
+        csr_write(index, prev_value & (~mmu_register_read(rs1)), intr);
+    mmu_register_write(rd, prev_value);
 }
 
 void csr_csrrwi(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
@@ -172,6 +178,7 @@ void csr_csrrwi(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
         uint32_t prev_value = csr_read(index);
         csr_write(index, uimm);
         mem_register_write(rd, prev_value);
+        mmu_register_write(rd, prev_value);
     } else {
         csr_write(index, uimm);
     }
@@ -186,6 +193,7 @@ void csr_csrrsi(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
     }
     uint32_t prev_value = csr_read(index);
     mem_register_write(rd, prev_value);
+    mmu_register_write(rd, prev_value);
     if (uimm) {
         csr_write(index, prev_value | uimm);
     }
@@ -200,6 +208,7 @@ void csr_csrrci(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
     }
     uint32_t prev_value = csr_read(index);
     mem_register_write(rd, prev_value);
+    mmu_register_write(rd, prev_value);
     if (uimm) {
         csr_write(index, prev_value & (~uimm));
     }

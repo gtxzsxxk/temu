@@ -2,7 +2,7 @@
 // Created by hanyuan on 2024/2/11.
 //
 #include <stdint.h>
-#include "mem.h"
+#include "mmu.h"
 #include "trap.h"
 #include "zicsr.h"
 

@@ -3,7 +3,7 @@
 //
 
 #include "machine.h"
-#include "mem.h"
+#include "mmu.h"
 #include "decode.h"
 #include "uart8250.h"
 #include "trap.h"
@@ -30,7 +30,7 @@ _Noreturn void machine_start(uint32_t start, int printreg) {
         PERF_MONITOR_CONTINUOUS(mainloop, PERF_BATCH_100M);
 
         access_error_intr = 0;
-        instruction = mem_read_inst(program_counter, &access_error_intr);
+        instruction = mmu_read_inst(program_counter, &access_error_intr);
         if (unlikely(access_error_intr)) {
             if (access_error_intr == 2) {
                 trap_throw_exception(EXCEPTION_INST_PAGEFAULT, program_counter);
@@ -71,7 +71,7 @@ static void machine_tick(void) {
 static void machine_debug(uint32_t instruction, int printreg) {
 #ifdef RISCV_DEBUG
     if (printreg) {
-        mem_debug_printreg(program_counter);
+        mmu_debug_printreg(program_counter);
     }
 #ifdef RISCV_ISA_TESTS
     if (program_counter == 0x2003008) {
