@@ -290,9 +290,38 @@ int uart8250_init(void) {
     return 0;
 }
 
+#if defined(WIN32) || defined(WIN64)
+
+#include <windows.h>
+
+#endif
+
 _Noreturn void *uart8250_listening(void *ptr) {
+#if defined(WIN32) || defined(WIN64)
+    HANDLE hStdin;
+    INPUT_RECORD inChar;
+    DWORD cNumRead;
+    hStdin = GetStdHandle(STD_INPUT_HANDLE);
+#endif
     for (;;) {
+#if !defined(WIN32) && !defined(WIN64)
         int ch = getchar();
+#else
+        BOOL suc = ReadConsoleInput(
+                hStdin,      // input buffer handle
+                &inChar,     // buffer to read into
+                1,         // size of read buffer
+                &cNumRead);
+        if (!suc || !cNumRead || inChar.EventType != KEY_EVENT) {
+            continue;
+        }
+        int ch = (unsigned char) inChar.Event.KeyEvent.uChar.AsciiChar;
+        suc = ReadConsoleInput(
+                hStdin,      // input buffer handle
+                &inChar,     // buffer to read into
+                1,         // size of read buffer
+                &cNumRead);
+#endif
         port_lock_lock(&rx_fifo_lock, 1);
         if (rx_fifo_tail >= UART_FIFO_SIZE - 1) {
             /* FIFO is full */

@@ -7,7 +7,9 @@
 #include <termios.h>
 #include <unistd.h>
 #else
-#warning Console settings are not ported to windows currently
+
+#include <windows.h>
+
 #endif
 
 void port_os_console_init() {
@@ -18,5 +20,12 @@ void port_os_console_init() {
     tm.c_lflag &= ~(ICANON);
     tcsetattr(STDIN_FILENO, TCSANOW, &tm);
 #else
+    HANDLE hStdin;
+    DWORD fdwSaveOldMode, fdwMode;
+    hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    GetConsoleMode(hStdin, &fdwSaveOldMode);
+    fdwMode = ENABLE_PROCESSED_INPUT | ENABLE_INSERT_MODE | ENABLE_VIRTUAL_TERMINAL_INPUT |
+              ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hStdin, fdwMode);
 #endif
 }
