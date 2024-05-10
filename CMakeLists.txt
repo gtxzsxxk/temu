@@ -52,3 +52,13 @@ add_executable(temu src/main.c
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(temu PRIVATE Threads::Threads)
+
+if (PerformanceMode)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT supportLto OUTPUT output)
+    if (supportLto)
+        set_property(TARGET temu PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    else ()
+        message(WARNING "IPO is not supported: ${output}")
+    endif ()
+endif ()
