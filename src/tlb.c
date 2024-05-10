@@ -6,6 +6,10 @@
 #include "mmu.h"
 #include "zicsr.h"
 
+#ifndef NULL
+#define NULL (void*)0
+#endif
+
 static struct tlb_cache_line TLB[TLB_CACHE_LINE_SIZE][TLB_CACHE_WAY];
 
 /* return the ppn of the virtual address */
@@ -37,7 +41,7 @@ uint32_t tlb_lookup(uint32_t vaddr, uint8_t access_flags, uint8_t *fault) {
 void tlb_insert(uint32_t vaddr, struct tlb_cache_line data) {
     struct tlb_cache_line *cacheline_set = TLB[TLB_VADDR_GET_INDEX(vaddr)];
     uint16_t min_used = 0xffff;
-    struct tlb_cache_line *new_cache_line;
+    struct tlb_cache_line *new_cache_line = NULL;
     for (uint8_t i = 0; i < TLB_CACHE_WAY; i++) {
         /* Cache未满 */
         if (!cacheline_set[i].valid) {

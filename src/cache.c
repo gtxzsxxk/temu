@@ -66,7 +66,7 @@ cache_load(struct cache_line cache[CACHE_LINES][CACHE_WAYS], uint32_t paddr, uin
     struct cache_line *cacheline_set = cache[CACHE_ADDR_GET_INDEX(paddr)];
     uint32_t tag = CACHE_ADDR_GET_TAG(paddr);
     uint16_t min_used = 0xffff;
-    struct cache_line *new_cache_line;
+    struct cache_line *new_cache_line = NULL;
     for (uint8_t i = 0; i < CACHE_WAYS; i++) {
         if (!cacheline_set[i].valid) {
             new_cache_line = &cacheline_set[i];
