@@ -511,12 +511,20 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         program_counter -= 4;
     } else if (!funct3 && !rd && !rs1 && imm == 0x102) {
         /* SRET */
-        trap_return_supervisor();
+        if (current_privilege >= CSR_MASK_SUPERVISOR) {
+            trap_return_supervisor();
+        } else {
+            trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
+        }
         /* avoid incorrect pc */
         program_counter -= 4;
     } else if (!funct3 && !rd && !rs1 && imm == 0x302) {
         /* MRET */
-        trap_return_machine();
+        if (current_privilege >= CSR_MASK_MACHINE) {
+            trap_return_machine();
+        } else {
+            trap_throw_exception(EXCEPTION_ILLEGAL_INST, inst);
+        }
         /* avoid incorrect pc */
         program_counter -= 4;
     } else if (!funct3 && (imm >> 5) == 0x09) {
