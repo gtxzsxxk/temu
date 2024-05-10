@@ -642,7 +642,7 @@ DEC_FUNC(ZIFENCEI_FENCE) {
     uint32_t imm;
     uint8_t funct3, rs1, rs2;
     INST_DEC(s, &imm, &funct3, &rs1, &rs2);
-    if(funct3 == 0x01) {
+    if (funct3 == 0x01) {
         cache_flush_icache();
     }
     program_counter += 4;
