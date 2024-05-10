@@ -101,19 +101,27 @@ uint8_t csr_get_index_by_number(uint16_t csr_number) {
     return -1;
 }
 
-uint32_t csr_read(uint16_t csr_index) {
+static uint32_t csr_read(uint16_t csr_index, uint8_t *exception) {
     /* TODO: implement read actions */
-    return control_status_registers[csr_index];
+    if ((csr_match[csr_index] & 0x03) <= current_privilege) {
+        *exception = 0;
+        return control_status_registers[csr_index];
+    }
+    *exception = 1;
+    return -1;
 }
 
-void csr_write(uint16_t csr_index, uint32_t value) {
+static void csr_write(uint16_t csr_index, uint32_t value, uint8_t *exception) {
     /* TODO: implement write actions */
-    if (csr_match[csr_index] & CSR_MASK_WRITE) {
+    if (likely(csr_match[csr_index] & CSR_MASK_WRITE && ((csr_match[csr_index] & 0x03) <= current_privilege))) {
+        *exception = 0;
         control_status_registers[csr_index] = value;
         if (csr_index == CSR_idx_satp) {
             /* 目前还没有支持ASID，所以在每次写SATP后需要手动flush TLB */
             tlb_flushall();
         }
+    } else {
+        *exception = 1;
     }
 }
 
@@ -125,13 +133,20 @@ void csr_csrrw(uint8_t rs1, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
         return;
     }
     if (rd) {
-        uint32_t prev_value = csr_read(index);
-        csr_write(index, mem_register_read(rs1));
-        mem_register_write(rd, prev_value);
+        uint32_t prev_value = csr_read(index, intr);
+        if (unlikely(*intr)) {
+            return;
+        }
         csr_write(index, mmu_register_read(rs1), intr);
+        if (unlikely(*intr)) {
+            return;
+        }
+        mmu_register_write(rd, prev_value);
     } else {
-        csr_write(index, mem_register_read(rs1));
         csr_write(index, mmu_register_read(rs1), intr);
+        if (unlikely(*intr)) {
+            return;
+        }
     }
 }
 
@@ -142,12 +157,16 @@ void csr_csrrs(uint8_t rs1, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
         *intr = 1;
         return;
     }
-    uint32_t prev_value = csr_read(index);
-    if (rs1) {
-        csr_write(index, prev_value | mem_register_read(rs1));
+    uint32_t prev_value = csr_read(index, intr);
+    if (*intr) {
+        return;
     }
-    mem_register_write(rd, prev_value);
+    if (rs1) {
         csr_write(index, prev_value | mmu_register_read(rs1), intr);
+        if (unlikely(*intr)) {
+            return;
+        }
+    }
     mmu_register_write(rd, prev_value);
 }
 
@@ -158,12 +177,16 @@ void csr_csrrc(uint8_t rs1, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
         *intr = 1;
         return;
     }
-    uint32_t prev_value = csr_read(index);
-    if (rs1) {
-        csr_write(index, prev_value & (~mem_register_read(rs1)));
+    uint32_t prev_value = csr_read(index, intr);
+    if (unlikely(*intr)) {
+        return;
     }
-    mem_register_write(rd, prev_value);
+    if (rs1) {
         csr_write(index, prev_value & (~mmu_register_read(rs1)), intr);
+        if (unlikely(*intr)) {
+            return;
+        }
+    }
     mmu_register_write(rd, prev_value);
 }
 
@@ -175,12 +198,20 @@ void csr_csrrwi(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
         return;
     }
     if (rd) {
-        uint32_t prev_value = csr_read(index);
-        csr_write(index, uimm);
-        mem_register_write(rd, prev_value);
+        uint32_t prev_value = csr_read(index, intr);
+        if (unlikely(*intr)) {
+            return;
+        }
+        csr_write(index, uimm, intr);
+        if (unlikely(*intr)) {
+            return;
+        }
         mmu_register_write(rd, prev_value);
     } else {
-        csr_write(index, uimm);
+        csr_write(index, uimm, intr);
+        if (unlikely(*intr)) {
+            return;
+        }
     }
 }
 
@@ -191,11 +222,16 @@ void csr_csrrsi(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
         *intr = 1;
         return;
     }
-    uint32_t prev_value = csr_read(index);
-    mem_register_write(rd, prev_value);
+    uint32_t prev_value = csr_read(index, intr);
+    if (unlikely(*intr)) {
+        return;
+    }
     mmu_register_write(rd, prev_value);
     if (uimm) {
-        csr_write(index, prev_value | uimm);
+        csr_write(index, prev_value | uimm, intr);
+        if (unlikely(*intr)) {
+            return;
+        }
     }
 }
 
@@ -206,11 +242,16 @@ void csr_csrrci(uint8_t uimm, uint8_t rd, uint16_t csr_number, uint8_t *intr) {
         *intr = 1;
         return;
     }
-    uint32_t prev_value = csr_read(index);
-    mem_register_write(rd, prev_value);
+    uint32_t prev_value = csr_read(index, intr);
+    if (unlikely(*intr)) {
+        return;
+    }
     mmu_register_write(rd, prev_value);
     if (uimm) {
-        csr_write(index, prev_value & (~uimm));
+        csr_write(index, prev_value & (~uimm), intr);
+        if (unlikely(*intr)) {
+            return;
+        }
     }
 }
 
