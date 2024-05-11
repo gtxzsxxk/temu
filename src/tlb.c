@@ -67,7 +67,7 @@ void tlb_insert(uint32_t vaddr, struct tlb_cache_line data) {
 void tlb_flushall() {
     for (uint32_t i = 0; i < TLB_CACHE_LINE_SIZE; i++) {
         for (uint8_t j = 0; j < TLB_CACHE_WAY; j++) {
-            TLB[i][j].valid = 0;
+            *(((uint32_t *) &TLB[i][j]) + 1) = 0;
         }
     }
 }
