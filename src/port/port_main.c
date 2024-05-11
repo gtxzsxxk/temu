@@ -13,10 +13,11 @@
   *
   * Example:
   * --addr=0x80db5000
+  * --addr=0x81fa0000
   * --exec=fw_jump.bin
   * --with=0x80000000#u-boot.bin
-  * --with=0x80dfd800#u-boot.dtb
-  * --with=0x80ab5000#uImage.gz
+  * --with=0x81ffd800#u-boot.dtb
+  * --with=0x81000000#uImage.gz
  */
 
 int port_main(int argc, char **argv) {
@@ -37,15 +38,16 @@ int port_main(int argc, char **argv) {
             int counter = 7;
             for (int j = 9; j < strlen(argv[i]); j++) {
                 char literal_value = argv[i][j];
-                if(literal_value >= 'a') {
+                if (literal_value >= 'a') {
                     literal_value -= 'a';
-                } else if(literal_value >= 'A') {
+                    literal_value += 10;
+                } else if (literal_value >= 'A') {
                     literal_value -= 'A';
-                } else if(literal_value >= '0') {
+                    literal_value += 10;
+                } else if (literal_value >= '0') {
                     literal_value -= '0';
                 }
-                char current_half_byte = literal_value;
-                start_addr |= (current_half_byte << (counter << 2));
+                start_addr |= (literal_value << (counter << 2));
                 counter--;
             }
             has_addr = 1;
@@ -61,15 +63,16 @@ int port_main(int argc, char **argv) {
             uint32_t addr = 0;
             for (; j < 9 + 8; j++) {
                 char literal_value = argv[i][j];
-                if(literal_value >= 'a') {
+                if (literal_value >= 'a') {
                     literal_value -= 'a';
-                } else if(literal_value >= 'A') {
+                    literal_value += 10;
+                } else if (literal_value >= 'A') {
                     literal_value -= 'A';
-                } else if(literal_value >= '0') {
+                    literal_value += 10;
+                } else if (literal_value >= '0') {
                     literal_value -= '0';
                 }
-                char current_half_byte = literal_value;
-                addr |= (current_half_byte << (counter << 2));
+                addr |= (literal_value << (counter << 2));
                 counter--;
             }
             for (j = 18; j < strlen(argv[i]); j++) {
