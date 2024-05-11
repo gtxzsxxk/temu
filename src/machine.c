@@ -11,6 +11,7 @@
 #include "zicsr.h"
 #include "port/console.h"
 #include "perf.h"
+#include "port/os_yield_cpu.h"
 
 //#define RISCV_ISA_TESTS
 
@@ -50,8 +51,12 @@ _Noreturn void machine_start(uint32_t start, int printreg) {
 static void machine_pre_boot(uint32_t start) {
     program_counter = start;
 
-    port_os_console_init();
+    zicnt_init();
     uart8250_init();
+
+    port_os_console_init();
+    port_os_yield_cpu_add_interrupt(zicnt_time_tick);
+    port_os_yield_cpu_add_interrupt(uart8250_tick);
 }
 
 static void machine_tick(void) {
