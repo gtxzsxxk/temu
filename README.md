@@ -16,21 +16,21 @@
 ```console
 2K performance run parameters for coremark.
 CoreMark Size    : 666
-Total ticks      : 12912
-Total time (secs): 12.912000
-Iterations/Sec   : 309.789343
+Total ticks      : 12692
+Total time (secs): 12.692000
+Iterations/Sec   : 315.159155
 Iterations       : 4000
 Compiler version : GCC12.3.0
 Compiler flags   : -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64  -O2 -g0 -D_FORTIFY_SOURCE=1   -lrt
 Memory location  : Please put data memory location here
-			(e.g. code in flash, data on heap etc)
+                        (e.g. code in flash, data on heap etc)
 seedcrc          : 0xe9f5
 [0]crclist       : 0xe714
 [0]crcmatrix     : 0x1fd7
 [0]crcstate      : 0x8e3a
 [0]crcfinal      : 0x65c5
 Correct operation validated. See readme.txt for run and reporting rules.
-CoreMark 1.0 : 309.789343 / GCC12.3.0 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64  -O2 -g0 -D_FORTIFY_SOURCE=1   -lrt / Heap
+CoreMark 1.0 : 315.159155 / GCC12.3.0 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64  -O2 -g0 -D_FORTIFY_SOURCE=1   -lrt / Heap
 ```
 
 ## Getting Started
@@ -114,7 +114,10 @@ gzip -c uImage > uImage.gz
 ### 使用TEMU运行主线Linux系统
 
 * 确保你拥有`RISC-V`指令集的二进制文件，本项目目前仅支持装载`bin`，即`objcopy`的输出，暂时不支持直接加载ELF，且加载ELF对于系统级别的模拟意义不大
-* 这些二进制文件可以在这里下载： [TEMU Booting Binaries v0.1.1](https://cloud.tsinghua.edu.cn/f/9e6c7a13b2914654bcd3/?dl=1)，可以直接使用`wget`下载到`linux`中。
+* 这些二进制文件可以在这里下载： [TEMU Booting Binaries v0.1.2](https://cloud.tsinghua.edu.cn/f/b639b1cc87784504aab4/?dl=1)，可以直接使用`wget`下载到`linux`中。
+    * Changes since `TEMU Booting Binaries v0.1.1`
+        * 使能内核中的`CONFIG_PREEMPT`
+        * 在根文件系统中添加`Coremark`跑分工具
     * Changes since `TEMU Booting Binaries v0.1.0`
         * 添加`htop`工具
         * 修复了`U-Boot`中一个引起`Store/AMO Access Fault`异常的bug
