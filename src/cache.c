@@ -196,7 +196,7 @@ void cache_data_write_w(uint32_t paddr, uint32_t data, uint8_t *intr) {
 void cache_flush_icache() {
     for (uint32_t i = 0; i < CACHE_LINES; i++) {
         for (uint8_t j = 0; j < CACHE_WAYS; j++) {
-            ICACHE[i][j].valid = 0;
+            *(((uint32_t *) (&ICACHE[i][j])) + 17) = 0;
             if (DCACHE[i][j].valid && DCACHE[i][j].dirty) {
                 /* Write Back */
                 uint32_t wb_addr = (i << CACHE_OFFSET_FIELD_LENGTH) |
