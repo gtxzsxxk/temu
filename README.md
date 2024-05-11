@@ -10,9 +10,28 @@
 
 该项目是一个基于`C`语言编写的`RISC-V`模拟器，支持`rv32ima_zicsr_zicnt_sstc`架构和`sv32`内存分页结构。
 模拟器实现了**指令级别**的模拟，即使用`C`**解释**执行其描述的内存操作与运算等。这一过程就像`CPython`执行`Python`字节码一样，
-`PVM`会根据字节码逐条执行对应的操作，如加载变量、调用函数、执行算术运算等。本模拟器与`CPython`原理基本相同，`TEMU`虚拟了`SoC`
-的常见体系结构，
-支持运行主线`Linux`。`TEMU`模拟的`SoC`，在本文档中，都会基于`OpenSBI`+`U-Boot`的方式来进行内核启动前的工作。
+`PVM`会根据字节码逐条执行对应的操作，如加载变量、调用函数、执行算术运算等。本模拟器与`CPython`原理基本相同，`TEMU`作为片上系统模拟器，实现了`SoC`
+的常见体系结构模拟，支持运行主线`Linux`。`TEMU`模拟的`SoC`，在本文档中，都会基于`OpenSBI`+`U-Boot`的方式来进行内核启动前的工作。
+
+```console
+2K performance run parameters for coremark.
+CoreMark Size    : 666
+Total ticks      : 12912
+Total time (secs): 12.912000
+Iterations/Sec   : 309.789343
+Iterations       : 4000
+Compiler version : GCC12.3.0
+Compiler flags   : -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64  -O2 -g0 -D_FORTIFY_SOURCE=1   -lrt
+Memory location  : Please put data memory location here
+			(e.g. code in flash, data on heap etc)
+seedcrc          : 0xe9f5
+[0]crclist       : 0xe714
+[0]crcmatrix     : 0x1fd7
+[0]crcstate      : 0x8e3a
+[0]crcfinal      : 0x65c5
+Correct operation validated. See readme.txt for run and reporting rules.
+CoreMark 1.0 : 309.789343 / GCC12.3.0 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64  -O2 -g0 -D_FORTIFY_SOURCE=1   -lrt / Heap
+```
 
 ## Getting Started
 
@@ -30,8 +49,7 @@
 * (TODO) 在根文件系统中添加其它软件等
 * (TODO) 添加显示屏等外设
 * (TODO) 使用`cmake`自动下载`TEMU`二进制
-* (TODO) 将定时器也移植到`port`下
-* (TODO) 实现休眠，利用`WFI`让出CPU
+* (TODO) 实现休眠，利用`WFI`在非裸机平台上让出CPU
 
 ### Compiling （建议略过，直接跳到下一步，体验已经准备好的二进制）
 
