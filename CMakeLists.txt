@@ -3,7 +3,7 @@ project(temu C)
 
 set(CMAKE_C_STANDARD 11)
 
-set(PerformanceMode OFF)
+set(PerformanceMode ON)
 set(PerformanceMonitor OFF)
 if (PerformanceMode)
     message(STATUS "${CMAKE_C_COMPILER_ID} toolchain.")
