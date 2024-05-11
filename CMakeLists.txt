@@ -6,16 +6,17 @@ set(CMAKE_C_STANDARD 11)
 set(PerformanceMode OFF)
 set(PerformanceMonitor OFF)
 if (PerformanceMode)
+    message(STATUS "${CMAKE_C_COMPILER_ID} toolchain.")
     if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
-        message(STATUS "Clang toolchain. Using -O3.")
+        message(STATUS "Using -O3.")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
     else ()
-        message(STATUS "GNU toolchain. Using -O2.")
+        message(STATUS "Using -O2.")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -fno-strict-aliasing")
     endif ()
     message(STATUS "Compiling with performance mode")
 else ()
-    message(STATUS "Compiling without performance")
+    message(STATUS "Compiling with NO performance")
 endif ()
 if (NOT PerformanceMonitor)
     add_definitions(-DPERF_MUTE_ALL)
@@ -49,7 +50,9 @@ add_executable(temu src/main.c
         src/tlb.c
         include/tlb.h
         src/cache.c
-        include/cache.h)
+        include/cache.h
+        src/port/system_timer.c
+        include/port/system_timer.h)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)

@@ -3,6 +3,7 @@
 //
 
 #include "machine.h"
+#include "parameters.h"
 #include "mmu.h"
 #include "decode.h"
 #include "uart8250.h"
@@ -11,7 +12,6 @@
 #include "port/console.h"
 #include "perf.h"
 
-//#define RISCV_DEBUG
 //#define RISCV_ISA_TESTS
 
 static uint8_t access_error_intr;
@@ -69,7 +69,7 @@ static void machine_tick(void) {
 }
 
 static void machine_debug(uint32_t instruction, int printreg) {
-#ifdef RISCV_DEBUG
+#if TEMU_DEBUG_CODE
     if (printreg) {
         mmu_debug_printreg(program_counter);
     }

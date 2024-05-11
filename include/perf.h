@@ -5,6 +5,7 @@
 #ifndef TEMU_PERF_H
 #define TEMU_PERF_H
 
+#ifndef BARE_METAL_PLATFORM
 #include <time.h>
 #include <stdio.h>
 #include "parameters.h"
@@ -58,6 +59,12 @@
                             clksum##name = 0;                                                                                 \
                         }                                       \
                     } while(0)
+#endif
+#else
+#define PERF_MONITOR_CONTINUOUS(name, batch_size) do {} while(0);
+#define PERF_MONITOR_CONTINUOUS_CAN_MUTE(name, batch_size) do {} while(0);
+#define PERF_MONITOR_DISCRETE_WARP_START(name) do {} while (0);
+#define PERF_MONITOR_DISCRETE_WARP_END(name, batch_size) do {} while (0);
 #endif
 
 #endif //TEMU_PERF_H
