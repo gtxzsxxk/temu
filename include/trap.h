@@ -29,6 +29,8 @@
 extern uint8_t in_wfi;
 extern uint32_t wfi_next_pc;
 
+uint32_t trap_is_pending(void);
+
 void trap_clear_interrupt_pending(uint32_t cause);
 
 void trap_throw_interrupt(uint32_t cause);

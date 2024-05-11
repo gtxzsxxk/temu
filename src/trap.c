@@ -17,6 +17,10 @@ static uint32_t trap_get_program_counter(void) {
     return program_counter;
 }
 
+uint32_t trap_is_pending(void) {
+    return control_status_registers[CSR_idx_sip];
+}
+
 void trap_clear_interrupt_pending(uint32_t cause) {
     control_status_registers[CSR_idx_sip] &= ~(1 << cause);
     control_status_registers[CSR_idx_mip] &= ~(1 << cause);
@@ -34,8 +38,8 @@ void trap_throw_interrupt(uint32_t cause) {
 void trap_take_interrupt(void) {
     uint32_t cause = 0;
     /* TODO: priority */
-    uint32_t pending = control_status_registers[CSR_idx_sip];
-    if (!pending) {
+    uint32_t pending = trap_is_pending();
+    if (!trap_is_pending()) {
         return;
     }
     while (!(pending & 0x01)) {
