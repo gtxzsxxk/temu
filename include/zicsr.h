@@ -197,8 +197,6 @@
 extern uint8_t current_privilege;
 extern uint32_t control_status_registers[];
 
-uint8_t csr_get_index_by_number(uint16_t csr_number);
-
 void csr_csrrw(uint8_t rs1, uint8_t rd, uint16_t csr_number, uint8_t *intr);
 
 void csr_csrrs(uint8_t rs1, uint8_t rd, uint16_t csr_number, uint8_t *intr);
@@ -216,5 +214,7 @@ void zicnt_cycle_tick(void);
 void zicnt_time_tick(void);
 
 uint64_t zicnt_get_cycle(void);
+
+void zicnt_init(void);
 
 #endif //TEMU_ZICSR_H

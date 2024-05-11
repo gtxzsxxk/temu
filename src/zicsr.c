@@ -6,6 +6,7 @@
 #include "tlb.h"
 #include "trap.h"
 #include "port/system_timer.h"
+#include "port/os_yield_cpu.h"
 #include "zicsr.h"
 
 uint8_t current_privilege = CSR_MASK_MACHINE;
@@ -87,7 +88,15 @@ const uint8_t csr_index_remap[0x10] = {
         [0xF] = CSR_idx_mvendorid,
 };
 
-uint8_t csr_get_index_by_number(uint16_t csr_number) {
+static uint64_t zicnt_csr_conv_host(uint64_t time_elapsed) {
+    return ((ZICNT_TIMER_FREQ / PORT_CLOCKS_PER_SEC) * (time_elapsed));
+}
+
+static uint64_t zicnt_csr_conv_emu(uint64_t ticks_elapsed) {
+    return ticks_elapsed / (ZICNT_TIMER_FREQ / 1000000);
+}
+
+static uint8_t csr_get_index_by_number(uint16_t csr_number) {
     uint8_t start_index = csr_index_remap[csr_number >> 8];
     if (start_index == 100) {
         return -1;
@@ -263,7 +272,7 @@ void zicnt_cycle_tick(void) {
 
 void zicnt_time_tick(void) {
     static port_clock_t last_clk = 0;
-    csr_time += (uint64_t) ((ZICNT_TIMER_FREQ / PORT_CLOCKS_PER_SEC) * (port_system_timer_get_ticks() - last_clk));
+    csr_time += zicnt_csr_conv_host(port_system_timer_get_ticks() - last_clk);
 
     timecmp = (((uint64_t) control_status_registers[CSR_idx_stimecmph]) << 32) |
               control_status_registers[CSR_idx_stimecmp];
@@ -282,4 +291,8 @@ void zicnt_time_tick(void) {
 
 uint64_t zicnt_get_cycle(void) {
     return cycle;
+}
+
+void zicnt_init(void) {
+    port_os_yield_cpu_init(zicnt_csr_conv_emu, &csr_time, &timecmp);
 }
