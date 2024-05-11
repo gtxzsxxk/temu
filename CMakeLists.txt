@@ -54,7 +54,9 @@ add_executable(temu src/main.c
         src/port/system_timer.c
         include/port/system_timer.h
         src/port/port_main.c
-        include/port/port_main.h)
+        include/port/port_main.h
+        src/port/os_yield_cpu.c
+        include/port/os_yield_cpu.h)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)

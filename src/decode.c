@@ -1,13 +1,15 @@
 //
 // Created by hanyuan on 2024/2/8.
 //
-#include "decode.h"
+
 #include "mmu.h"
 #include "tlb.h"
 #include "zicsr.h"
 #include "trap.h"
 #include "perf.h"
 #include "cache.h"
+#include "port/os_yield_cpu.h"
+#include "decode.h"
 
 static const uint32_t POWERS_OF_2_SUB_ONE[] = {
         1,
@@ -532,6 +534,7 @@ DEC_FUNC(ZICSR_ECALL_EBREAK) {
         tlb_flushall();
     } else if (!funct3 && !rd && !rs1 && imm == 0x105) {
         /* WFI */
+        port_os_yield_cpu();
         in_wfi = 1;
         wfi_next_pc = program_counter + 4;
         return;
