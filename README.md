@@ -1,8 +1,8 @@
-# TEMU (Tailored Emulator)
+# TEMU: Temu is not qEMU
 
-本项目的英文全称为`Tailored Emulator`，其中的字母`T`绝对与清华大学没有任何关系。本命名为致敬`QEMU`用。
+`T`绝对与清华大学没有任何关系。本命名为致敬`QEMU`用。
 
-- [快餐：进入内核演示](#jumping-to-kernel)
+- [快餐：进入内核演示](#使用TEMU运行主线Linux系统)
 - [存储器与内存映射](#内存映射)
 - [B站视频演示](https://www.bilibili.com/video/BV1s2421P7rZ)
 
