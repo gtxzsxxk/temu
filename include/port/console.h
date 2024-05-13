@@ -5,6 +5,7 @@
 #ifndef TEMU_CONSOLE_H
 #define TEMU_CONSOLE_H
 #include <stdint.h>
+#include "parameters.h"
 
 void port_os_console_init();
 

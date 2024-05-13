@@ -2,6 +2,7 @@
 // Created by hanyuan on 2024/4/23.
 //
 #include "port/console.h"
+#include "uart8250.h"
 
 #if !defined(WIN32) && !defined(WIN64) && !defined(BARE_METAL_PLATFORM)
 
@@ -9,20 +10,20 @@
 #include <unistd.h>
 #include <stdio.h>
 
-#else
+#elif !defined(BARE_METAL_PLATFORM)
 
 #include <windows.h>
 
 #endif
 
 void port_os_console_init() {
-#if !defined(WIN32) && !defined(WIN64)
+#if !defined(WIN32) && !defined(WIN64) && !defined(BARE_METAL_PLATFORM)
     static struct termios tm;
     tcgetattr(STDIN_FILENO, &tm);
     cfmakeraw(&tm);
     tm.c_lflag &= ~(ICANON);
     tcsetattr(STDIN_FILENO, TCSANOW, &tm);
-#else
+#elif !defined(BARE_METAL_PLATFORM)
     HANDLE hStdin;
     DWORD fdwSaveOldMode, fdwMode;
     hStdin = GetStdHandle(STD_INPUT_HANDLE);
@@ -31,13 +32,15 @@ void port_os_console_init() {
               ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(hStdin, fdwMode);
 #endif
+
+    uart8250_init();
 }
 
 void port_console_write(uint8_t c) {
 #ifndef BARE_METAL_PLATFORM
     printf("%c", c);
 #else
-#error port console write to bare metal platform!
+#warning port console write to bare metal platform!
 #endif
 }
 
@@ -55,6 +58,7 @@ int port_console_read(void) {
 #error port console read to windows platform!
 #endif
 #else
-#error port console write to bare metal platform!
+#warning port console write to bare metal platform!
+    return 0;
 #endif
 }

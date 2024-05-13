@@ -12,4 +12,10 @@ port_clock_t port_system_timer_get_ticks(void) {
     return clock();
 }
 
+#else
+
+port_clock_t port_system_timer_get_ticks(void) {
+    return 0;
+}
+
 #endif

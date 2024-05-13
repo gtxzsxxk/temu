@@ -52,7 +52,6 @@ static void machine_pre_boot(uint32_t start) {
     program_counter = start;
 
     zicnt_init();
-    uart8250_init();
 
     port_os_console_init();
     port_os_yield_cpu_add_interrupt(zicnt_time_tick);
