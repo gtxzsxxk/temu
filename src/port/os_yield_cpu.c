@@ -3,6 +3,9 @@
 //
 
 #include <stdint.h>
+#include "parameters.h"
+
+#ifndef BARE_METAL_PLATFORM
 #include <unistd.h>
 #include "trap.h"
 #include "port/system_timer.h"
@@ -69,3 +72,14 @@ void port_os_yield_cpu(void) {
     }
 #endif
 }
+
+#else
+
+void
+port_os_yield_cpu_init(uint64_t (*time_conv)(uint64_t), uint64_t *zicnt_timer_ticks, uint64_t *zicnt_timer_compare) {}
+
+void port_os_yield_cpu_add_interrupt(void (*intc)(void)) {}
+
+void port_os_yield_cpu(void) {}
+
+#endif
