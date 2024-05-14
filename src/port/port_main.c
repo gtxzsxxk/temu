@@ -12,13 +12,14 @@
   * Usage: temu -exec=program.bin [-with=addr#file.bin]
   *
   * Example:
-  * --addr=0x80db5000
   * --addr=0x81fa0000
   * --exec=fw_jump.bin
   * --with=0x80000000#u-boot.bin
   * --with=0x81ffd800#u-boot.dtb
   * --with=0x81000000#uImage.gz
  */
+
+const char temu_default_args[] = "--addr=0x81fa0000 --exec=fw_jump.bin --with=0x80000000#u-boot.bin --with=0x81ffd800#u-boot.dtb --with=0x81000000#uImage.gz";
 
 int port_main(int argc, char **argv) {
     /* TODO: optimize or refactor this argument parsing */
