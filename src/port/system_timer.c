@@ -6,10 +6,10 @@
 
 #ifndef BARE_METAL_PLATFORM
 
-#include <time.h>
-
 port_clock_t port_system_timer_get_ticks(void) {
     return clock();
 }
 
+#else
+#warning Define function port_system_timer_get_ticks outside of TEMU !
 #endif

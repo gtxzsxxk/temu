@@ -27,6 +27,8 @@ int port_load_binary_from_file(const char *path, uint32_t addr) {
         file_read_size += read_n;
     }
     PORT_FILE_CLOSE(fp);
+#ifndef BARE_METAL_PLATFORM
     printf(TEMU_PRINT_BANNER"Write %u bytes of %s to 0x%8x -- 0x%x.\n", file_read_size, path, addr, main_memory_offset);
+#endif
     return 0;
 }

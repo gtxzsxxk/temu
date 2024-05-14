@@ -277,6 +277,7 @@ void uart8250_tick(void) {
 }
 
 int uart8250_init(void) {
+#ifndef BARE_METAL_PLATFORM
     pthread_t listening_thd;
 
     port_lock_init(&rx_fifo_lock);
@@ -284,7 +285,7 @@ int uart8250_init(void) {
     if (pthread_create(&listening_thd, NULL, uart8250_listening, NULL)) {
         return -1;
     }
-
+#endif
     return 0;
 }
 
