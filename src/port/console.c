@@ -31,6 +31,8 @@ void port_os_console_init() {
               ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(hStdin, fdwMode);
 #endif
+
+    uart8250_init();
 }
 
 void port_console_write(uint8_t c) {
