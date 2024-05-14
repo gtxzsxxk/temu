@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#ifndef FATFS_SUPPORT
+#ifndef BARE_METAL_PLATFORM
 
 #include <stdio.h>
 
@@ -16,7 +16,7 @@
 #define PORT_FILE_READ fread
 #define PORT_FILE_CLOSE fclose
 #else
-#error Implement the file operations for Fatfs
+#error Implement the file operations for BARE METAL PLATFORMs
 #endif
 
 int port_load_binary_from_file(const char *path, uint32_t addr);
