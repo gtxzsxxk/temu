@@ -6,10 +6,12 @@
 #define TEMU_SYSTEM_TIMER_H
 
 #ifndef BARE_METAL_PLATFORM
-#define port_clock_t long int
-#define PORT_CLOCKS_PER_SEC 1000000
+#include <time.h>
+#define port_clock_t clock_t
+#define PORT_CLOCKS_PER_SEC CLOCKS_PER_SEC
 #else
-#error port timer into bare metal platform!
+#define port_clock_t uint64_t
+#define PORT_CLOCKS_PER_SEC 1000000
 #endif
 
 port_clock_t port_system_timer_get_ticks(void);

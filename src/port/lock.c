@@ -4,7 +4,7 @@
 
 #include "port/lock.h"
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) && !defined(BARE_METAL_PLATFORM)
 
 int port_lock_init(PORT_LOCK_T *lock) {
     return pthread_rwlock_init(lock, NULL);
@@ -22,7 +22,7 @@ void port_lock_lock(PORT_LOCK_T *lock, char is_write) {
     }
 }
 
-#elif defined(__linux__)
+#elif defined(__linux__) && !defined(BARE_METAL_PLATFORM)
 
 int port_lock_init(PORT_LOCK_T *lock) {
     return pthread_spin_init(lock, 0);
@@ -36,7 +36,7 @@ void port_lock_lock(PORT_LOCK_T *lock, char is_write) {
     pthread_spin_lock(lock);
 }
 
-#elif defined(WIN64) || defined(WIN32)
+#elif (defined(WIN64) || defined(WIN32)) && !defined(BARE_METAL_PLATFORM)
 
 int port_lock_init(PORT_LOCK_T *lock) {
     return pthread_spin_init(lock, 0);
@@ -49,6 +49,16 @@ void port_lock_unlock(PORT_LOCK_T *lock) {
 void port_lock_lock(PORT_LOCK_T *lock, char is_write) {
     pthread_spin_lock(lock);
 }
+
+#elif defined(BARE_METAL_PLATFORM)
+
+int port_lock_init(PORT_LOCK_T *lock) {
+    return 0;
+}
+
+void port_lock_unlock(PORT_LOCK_T *lock) { }
+
+void port_lock_lock(PORT_LOCK_T *lock, char is_write) { }
 
 #else
 
