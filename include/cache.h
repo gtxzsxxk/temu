@@ -9,7 +9,9 @@
 
 #define CACHE_INDEX_FIELD_LENGTH    7
 #define CACHE_LINES                 (1 << CACHE_INDEX_FIELD_LENGTH)
-#define CACHE_WAYS                  2   /* 经过实验，此时效率最高 */
+#define ICACHE_WAYS_FIELD_LENGTH    1   /* 经过实验，此时效率最高 */
+#define DCACHE_WAYS_FIELD_LENGTH    1
+#define CACHE_GET_WAYS(x)           (1 << (x))
 #define CACHE_OFFSET_FIELD_LENGTH   6
 #define CACHE_LINE_DATA_SIZE        ((1 << CACHE_OFFSET_FIELD_LENGTH) >> 2)
 
