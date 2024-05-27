@@ -389,9 +389,12 @@ Because we don't use the real IEEE754 float points
 
 ### CPU Architect
 
-我们没有对微架构的描述，因为我们是解释执行指令，所以简化了许多微架构设计的内容。本项目模拟的SoC实现了`TLB`
-与`I-Cache`和`D-Cache`，都是以组相连的方式实现，由于CPU的串行性。
-也不存在任何总线，我们对SoC的仿真类似于操作系统中的宏内核的概念，指令解释与外设模拟都是同时实现的，可以直接调用。
+TEMU 模拟的 SoC 实现了`TLB`
+与`I-Cache`和`D-Cache`，都是以组相连的方式实现，由于 CPU 的串行性。
+也可以简化总线的实现，我们对 SoC 的仿真类似于操作系统中的宏内核的概念，指令解释与外设模拟都是同时实现的，
+互相直接函数调用。
+
+![TEMU 体系结构](images/temuArch.png)
 
 以下是CPU解释执行指令的有关代码：
 
