@@ -34,7 +34,7 @@ def temuExecInstruction(instStr):
             "pc": "0x%08x" % (temuHandler.lib_get_program_counter() & 0xffffffff)
         }
         for i in range(0, 32):
-            result["registers"].append("0x%08x" % temuHandler.mmu_register_read(i))
+            result["registers"].append("0x%08x" % (temuHandler.mmu_register_read(i) & 0xffffffff))
 
         return jsonify(result)
     else:
