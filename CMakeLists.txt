@@ -58,6 +58,38 @@ add_executable(temu src/main.c
         src/port/os_yield_cpu.c
         include/port/os_yield_cpu.h)
 
+add_library(temudifftest SHARED src/main.c
+        src/mmu.c
+        src/machine.c
+        src/decode.c
+        src/zicsr.c
+        include/zicsr.h
+        src/trap.c
+        include/trap.h
+        include/uart8250.h
+        src/peripherals/uart8250.c
+        src/peripherals/plic-simple.c
+        include/plic-simple.h
+        src/port/lock.c
+        include/port/lock.h
+        src/port/load_binary.c
+        include/port/load_binary.h
+        src/port/console.c
+        include/port/console.h
+        include/perf.h
+        include/port/main_memory.h
+        src/port/main_memory.c
+        src/tlb.c
+        include/tlb.h
+        src/cache.c
+        include/cache.h
+        src/port/system_timer.c
+        include/port/system_timer.h
+        src/port/port_main.c
+        include/port/port_main.h
+        src/port/os_yield_cpu.c
+        include/port/os_yield_cpu.h)
+
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(temu PRIVATE Threads::Threads)
