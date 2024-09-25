@@ -47,7 +47,19 @@ def temuExecInstruction(instStr):
 @app.route('/ddr/write/<addrStr>/<dataStr>')
 def temuWriteDDR(addrStr, dataStr):
     if temuHandler:
-        pass
+        addr = ctypes.c_uint32(eval("0x" + addrStr))
+        data = ctypes.c_uint32(eval("0x" + dataStr))
+        write_res = temuHandler.lib_memory_write_w(addr, data)
+        if write_res:
+            return jsonify({
+                "valid": False,
+                "message": "Address bad or not aligned."
+            })
+        else:
+            return jsonify({
+                "valid": True,
+                "message": "Data is written to sim ddr."
+            })
     else:
         return jsonify({
             "valid": False,
