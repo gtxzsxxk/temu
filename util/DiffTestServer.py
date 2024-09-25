@@ -1,8 +1,13 @@
 from flask import Flask, jsonify, request
 import ctypes
 import json
+import platform
 
-DIFFTEST_PATH = "../cmake-build-debug/libtemudifftest.dylib"
+ext = ".so" if platform.system() \
+               in ["Linux", "Windows"] and "microsoft" in platform.release().lower() \
+    else ".dylib" if platform.system() == "Darwin" else None
+
+DIFFTEST_PATH = "../cmake-build-debug/libtemudifftest" + ext
 temuHandler = None
 
 app = Flask(__name__)
