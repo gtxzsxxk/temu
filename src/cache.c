@@ -249,3 +249,28 @@ static void physical_memory_write_w(uint32_t addr, uint32_t data, uint8_t *intr)
         }
     }
 }
+
+uint64_t lib_memory_read_w(uint32_t addr) {
+    if (addr % 4) {
+        return 0xffffffff00000000;
+    }
+    if (addr >= RAM_BASE_ADDR && addr + 3 < RAM_BASE_ADDR + RAM_SIZE) {
+        return port_main_memory_read_w(addr - RAM_BASE_ADDR);
+    } else {
+
+        return 0xffffffff00000000;
+    }
+}
+
+uint32_t lib_memory_write_w(uint32_t addr, uint32_t data) {
+    if (addr % 4) {
+        return 1;
+    }
+
+    if (addr >= RAM_BASE_ADDR && addr + 3 < RAM_BASE_ADDR + RAM_SIZE) {
+        port_main_memory_write_w(addr - RAM_BASE_ADDR, data);
+        return 0;
+    } else {
+        return 1;
+    }
+}

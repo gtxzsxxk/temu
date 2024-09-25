@@ -52,4 +52,8 @@ void cache_data_write_w(uint32_t paddr, uint32_t data, uint8_t *intr);
 
 void cache_flush_icache();
 
+uint64_t lib_memory_read_w(uint32_t addr);
+
+uint32_t lib_memory_write_w(uint32_t addr, uint32_t data);
+
 #endif //TEMU_CACHE_H
