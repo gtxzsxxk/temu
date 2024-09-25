@@ -33,13 +33,15 @@ def temuReset():
     })
 
 
-@app.route('/exec/<instStr>')
-def temuExecInstruction(instStr):
+@app.route('/exec')
+def temuExecInstruction():
     if temuHandler:
-        inst = ctypes.c_uint32(eval("0x" + instStr))
-        temuHandler.decode(inst)
+        fault = ctypes.c_uint32(0)
+        refInst = temuHandler.mmu_read_inst(temuHandler.lib_get_program_counter() & 0xffffffff, ctypes.pointer(fault))
+        temuHandler.decode(refInst)
         result = {
             "valid": True,
+            "instruction_ref": "0x%08x" % (refInst & 0xffffffff),
             "registers": [],
             "pc": "0x%08x" % (temuHandler.lib_get_program_counter() & 0xffffffff)
         }
