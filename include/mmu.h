@@ -41,6 +41,10 @@ void mmu_write_h(uint32_t addr, uint16_t data, uint8_t *intr);
 
 void mmu_write_w(uint32_t addr, uint32_t data, uint8_t *intr);
 
+uint32_t lib_get_program_counter(void);
+
+void lib_set_program_counter(uint32_t pc);
+
 uint32_t mmu_register_read(uint8_t rd);
 
 void mmu_register_write(uint8_t rd, uint32_t value);

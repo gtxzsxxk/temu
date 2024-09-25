@@ -249,6 +249,14 @@ void mmu_write_w(uint32_t addr, uint32_t data, uint8_t *intr) {
     cache_data_write_w(addr_translated, data, intr);
 }
 
+uint32_t lib_get_program_counter(void) {
+    return program_counter;
+}
+
+void lib_set_program_counter(uint32_t pc) {
+    program_counter = pc;
+}
+
 uint32_t mmu_register_read(uint8_t rd) {
     if (rd == 0) {
         return 0;
