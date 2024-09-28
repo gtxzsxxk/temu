@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 import ctypes
 import json
 import platform
+import sys
 
 ext = ".so" if platform.system() \
                in ["Linux", "Windows"] and "microsoft" in platform.release().lower() \
@@ -24,7 +25,7 @@ def temuReset():
     if temuHandler is None:
         temuHandler = ctypes.CDLL(DIFFTEST_PATH)
     temuHandler.lib_set_program_counter(ctypes.c_uint32(0x80000000))
-
+    temuHandler.lib_cache_reset()
     # TODO: 与仿真机生成同样的随机寄存器
     for i in range(0, 32):
         temuHandler.mmu_register_write(i, 0)
@@ -120,6 +121,23 @@ def temuWriteDDR(addrStr, dataStr):
                 "valid": True,
                 "message": "Data is written to sim ddr."
             })
+    else:
+        return jsonify({
+            "valid": False,
+            "message": "You need to reset temu."
+        })
+
+
+@app.route('/ddr/read/<addrStr>')
+def temuReadDDR(addrStr):
+    if temuHandler:
+        addr = ctypes.c_uint32(eval("0x" + addrStr))
+        data = temuHandler.lib_memory_read_w(addr)
+        return jsonify({
+            "valid": True,
+            "message": "Data is read.",
+            "data": "0x%08x" % (data & 0xffffffff)
+        })
     else:
         return jsonify({
             "valid": False,
