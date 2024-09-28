@@ -2,6 +2,7 @@
 // Created by hanyuan on 2024/5/7.
 //
 
+#include <string.h>
 #include "cache.h"
 #include "parameters.h"
 #include "port/main_memory.h"
@@ -248,6 +249,11 @@ static void physical_memory_write_w(uint32_t addr, uint32_t data, uint8_t *intr)
             *intr = 1;
         }
     }
+}
+
+void lib_cache_reset() {
+    memset(ICACHE, 0, sizeof(struct cache_line) * CACHE_LINES * CACHE_GET_WAYS(ICACHE_WAYS_FIELD_LENGTH));
+    memset(DCACHE, 0, sizeof(struct cache_line) * CACHE_LINES * CACHE_GET_WAYS(DCACHE_WAYS_FIELD_LENGTH));
 }
 
 uint64_t lib_memory_read_w(uint32_t addr) {
