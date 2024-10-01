@@ -1,4 +1,5 @@
 cmake-build-*
+build*
 *.bin
 *.elf
 *.dump
