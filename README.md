@@ -48,7 +48,7 @@ CoreMark 1.0 : 315.159155 / GCC12.3.0 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE 
 * (TODO) 使用`Ctrl + A + X`退出
 * (TODO) 在根文件系统中添加其它软件等
 * (TODO) 添加显示屏等外设
-* (TODO) 使用`cmake`自动下载`TEMU`二进制
+* 使用`cmake`自动下载`TEMU`二进制
 
 ### Compiling （建议略过，直接跳到下一步，体验已经准备好的二进制）
 
