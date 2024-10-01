@@ -3,6 +3,13 @@ project(temu C)
 
 set(CMAKE_C_STANDARD 11)
 
+# Download info
+set(URL "https://cloud.tsinghua.edu.cn/f/b639b1cc87784504aab4/?dl=1")
+set(DOWNLOAD_DIR "${CMAKE_BINARY_DIR}/linux")
+set(FILE_NAME "binary.zip")
+file(MAKE_DIRECTORY ${DOWNLOAD_DIR})
+set(LOCAL_FILE_PATH "${DOWNLOAD_DIR}/${FILE_NAME}")
+
 set(PerformanceMode ON)
 set(PerformanceMonitor OFF)
 if (PerformanceMode)
@@ -103,3 +110,27 @@ if (PerformanceMode)
         message(WARNING "IPO is not supported: ${output}")
     endif ()
 endif ()
+
+
+add_custom_command(
+    OUTPUT ${DOWNLOAD_DIR}/u-boot.bin
+    COMMAND /bin/sh -c "if [ ! -f ${DOWNLOAD_DIR}/u-boot.bin ]; then wget ${URL} -O ${LOCAL_FILE_PATH} && unzip -o ${LOCAL_FILE_PATH} -d ${DOWNLOAD_DIR}; else echo 'Already extracted'; fi"
+    COMMENT "Downloading ${FILE_NAME} using wget"
+    VERBATIM
+)
+
+add_custom_target(download ALL
+    DEPENDS ${DOWNLOAD_DIR}/u-boot.bin
+    COMMENT "Download and extract file"
+    COMMAND ${CMAKE_COMMAND} -E rm -f ${DOWNLOAD_DIR}/${FILE_NAME}
+)
+
+add_custom_target(temurun
+    COMMAND ./temu --addr=0x81fa0000 --exec=linux/fw_jump.bin "--with=0x80000000\#linux/u-boot.bin" "--with=0x81ffd800\#linux/u-boot.dtb" "--with=0x81000000\#linux/uImage.gz"
+    DEPENDS temu download
+    COMMENT "Running temu with specific arguments"
+)
+
+add_custom_target(runlinux
+    DEPENDS temurun
+)
