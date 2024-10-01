@@ -38,17 +38,19 @@ CoreMark 1.0 : 315.159155 / GCC12.3.0 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE 
 ### Dependencies
 
 * `OpenSBI`, `U-Boot`(Optional), `Linux Kernel`的二进制文件
-* `cmake`工具链
+* `cmake`工具链，自动下载`TEMU-Linux`二进制
 * `mkimage` (Optional)
 * `riscv-gnu-toolchain`(Optional，如果你希望自己编译`RISC-V`平台的目标二进制文件，我这里使用`buildroot`
   制作的`riscv32-buildroot-linux-gnu-`作为我的交叉编译工具链)
 * 支持的`host`平台：`macOS with LLVM`, `Linux`, `Windows with MinGW`
+
+### TODO
+
 * (TODO) 将此项目的代码对`MSVC`友好
 * (TODO) 适配`Windows`的终端环境
 * (TODO) 使用`Ctrl + A + X`退出
 * (TODO) 在根文件系统中添加其它软件等
-* (TODO) 添加显示屏等外设
-* 使用`cmake`自动下载`TEMU`二进制
+* (TODO) 添加显示屏，以太网等外设
 
 ### Compiling （建议略过，直接跳到下一步，体验已经准备好的二进制）
 
