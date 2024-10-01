@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 
 # Download info
 set(URL "https://cloud.tsinghua.edu.cn/f/b639b1cc87784504aab4/?dl=1")
-set(DOWNLOAD_DIR "${CMAKE_BINARY_DIR}/../linux")
+set(DOWNLOAD_DIR "${CMAKE_BINARY_DIR}/linux")
 set(FILE_NAME "binary.zip")
 file(MAKE_DIRECTORY ${DOWNLOAD_DIR})
 set(LOCAL_FILE_PATH "${DOWNLOAD_DIR}/${FILE_NAME}")
@@ -126,11 +126,11 @@ add_custom_target(download ALL
 )
 
 add_custom_target(temurun
-    COMMAND ./temu --addr=0x81fa0000 --exec=../linux/fw_jump.bin "--with=0x80000000\#../linux/u-boot.bin" "--with=0x81ffd800\#../linux/u-boot.dtb" "--with=0x81000000\#../linux/uImage.gz"
-    DEPENDS temu
+    COMMAND ./temu --addr=0x81fa0000 --exec=linux/fw_jump.bin "--with=0x80000000\#linux/u-boot.bin" "--with=0x81ffd800\#linux/u-boot.dtb" "--with=0x81000000\#linux/uImage.gz"
+    DEPENDS temu download
     COMMENT "Running temu with specific arguments"
 )
 
-add_custom_target(run ALL
+add_custom_target(runlinux
     DEPENDS temurun
 )
